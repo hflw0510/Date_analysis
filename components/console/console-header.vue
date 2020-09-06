@@ -1,6 +1,5 @@
 <template>
     <div>
-        <zoneList ref="zlist"></zoneList>
     </div>
 </template>
 
@@ -8,7 +7,7 @@
 
 </style>
 <script>
-import zoneList from '~/components/console/zonelist';
+//import zoneList from '~/components/console/zonelist';
 
 export default {
     data() {
@@ -17,7 +16,7 @@ export default {
         }
     },
     components:{
-        zoneList
+
     }
 }
 

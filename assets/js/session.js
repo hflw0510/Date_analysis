@@ -3,30 +3,21 @@ import request from '~/assets/js/request'
 import rpc, { updateToken, resetToken, getApiToken } from '~/assets/js/rpc'
 let session = {};
 
-function logon(r, e) {
-    var t = request("t"),
-        p = request("p");
-
-    if (t && p) {
-        resetToken();
-        rpc(hosts.subscribeHost + "/auth.asp", "Logon.Passport", t, p, function(d) {
+function logon(user, pwd, r, e) {
+    if (user && pwd) {
+        rpc(hosts.subscribeHost + "/auth.asp", "Auth.User_Logon", user, pwd, function(d) {
             if (d.error)
                 return e ? e(d) : undefined;
-            if (d.result.GlobalToken)
-                updateToken(d.result.GlobalToken);
-            session = d.result.Session;
             if (r)
-                r(session["Logon"]);
+                r(d.result.userid);
         });
         return;
     }
 
-    if (getApiToken() != "")
-        return sync(r, function(d) {
-            resetToken();
-            if (e)
-                e(d);
-        });
+    return sync(r, function(d) {
+        if (e)
+            e(d);
+    });
     if (e)
         e({
             error: {
@@ -37,13 +28,11 @@ function logon(r, e) {
 }
 
 function sync(r, e) {
-    rpc(hosts.subscribeHost + "/auth.asp", "Logon.Sync", function(d) {
+    rpc(hosts.subscribeHost + "/auth.asp", "Auth.Sync", function(d) {
         if (d.error)
             return e(d);
-        session = d.result.Session;
-        if (d.result.GlobalToken)
-            updateToken(d.result.GlobalToken);
-        r(session["Logon"]);
+        if (r)
+            r(d);
     })
 }
 
@@ -57,7 +46,8 @@ function logoff(url) {
 
 var passport = {
     logon: function(url) {
-        window.location = hosts.logonHost + "/api/logon.asp?id=1&ru=" + encodeURI(url ? url : window.location) + "&tw=1800&sm=0&lc=2052";
+        //window.location = hosts.logonHost + "/api/logon.asp?id=1&ru=" + encodeURI(url ? url : window.location) + "&tw=1800&sm=0&lc=2052";
+        window.location = "/logon";
     },
     register: function(url) {
         window.location = config.logonHost + "/api/logon.asp?id=1&ru=" + encodeURI(url ? url : window.location) + "&tw=1800&sm=0&lc=2052&fun=register";

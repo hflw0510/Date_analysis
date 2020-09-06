@@ -14,7 +14,7 @@
                     <el-input placeholder="请输入用户名" prefix-icon="el-icon-user" v-model="user"></el-input>
                 </div>
                 <div class="logon-main-pwd">
-                    <el-input placeholder="请输入密码" prefix-icon="el-icon-lock" v-model="pwd" show-password></el-input>
+                    <el-input placeholder="请输入密码" prefix-icon="el-icon-lock" v-model="pwd" show-password @keyup.enter.native="logon"></el-input>
                 </div>
                 <div class="logon-main-submit">
                     <el-button type="primary" @click="logon">登录</el-button>
@@ -94,6 +94,9 @@
 </style>
 
 <script>
+
+import session from '~/assets/js/session'
+
 export default {
     head() {
         return {
@@ -109,9 +112,12 @@ export default {
 
     },
     methods: {
-        logon() {
-            //alert(this.user + this.pwd);
-            window.location = '/console';
+        logon(){
+            session.logon(this.user, this.pwd, d => {
+                location = '/console';
+            }, d => {
+                this.$message.error('用户名密码错误，请重新登录');
+            });
         }
     }
 };

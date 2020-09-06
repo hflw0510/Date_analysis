@@ -105,15 +105,13 @@ export default {
     },
     methods:{
         logon(){
-            session.logon(d => {
-                if (request("t") && request("p")) {
-                    if (jsCookie.get('console-hash'))
-                        location = location.pathname + jsCookie.get('console-hash');
-                    else
-                        location = location.pathname;
-                }
+            session.logon('', '', d => {
+                //if (jsCookie.get('console-hash'))
+                //    location = location.pathname + jsCookie.get('console-hash');
+                //else
+                //    location = location.pathname;
             }, d => {
-                if (d.error.code == 10086) return session.passport.logon();
+                //if (d.error.code == 10086) return session.passport.logon();
 
                 this.$confirm('登录失效，是否重新登录？', '提示', {
                     confirmButtonText: '确定',

@@ -36,15 +36,6 @@ const zhCN = {
     list: {
         'mylist': '简单表格'
     },
-    zonelist:{
-        'select': '请选择区域',
-        'hk01': '香港一区',
-        'bjsjs': '北京一区',
-        'la01': '洛杉矶',
-        'kr01': '韩国',
-        'sjst': '石景山测试',
-        'ca01': '北美'
-    },
     consoleInstance:{
         'wan': '外',
         'lan': '内',

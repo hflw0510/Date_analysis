@@ -83,6 +83,7 @@
                                 :column="column"
                             >
                             </expand>
+                            <el-button v-else-if="column.buttons" v-for="(l) in column.buttons" :key="l.key" :size="l.size" :type="l.type" @click="btnClick(l.event,[l.key, scope.row])">{{ $t(l.text) }}</el-button>
                             <div v-else v-html="scope.row[column.colname]"></div>
                         </template>
                     </el-table-column>

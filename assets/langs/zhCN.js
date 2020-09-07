@@ -33,6 +33,10 @@ const zhCN = {
         'spec_type': '物种类型',
         'log': '日志管理'
     },
+    table: {
+        'edit': '编辑',
+        'delete': '删除'
+    },
     list: {
         'mylist': '简单表格'
     },

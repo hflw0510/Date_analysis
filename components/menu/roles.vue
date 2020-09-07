@@ -2,13 +2,13 @@
     <div>
         <simpletable ref="st" :props="props" @refresh="refresh" @bclick="btnClick" @create="create"></simpletable>
         <el-dialog
-            title="设备管理"
+            title="角色管理"
             :visible.sync="centerDialogVisible"
             width="40%"
             center
         >
             <el-form ref="form" :model="form" :rules="rules" ret="form" label-width="80px" label-position="left">
-                <el-form-item label="设备名称" prop="name">
+                <el-form-item label="角色名称" prop="name">
                     <el-input v-model="form.name"></el-input>
                 </el-form-item>
                 <el-form-item label="创建时间">
@@ -17,11 +17,11 @@
                 <el-form-item label="更新时间">
                     <el-input v-model="form.updatetime" disabled></el-input>
                 </el-form-item>
-                <el-form-item label="设备信息">
-                    <el-input v-model="form.info" type="textarea" :autosize="{ minRows: 6, maxRows: 10}"></el-input>
+                <el-form-item label="授权">
+                    <el-transfer v-model="value" :data="data"></el-transfer>
                 </el-form-item>
-                <el-form-item label="状态">
-                    <el-switch v-model="form.status"></el-switch>
+                <el-form-item label="备注">
+                    <el-input v-model="form.memo"></el-input>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="form_submit">确定</el-button>
@@ -57,18 +57,10 @@ const tbCols = [
     },
     {
         colname: '3',
-        title: '设备名称',
+        title: '角色名称',
         searchable: true,
         sortable: true,
         width: ''
-    },
-    {
-        colname: '5',
-        title: '状态',
-        searchable: true,
-        sortable: true,
-        align: 'center',
-        width: '160'
     },
     {
         colname: '',
@@ -120,34 +112,72 @@ export default {
                 name: '',
                 createtime: '',
                 updatetime: '',
-                info: '',
-                status: true
+                memo: ''
             },
             rules: {
                 name: [
-                    { required: true, message: '请输入设备名称', trigger: 'blur' },
-                    { min: 3, max: 12, message: '长度在 3 到 12 个字符', trigger: 'blur' }
+                    { required: true, message: '请输入角色名称', trigger: 'blur' },
+                    { min: 2, max: 12, message: '长度在 2 到 12 个字符', trigger: 'blur' }
                 ]
             },
             props : {
-                title: 'device',
+                title: 'department',
                 isDown: true,
-                isInfo: '设备列表',
+                isInfo: '角色列表',
                 isSinglepage: true,
                 tbCols,
                 tbBtns,
                 tbData: tableData
             },
+            data:[],
+            value: [],
             tableData,
             centerDialogVisible: false
         }
     },
     created() {
         this.load();
+
+        let bi, bs, i, s;
+        bi = {
+            device: '设备',
+            department: '部门',
+            roles: '角色',
+            users: '用户',
+            species: '物种库',
+            spec_type: '物种类型'
+        };
+        bs = {
+
+        };
+        for (i in bi){
+            this.data.push({
+                key: i + '.Create',
+                label: bi[i] + '-新建'
+            });
+            this.data.push({
+                key: i + '.Modify',
+                label: bi[i] + '-编辑'
+            });
+            this.data.push({
+                key: i + '.List',
+                label: bi[i] + '-读取'
+            });
+            this.data.push({
+                key: i + '.Delete',
+                label: bi[i] + '-删除'
+            });
+        }
+        for (s in bs){
+            this.data.push({
+                key: s,
+                label: bs[s]
+            });
+        }
 	},
     methods: {
         load (){
-            rpc(hosts.baseHost, 'bi.list', 'device', '', (d) => {
+            rpc(hosts.baseHost, 'bi.list', 'roles', '', (d) => {
                 if(d.result){
                     this.tableData.length = 0;
                     d.result.forEach(v => this.tableData.push(this.dataRender(v)));
@@ -157,16 +187,16 @@ export default {
         },
         delete(id) {
             if (!id) return 
-            rpc(hosts.baseHost, 'bi.delete', 'device', id, (d) => {
+            rpc(hosts.baseHost, 'bi.delete', 'roles', id, (d) => {
                 if(d.result){
                     this.$message({
-                        message: '设备信息删除成功',
+                        message: '角色信息删除成功',
                         type: 'warning'
                     });
                     this.load();
                 }
                 else {
-                    this.$message.error('设备信息删除失败');
+                    this.$message.error('角色信息删除失败');
                 }
             })
         },
@@ -180,8 +210,8 @@ export default {
                     this.form.createtime = params[1][1];
                     this.form.updatetime = params[1][2];
                     this.form.name = params[1][3];
-                    this.form.info = params[1][4];
-                    this.form.status = (params[1][5]=='启用')?true:false;
+                    this.form.memo = params[1][4];
+                    this.value = JSON.parse(params[1][5]);
                     this.centerDialogVisible = true;
                     break;
                 case 'delete':
@@ -204,9 +234,9 @@ export default {
                 name: '',
                 createtime: '',
                 updatetime: '',
-                info: '',
-                status: true
-            }
+                memo: ''
+            };
+            this.value = [];
         },
         form_submit() {
             let data, check=true;
@@ -216,17 +246,16 @@ export default {
                     return false;
                 }
             });
-            console.log(check)
             if (!check) return;
             data = {
                 name: this.form.name,
-                centent: this.form.info,
-                isdisabled: this.form.status?0:1
+                memo: this.form.memo,
+                privileges: JSON.stringify(this.value)
             }
-            rpc(hosts.baseHost, 'bi.Save', 'device', this.form.id, data, (d) => {
+            rpc(hosts.baseHost, 'bi.Save', 'roles', this.form.id, data, (d) => {
                 if(d.result){
                     this.$message({
-                        message: '设备信息保存成功',
+                        message: '角色信息保存成功',
                         type: 'success'
                         });
                     this.load();
@@ -239,10 +268,6 @@ export default {
             this.centerDialogVisible=true;
         },
         dataRender(d) {
-            if (d[5] == 0)
-                d[5] = '启用';
-            else
-                d[5] = '禁用';
             return d;
         }
     },

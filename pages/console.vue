@@ -1,6 +1,6 @@
 <template>
     <el-container style="height: 100%">
-        <el-header class="console-header" height="56px">
+        <el-header class="console-header">
             <cheader class="console-header-cheader"></cheader>
         </el-header>
 
@@ -25,7 +25,15 @@
     }
 
     .console-header {
-        background-color: #36a9e1;
+        padding: 0px;
+        background-color: #d6e9ff;
+        margin: 0px;
+    }
+    .console-header-cheader {
+        height: 60px;
+        line-height: 60px;
+        text-align: left;
+        overflow: hidden;
         margin: 0px;
     }
 

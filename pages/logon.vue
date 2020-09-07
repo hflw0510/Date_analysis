@@ -17,7 +17,7 @@
                     <el-input placeholder="请输入密码" prefix-icon="el-icon-lock" v-model="pwd" show-password @keyup.enter.native="logon"></el-input>
                 </div>
                 <div class="logon-main-submit">
-                    <el-button type="primary" @click="logon">登录</el-button>
+                    <el-button type="primary" @click="logon" v-loading.fullscreen.lock="fullscreenLoading">登录</el-button>
                 </div>
             </el-main>
         </el-container>
@@ -105,7 +105,8 @@ export default {
     data () {
         return {
             user: '',
-            pwd: ''
+            pwd: '',
+            fullscreenLoading: false
         }
     },
     mounted(){
@@ -113,10 +114,13 @@ export default {
     },
     methods: {
         logon(){
+            this.fullscreenLoading = true;
             session.logon(this.user, this.pwd, d => {
+                this.fullscreenLoading = false;
                 location = '/console';
             }, d => {
                 this.$message.error('用户名密码错误，请重新登录');
+                this.fullscreenLoading = false;
             });
         }
     }

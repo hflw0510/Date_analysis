@@ -2,13 +2,13 @@
     <div>
         <simpletable ref="st" :props="props" @refresh="refresh" @bclick="btnClick" @create="create"></simpletable>
         <el-dialog
-            title="设备管理"
+            title="物种类型管理"
             :visible.sync="centerDialogVisible"
             width="40%"
             center
         >
             <el-form ref="form" :model="form" :rules="rules" ret="form" label-width="80px" label-position="left">
-                <el-form-item label="设备名称" prop="name">
+                <el-form-item label="物种类型" prop="name">
                     <el-input v-model="form.name"></el-input>
                 </el-form-item>
                 <el-form-item label="创建时间">
@@ -16,12 +16,6 @@
                 </el-form-item>
                 <el-form-item label="更新时间">
                     <el-input v-model="form.updatetime" disabled></el-input>
-                </el-form-item>
-                <el-form-item label="设备信息">
-                    <el-input v-model="form.info" type="textarea" :autosize="{ minRows: 6, maxRows: 10}"></el-input>
-                </el-form-item>
-                <el-form-item label="状态">
-                    <el-switch v-model="form.status"></el-switch>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="form_submit">确定</el-button>
@@ -57,18 +51,10 @@ const tbCols = [
     },
     {
         colname: '3',
-        title: '设备名称',
+        title: '物种类型',
         searchable: true,
         sortable: true,
         width: ''
-    },
-    {
-        colname: '5',
-        title: '状态',
-        searchable: true,
-        sortable: true,
-        align: 'center',
-        width: '160'
     },
     {
         colname: '',
@@ -119,20 +105,18 @@ export default {
                 id: 0,
                 name: '',
                 createtime: '',
-                updatetime: '',
-                info: '',
-                status: true
+                updatetime: ''
             },
             rules: {
                 name: [
-                    { required: true, message: '请输入设备名称', trigger: 'blur' },
-                    { min: 3, max: 12, message: '长度在 3 到 12 个字符', trigger: 'blur' }
+                    { required: true, message: '请输入物种类型', trigger: 'blur' },
+                    { min: 2, max: 12, message: '长度在 2 到 12 个字符', trigger: 'blur' }
                 ]
             },
             props : {
-                title: 'device',
+                title: 'spec_type',
                 isDown: true,
-                isInfo: '设备列表',
+                isInfo: '物种类型列表',
                 isSinglepage: true,
                 tbCols,
                 tbBtns,
@@ -147,7 +131,7 @@ export default {
 	},
     methods: {
         load (){
-            rpc(hosts.baseHost, 'bi.list', 'device', '', (d) => {
+            rpc(hosts.baseHost, 'bi.list', 'spec_type', '', (d) => {
                 if(d.result){
                     this.tableData.length = 0;
                     d.result.forEach(v => this.tableData.push(this.dataRender(v)));
@@ -157,16 +141,16 @@ export default {
         },
         delete(id) {
             if (!id) return 
-            rpc(hosts.baseHost, 'bi.delete', 'device', id, (d) => {
+            rpc(hosts.baseHost, 'bi.delete', 'spec_type', id, (d) => {
                 if(d.result){
                     this.$message({
-                        message: '设备信息删除成功',
+                        message: '物种类型删除成功',
                         type: 'warning'
                     });
                     this.load();
                 }
                 else {
-                    this.$message.error('设备信息删除失败');
+                    this.$message.error('物种类型删除失败');
                 }
             })
         },
@@ -180,8 +164,6 @@ export default {
                     this.form.createtime = params[1][1];
                     this.form.updatetime = params[1][2];
                     this.form.name = params[1][3];
-                    this.form.info = params[1][4];
-                    this.form.status = (params[1][5]=='启用')?true:false;
                     this.centerDialogVisible = true;
                     break;
                 case 'delete':
@@ -203,9 +185,7 @@ export default {
                 id: 0,
                 name: '',
                 createtime: '',
-                updatetime: '',
-                info: '',
-                status: true
+                updatetime: ''
             }
         },
         form_submit() {
@@ -216,17 +196,14 @@ export default {
                     return false;
                 }
             });
-            console.log(check)
             if (!check) return;
             data = {
-                name: this.form.name,
-                centent: this.form.info,
-                isdisabled: this.form.status?0:1
+                name: this.form.name
             }
-            rpc(hosts.baseHost, 'bi.Save', 'device', this.form.id, data, (d) => {
+            rpc(hosts.baseHost, 'bi.Save', 'spec_type', this.form.id, data, (d) => {
                 if(d.result){
                     this.$message({
-                        message: '设备信息保存成功',
+                        message: '物种类型保存成功',
                         type: 'success'
                         });
                     this.load();
@@ -239,10 +216,6 @@ export default {
             this.centerDialogVisible=true;
         },
         dataRender(d) {
-            if (d[5] == 0)
-                d[5] = '启用';
-            else
-                d[5] = '禁用';
             return d;
         }
     },

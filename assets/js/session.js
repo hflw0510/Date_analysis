@@ -37,11 +37,8 @@ function sync(r, e) {
 }
 
 function logoff(url) {
-    rpc(hosts.subscribeHost + "/auth.asp", "Logon.Logoff");
-    resetToken();
-    setTimeout(function() {
-        passport.logoff(url);
-    }, 100);
+    rpc(hosts.subscribeHost + "/auth.asp", "Auth.Logout");
+    passport.logon();
 }
 
 var passport = {

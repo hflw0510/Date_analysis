@@ -4,7 +4,7 @@
         <el-dialog
             title="角色管理"
             :visible.sync="centerDialogVisible"
-            width="40%"
+            width="45%"
             center
         >
             <el-form ref="form" :model="form" :rules="rules" ret="form" label-width="80px" label-position="left">
@@ -18,7 +18,7 @@
                     <el-input v-model="form.updatetime" disabled></el-input>
                 </el-form-item>
                 <el-form-item label="授权">
-                    <el-transfer v-model="value" :data="data"></el-transfer>
+                    <el-transfer v-model="value" :data="data" :titles="['所有权限', '已有权限']"></el-transfer>
                 </el-form-item>
                 <el-form-item label="备注">
                     <el-input v-model="form.memo"></el-input>

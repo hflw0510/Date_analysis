@@ -11,7 +11,7 @@
                 </div>
                 <div class="logon-main-title">Admin Pro 在线源数据分析系统</div>
                 <div class="logon-main-user">
-                    <el-input placeholder="请输入用户名" prefix-icon="el-icon-user" v-model="user"></el-input>
+                    <el-input placeholder="请输入用户名" prefix-icon="el-icon-user" v-model="user" ref="user"></el-input>
                 </div>
                 <div class="logon-main-pwd">
                     <el-input placeholder="请输入密码" prefix-icon="el-icon-lock" v-model="pwd" show-password @keyup.enter.native="logon"></el-input>
@@ -110,7 +110,7 @@ export default {
         }
     },
     mounted(){
-
+        this.$refs.user.focus();
     },
     methods: {
         logon(){

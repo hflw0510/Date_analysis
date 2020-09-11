@@ -198,7 +198,6 @@ export default {
         }
     },
     created() {
-        this.load();
         this.spec_type();
 	},
     methods: {
@@ -212,6 +211,7 @@ export default {
                         });
                         this.spec_type_data[v[0]] = v[3];
                     });
+                    this.load();
                 }
             })
         },
@@ -329,7 +329,8 @@ export default {
                 d[11] = '启用';
             else
                 d[11] = '禁用';
-            d[13] = this.spec_type_data[d[3]];
+            let std = this.spec_type_data
+            d[13] = std[d[3]];
             return d;
         }
     },

@@ -19,18 +19,35 @@
 
     <p>{{$t('ab.hello')}}</p> 
     <p>{{$t('ab.msg')}}</p>
+
+    <el-dialog
+        title="多选框"
+        :visible.sync="centerDialogVisible"
+        width="40%"
+        center
+    >
+    <checkboxes ref="cbs" :props="cbs" @event="checkboxes_event"></checkboxes>
+    </el-dialog>
+
+    <el-button plain @click="centerDialogVisible = true"> 打开多选框 </el-button>
   </div>
 </template>
 
 <script>
+import checkboxes from '~/components/util/checkboxes';
+
 export default {
   name: 'hello',
   props: ['props'],
   data () {
     return {
-      msg: '我是Hello组件',
-      color: 'color',
-      value1: ''
+        msg: '我是Hello组件',
+        color: 'color',
+        value1: '',
+        centerDialogVisible: false,
+        cbs:{
+            data: [1,2,3,4,5]
+        }
     }
   },
   created() {
@@ -99,8 +116,15 @@ export default {
           duration: 0,
           offset: 42
         });
+      },
+
+      checkboxes_event(){
+
       }
-  }
+  },
+    components: {
+        checkboxes
+    }
 }
 </script>
 

@@ -8,6 +8,12 @@ module.exports = {
     'element-ui/lib/theme-chalk/index.css'
   ],
 
+  head:{
+    meta: [
+      { charset: 'utf-8' }
+    ]
+  },
+
   /*
   ** Add element-ui in our app, see plugins/element-ui.js file
   */

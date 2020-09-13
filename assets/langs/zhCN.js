@@ -17,7 +17,8 @@ const zhCN = {
         'mutilvolume': '多通道云盘',
         'snapshot': '快照',
         'image': '镜像',
-        'zonelist': '区域列表'
+        'zonelist': '区域列表',
+        'echarts': '图表'
     },
     logon:{
         'title':'用户登录'

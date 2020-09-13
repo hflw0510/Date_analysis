@@ -26,8 +26,10 @@ const m = [
                 key1:'11test'
             },
             'list.mylist': '',
-            'console.instance': '22'
+            'console.instance': '22',
+            'console.echarts' : ''
         }
+        
     }
 ]
 

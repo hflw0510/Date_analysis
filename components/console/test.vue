@@ -46,7 +46,136 @@ export default {
         value1: '',
         centerDialogVisible: false,
         cbs:{
-            data: [1,2,3,4,5]
+            data1: [
+                {
+                    id: 1,
+                    value: 4,
+                    title: 'test1'
+                },
+                {
+                    id: 2,
+                    value: 5,
+                    title: 'test2'
+                }
+            ],
+            dataGroups: [
+                {
+                    id: 1,
+                    checkAll: false,
+                    isIndeterminate: false,
+                    title: '组1'
+                },
+                {
+                    id: 2,
+                    checkAll: false,
+                    isIndeterminate: false,
+                    title: '组2'
+                },
+                {
+                    id: 3,
+                    checkAll: false,
+                    isIndeterminate: false,
+                    title: '组3'
+                }
+            ],
+            dataOptions: [
+                [
+                    {
+                        id: 1,
+                        value: 2,
+                        title: '组1-1'
+                    },
+                    {
+                        id: 2,
+                        value: 4,
+                        title: '组1-2'
+                    },
+                    {
+                        id: 3,
+                        value: 5,
+                        title: '组1-3'
+                    },
+                    {
+                        id: 4,
+                        value: 6,
+                        title: '组1-4'
+                    },
+                    {
+                        id: 5,
+                        value: 7,
+                        title: '组1-5'
+                    },
+                    {
+                        id: 6,
+                        value: 9,
+                        title: '组1-6'
+                    }
+                ],
+                [
+                    {
+                        id: 11,
+                        value: 12,
+                        title: '组2-1'
+                    },
+                    {
+                        id: 12,
+                        value: 14,
+                        title: '组2-2'
+                    },
+                    {
+                        id: 13,
+                        value: 15,
+                        title: '组2-3'
+                    },
+                    {
+                        id: 14,
+                        value: 16,
+                        title: '组2-4'
+                    },
+                    {
+                        id: 15,
+                        value: 17,
+                        title: '组2-5'
+                    },
+                    {
+                        id: 16,
+                        value: 19,
+                        title: '组2-6'
+                    }
+                ],
+                [
+                    {
+                        id: 21,
+                        value: 22,
+                        title: '组3-1'
+                    },
+                    {
+                        id: 22,
+                        value: 24,
+                        title: '组3-2'
+                    },
+                    {
+                        id: 23,
+                        value: 25,
+                        title: '组3-3'
+                    },
+                    {
+                        id: 24,
+                        value: 26,
+                        title: '组3-4'
+                    },
+                    {
+                        id: 25,
+                        value: 27,
+                        title: '组3-5'
+                    },
+                    {
+                        id: 26,
+                        value: 29,
+                        title: '组3-6'
+                    }
+                ]
+            ]
         }
     }
   },

@@ -29,7 +29,7 @@
     <checkboxes ref="cbs" :props="cbs" @event="checkboxes_event"></checkboxes>
     </el-dialog>
 
-    <el-button plain @click="centerDialogVisible = true"> 打开多选框 </el-button>
+    <el-button plain @click="cbsClick()"> 打开多选框 </el-button>
   </div>
 </template>
 
@@ -247,8 +247,14 @@ export default {
         });
       },
 
-      checkboxes_event(){
+      cbsClick(){
+          this.centerDialogVisible = true
+      },
 
+      checkboxes_event(d){
+        console.log(d)
+        alert(d);
+        this.centerDialogVisible = false;
       }
   },
     components: {

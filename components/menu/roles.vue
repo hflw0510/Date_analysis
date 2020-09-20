@@ -148,7 +148,7 @@ export default {
             spec_type: '物种类型'
         };
         bs = {
-
+            'search.Get_data' : '图表查询'
         };
         for (i in bi){
             this.data.push({

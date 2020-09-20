@@ -6,6 +6,25 @@ const m = [
         'sub': {}
     },
     {
+        'index': 'menu.search',
+        'icon': 'el-icon-search',
+        'sub': {
+            'menu.species': '',
+            'menu.rawdata': ''
+        }
+    },
+    {
+        'index': 'menu.analysis',
+        'icon': 'el-icon-pie-chart',
+        'sub': {
+            'menu.all': '',
+            'menu.space': '',
+            'menu.day': '',
+            'menu.relevant': '',
+            'menu.source': '',
+        }
+    },
+    {
         'index': 'menu.manage',
         'icon': 'el-icon-setting',
         'sub': {
@@ -26,6 +45,7 @@ const m = [
                 key1:'11test'
             },
             'list.mylist': '',
+            'list.mysearch': '',
             'console.instance': '22',
             'console.echarts' : ''
         }

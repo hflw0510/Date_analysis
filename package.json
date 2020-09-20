@@ -13,6 +13,7 @@
     "js-base64": "^2.4.9",
     "js-cookie": "^2.2.0",
     "nedb": "^1.8.0",
+    "number-precision": "^1.5.0",
     "nuxt": "^2.8",
     "url-parse": "^1.4.3",
     "vue-bus": "^1.1.0",

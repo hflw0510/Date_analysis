@@ -80,7 +80,8 @@ export default {
             mainHeight: 600,
             sideWidth: 208,
             hashDatas: [],
-            isHashUnique: true
+            isHashUnique: true,
+            timer: ''
         }
     },
     mounted(){
@@ -110,6 +111,11 @@ export default {
 
         this.$nextTick(() => this.mainSetHeight());
         window.addEventListener('resize', () => this.mainSetHeight());
+
+        this.timer = setInterval(this.logon, 5 * 60 * 1000);
+    },
+    beforeDestory(){
+        clearInterval(this.timer);
     },
     methods:{
         logon(){

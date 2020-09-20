@@ -32,14 +32,23 @@ const zhCN = {
         'roles': '角色管理',
         'species': '物种库',
         'spec_type': '物种类型',
-        'log': '日志管理'
+        'log': '日志管理',
+        'search': '数据查询',
+        'rawdata': '基础数据查询',
+        'analysis': '专业分析',
+        'all': '总体特征',
+        'space': '时空分布特征',
+        'day': '日变化特征',
+        'relevant': '相关性分析',
+        'source': '源解析'
     },
     table: {
         'edit': '编辑',
         'delete': '删除'
     },
     list: {
-        'mylist': '简单表格'
+        'mylist': '简单表格',
+        'mysearch': '简单查询'
     },
     consoleInstance:{
         'wan': '外',

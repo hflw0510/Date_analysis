@@ -45,7 +45,7 @@ const tbCols = [
         searchable: false,
         sortable: false,
         align: 'center',
-        width: '280'
+        width: '180'
     },
     {
         colname: '2',
@@ -53,7 +53,7 @@ const tbCols = [
         searchable: false,
         sortable: false,
         align: 'center',
-        width: '280'
+        width: '180'
     },
     {
         colname: '3',

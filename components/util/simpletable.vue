@@ -1,6 +1,45 @@
 <template>
     <div>
-        <el-row>
+        <el-row v-if="isSearch">
+            <el-col :span=6 style="display: inline-block;padding-left: 8px">
+                <el-date-picker
+                    v-model="search_date"
+                    type="daterange"
+                    unlink-panels
+                    value-format="yyyy-MM-dd"
+                    format="yyyy 年 MM 月 dd 日"
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    end-placeholder="结束日期"
+                >
+                </el-date-picker>
+            </el-col>
+            <el-col :span=6 style="display: inline-block;padding-left: 8px;">
+                <el-button-group>
+                    <el-tooltip effect="dark" :content="$t('utilSimpletable.search')" placement="top">
+                        <el-button type="primary" icon="el-icon-search" @click="btnClick('search', search_date)"></el-button>
+                    </el-tooltip>
+                    <el-tooltip effect="dark" :content="$t('utilSimpletable.searchreset')" placement="top">
+                        <el-button type="primary" icon="el-icon-delete" @click="search_date='';"></el-button>
+                    </el-tooltip>
+                </el-button-group>
+            </el-col>
+            <el-col :span=12>
+                <el-button-group style="float: right;padding-right: 4px">
+                    <el-tooltip v-for="btn in tbBtns.filter(v => v.content)" :key="btn.key" effect="dark" :content="btn.content" :placement="btn.place">
+                        <el-button v-if="btn.btntype" :type="btn.btntype" :icon="'el-icon-'+ btn.btnicon" @click="btnClick(btn.key)"></el-button>
+                    </el-tooltip>
+                    <el-button v-for="btn in tbBtns.filter(v => !v.content && v.btntype)" :key="btn.key" :type="btn.btntype" :icon="'el-icon-'+ btn.btnicon" @click="btnClick(btn.key)"></el-button>
+                    <el-tooltip v-if="isDown" effect="dark" :content="$t('utilSimpletable.exportexecl')" placement="top">
+                        <el-button type="primary" icon="el-icon-download" @click="exportExecl()"></el-button>
+                    </el-tooltip>
+                    <el-tooltip v-if="isInfo" effect="dark" :content="isInfo" placement="top">
+                        <el-button type="primary" icon="el-icon-question"></el-button>
+                    </el-tooltip>
+                </el-button-group>
+            </el-col>
+        </el-row>
+        <el-row v-if="!isSearch">
             <el-col :span=2 style="display: inline-block;padding-left: 8px">
                 <el-select v-model="selectValue" :placeholder="$t('utilSimpletable.select')">
                     <el-option
@@ -66,6 +105,11 @@
                     >
                     </el-table-column>
                     <el-table-column
+                        type="index"
+                        width="48"
+                    >
+                    </el-table-column>
+                    <el-table-column
                         v-for="(column, index) in tbCols"
                         :key="index"
                         :prop="column.colname"
@@ -91,16 +135,24 @@
             </el-col>
         </el-row>
         <el-row style="padding: 8px;">
-            <el-col :span=3>
+            <el-col :span=4>
                 <el-alert
+                    v-if="isSelect"
                     :title="$t('utilSimpletable.rows') + tds.length + '    ' + $t('utilSimpletable.selected') + multipleSelection.length"
                     :type="multipleSelection.length?'success':'info'"
                     :closable="false"
                     show-icon
                 >
                 </el-alert>
-            </el-col>    
-            <el-col :span=21>
+                <el-alert
+                    v-if="!isSelect"
+                    :title="$t('utilSimpletable.rows') + tds.length"
+                    :closable="false"
+                    show-icon
+                >
+                </el-alert>
+            </el-col>
+            <el-col :span=20>
                 <el-pagination
                     v-if="!isSinglepage"
                     :current-page="currentPage"
@@ -143,7 +195,9 @@ export default {
             name: 'index',
             isBorder: false,
             isSelect: true,
+            isSearch: this.props['isSearch'],
             isSinglepage: this.props['isSinglepage'],
+            search_date: '',
             tableHeight: 0,
             topHeight: 172,
             bottomHeight: 38,
@@ -155,6 +209,7 @@ export default {
         }
     },
     mounted() {
+        if(this.props['noSelect']) this.isSelect = false;
         this.searchReset();
         this.$nextTick(() => this.tableSetHeight())
         window.addEventListener('resize', () => this.tableSetHeight());

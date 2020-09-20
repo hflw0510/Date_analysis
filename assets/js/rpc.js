@@ -62,20 +62,29 @@ function rpc(url, method) {
             r(response.data);
     })
     .catch(function (error) {
-        if (error.response.data ? error.response.data.hasOwnProperty('Token') : false)
-            if (host == subhost)
-                tokens[host] = cookieSet(host, error.response.data['Token']);
-
-        if (r)
-            r(error.response.data ? error.response.data : {
+        if (error.response){
+            if (r)
+                r(error.response.data ? error.response.data : {
+                    jsonrpc: "2.0",
+                    error: {
+                        code: error.response.status ? (0 - error.response.status) : -1,
+                        message: error.message,
+                        data: error
+                    },
+                    id: null
+                });
+        }
+        else{
+            r({
                 jsonrpc: "2.0",
                 error: {
-                    code: error.response.status ? (0 - error.response.status) : -1,
+                    code: -1,
                     message: error.message,
                     data: error
                 },
                 id: null
             });
+        }
     });
 }
 

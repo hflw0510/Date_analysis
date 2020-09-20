@@ -1,8 +1,37 @@
-<template>
- <div id="echarts">
-   <div id="myChart" class=charts1></div>
-   <div id="myChart2" class=charts2></div>
- </div>
+<template> 
+    <div>
+        <el-row>
+            <el-col :span=24 style="display: inline-block;padding-left: 8px">
+                <el-date-picker
+                    v-model="search_date"
+                    type="daterange"
+                    value-format="yyyy-MM-dd"
+                    format="yyyy 年 MM 月 dd 日"
+                    unlink-panels
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    end-placeholder="结束日期"
+                >
+                </el-date-picker>
+                <el-button-group>
+                    <el-tooltip effect="dark" :content="$t('utilSimpletable.search')" placement="top">
+                        <el-button type="primary" icon="el-icon-search" @click="searchClick('search')"></el-button>
+                    </el-tooltip>
+                    <el-tooltip effect="dark" :content="$t('utilSimpletable.searchreset')" placement="top">
+                        <el-button type="primary" icon="el-icon-delete" @click="search_date='';"></el-button>
+                    </el-tooltip>
+                </el-button-group>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span=24 style="padding-left: 8px;">
+               <div id="echarts">
+                    <div id="myChart" class=charts1></div>
+                    <div id="myChart2" class=charts2></div>
+                </div>
+            </el-col>
+        </el-row>
+    </div>
 </template>
 
 <style>
@@ -24,11 +53,13 @@
 </style>
 
 <script>
+import hosts from '~/assets/config/hosts'
+import rpc from '~/assets/js/rpc'
 
 export default {
   data () {
     return {
-        
+        search_date: ''
     }
   },
   mounted() {
@@ -36,6 +67,16 @@ export default {
     this.echartsInit2()
   },
   methods: {
+      searchClick(){
+          if (this.search_date){
+            rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {}, (d) => {
+                if(d.result){
+                    alert(d.result.length)
+                }
+            })
+          }
+          alert(this.search_date);
+      },
     echartsInit () {
       // 找到容器
       let myChart = this.$echarts.init(document.getElementById('myChart'))

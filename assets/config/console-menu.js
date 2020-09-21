@@ -20,6 +20,7 @@ const m = [
             'menu.all': '',
             'menu.space': '',
             'menu.day': '',
+            'menu.day_spec': '',
             'menu.relevant': '',
             'menu.source': '',
         }

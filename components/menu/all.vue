@@ -15,7 +15,7 @@
                 </el-date-picker>
                 <el-button-group>
                     <el-tooltip effect="dark" :content="$t('utilSimpletable.search')" placement="top">
-                        <el-button type="primary" icon="el-icon-search" @click="searchClick('search')"></el-button>
+                        <el-button type="primary" icon="el-icon-search" @click="searchClick('search')" v-loading.fullscreen.lock="fullscreenLoading"></el-button>
                     </el-tooltip>
                     <el-tooltip effect="dark" :content="$t('utilSimpletable.searchreset')" placement="top">
                         <el-button type="primary" icon="el-icon-delete" @click="search_date='';"></el-button>
@@ -25,18 +25,14 @@
         </el-row>
         <el-row>
             <el-col :span=24 style="padding: 8px 12px;">
-               <div id="echarts">
-                    <div id="myChart1" class=charts1></div>
-                    <div id="myChart2" class=charts2></div>
-                </div>
+                <div id="myChart1_1" class=charts1_1></div>
+                <div id="myChart1_2" class=charts1_2></div>
             </el-col>
         </el-row>
         <el-row>
             <el-col :span=24 style="padding: 8px 12px;">
-               <div id="echarts">
-                    <div id="myChart3" class=charts1></div>
-                    <div id="myChart4" class=charts2></div>
-                </div>
+                <div id="myChart1_3" class=charts1_1></div>
+                <div id="myChart1_4" class=charts1_2></div>
             </el-col>
         </el-row>
         <div>
@@ -53,7 +49,7 @@
 </template>
 
 <style>
-  .charts1 {
+  .charts1_1 {
     width: 700px;
     height: 480px;
     margin-left: auto;
@@ -61,7 +57,7 @@
     float: left;
   }
 
-  .charts2 {
+  .charts1_2 {
     width: 700px;
     height: 480px;
     margin-left: auto;
@@ -81,6 +77,7 @@ export default {
     data () {
         return {
             search_date: '',
+            fullscreenLoading: false,
             cbs: {
                 data: '',
                 dataGroups: [],
@@ -112,59 +109,60 @@ export default {
     },
     methods: {
         searchClick() {
+            this.fullscreenLoading = true;
             if (this.search_date) {
-                if (this.search_date){
-                    rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {}, (d) => {
-                        if(d.result){
-                            let data={}, data1={}, data2={};
-                            d.result.forEach(v => {
-                                if (!data.hasOwnProperty(v[10])){
-                                    data[v[10]] = {};
-                                }
-                                if (!data[v[10]].hasOwnProperty(v[1])){
-                                    data[v[10]][v[1]] = 0;
-                                }
-                                data[v[10]][v[1]] = NP.plus(data[v[10]][v[1]], v[3]);
+                rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {}, (d) => {
+                    if(d.result){
+                        let data={}, data1={}, data2={};
+                        d.result.forEach(v => {
+                            if (!data.hasOwnProperty(v[10])){
+                                data[v[10]] = {};
+                            }
+                            if (!data[v[10]].hasOwnProperty(v[1])){
+                                data[v[10]][v[1]] = 0;
+                            }
+                            data[v[10]][v[1]] = NP.plus(data[v[10]][v[1]], v[3]);
 
-                                if (!data1.hasOwnProperty(v[5])){
-                                    data1[v[5]] = {};
-                                }
-                                if (!data1[v[5]].hasOwnProperty(v[1])){
-                                    data1[v[5]][v[1]] = 0;
-                                }
-                                data1[v[5]][v[1]] = NP.plus(data1[v[5]][v[1]], v[3]);
+                            if (!data1.hasOwnProperty(v[5])){
+                                data1[v[5]] = {};
+                            }
+                            if (!data1[v[5]].hasOwnProperty(v[1])){
+                                data1[v[5]][v[1]] = 0;
+                            }
+                            data1[v[5]][v[1]] = NP.plus(data1[v[5]][v[1]], v[3]);
 
-                                if (v[8] > 0) {
-                                    if (!data2.hasOwnProperty(v[5])){
-                                        data2[v[5]] = {};
-                                    }
-                                    if (!data2[v[5]].hasOwnProperty(v[1])){
-                                        data2[v[5]][v[1]] = 0;
-                                    }
-                                    data2[v[5]][v[1]] = NP.plus(data2[v[5]][v[1]], NP.times(v[3], v[8]));
+                            if (v[8] > 0) {
+                                if (!data2.hasOwnProperty(v[5])){
+                                    data2[v[5]] = {};
                                 }
-                            });
+                                if (!data2[v[5]].hasOwnProperty(v[1])){
+                                    data2[v[5]][v[1]] = 0;
+                                }
+                                data2[v[5]][v[1]] = NP.plus(data2[v[5]][v[1]], NP.times(v[3], v[8]));
+                            }
+                        });
 
-                            this.get_chartData1(data);
-                            this.get_chartData2(data);
-                            this.get_chartData3(data1);
-                            this.get_chartData4(data2)
-                        }
-                        else if(d.error){
-                            throw(d.error);
-                            this.$message({
-                                message: d.error,
-                                type: 'warning'
-                            })
-                        }
-                    })
-                }
+                        this.get_chartData1(data);
+                        this.get_chartData2(data);
+                        this.get_chartData3(data1);
+                        this.get_chartData4(data2)
+                    }
+                    else if(d.error){
+                        throw(d.error);
+                        this.$message({
+                            message: d.error,
+                            type: 'warning'
+                        });
+                        this.fullscreenLoading = false;
+                    }
+                })
             }
             else{
                 this.$message({
                     message: '请选择时间！',
                     type: 'warning'
-                })
+                });
+                this.fullscreenLoading = false;
             }
         },
         get_chartData1(data) {
@@ -178,7 +176,6 @@ export default {
                 this.chartData1.bar.push(this.get_average(Object.values(data[k])));
                 this.chartData1.line.push(this.get_stdevp(Object.values(data[k])));
             }
-            
             this.chart1();
         },
         get_chartData2(data) {
@@ -209,7 +206,6 @@ export default {
                 this.chartData3.xAxis.push(v[0]);
                 this.chartData3.bar.push(v[1]);
             });
-
             this.chart3();
         },
         get_chartData4(data){
@@ -228,7 +224,6 @@ export default {
                 this.chartData4.xAxis.push(v[0]);
                 this.chartData4.bar.push(v[1]);
             });
-
             this.chart4();
         },
         get_average(arr){
@@ -289,7 +284,7 @@ export default {
             })
         },
         chart1(){
-            let myChart = this.$echarts.init(document.getElementById('myChart1'));
+            let myChart = this.$echarts.init(document.getElementById('myChart1_1'));
             let aa = {
                 title: {
                     text: 'VOCs体积分数平均',
@@ -333,10 +328,10 @@ export default {
                     }
                 ]
             };
-            myChart.setOption(aa)
+            myChart.setOption(aa);
         },
         chart2() {
-            let myChart = this.$echarts.init(document.getElementById('myChart2'));
+            let myChart = this.$echarts.init(document.getElementById('myChart1_2'));
             myChart.setOption({
                 title: {
                     text: 'VOCs组成特征',
@@ -357,7 +352,7 @@ export default {
             });
         },
         chart3 () {
-            let myChart = this.$echarts.init(document.getElementById('myChart3'))
+            let myChart = this.$echarts.init(document.getElementById('myChart1_3'))
             myChart.setOption({
                 title: {
                     text: '体积分数前10种VOCs物种',
@@ -386,10 +381,10 @@ export default {
                         }
                     }
                 }]
-            })
+            });
         },
         chart4() {
-            let myChart = this.$echarts.init(document.getElementById('myChart4'))
+            let myChart = this.$echarts.init(document.getElementById('myChart1_4'))
             myChart.setOption({
                 title: {
                     text: 'OFP前10种VOCs物种',
@@ -418,7 +413,10 @@ export default {
                         }
                     }
                 }]
-            })
+            });
+            myChart.on('finished', (params) => {
+                this.fullscreenLoading = false;
+            });
         }
     },
     components: {

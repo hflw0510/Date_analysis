@@ -1,5 +1,4 @@
 import zhLocale from 'element-ui/lib/locale/lang/zh-CN'
-//由于使用了element-ui，所以不可以使用el作为key
 
 const zhCN = {
     ab: {
@@ -39,6 +38,7 @@ const zhCN = {
         'all': '总体特征',
         'space': '时空分布特征',
         'day': '日变化特征',
+        'day_spec': '日变化特征-单物种',
         'relevant': '相关性分析',
         'source': '源解析'
     },

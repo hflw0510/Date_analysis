@@ -22,7 +22,8 @@ export default {
         return {
             dataGroups: [],
             dataOptions:[],
-            checkedCities: []
+            checkedCities: [],
+            cbsformat: this.cbs_format
         }
     },
     mounted() {
@@ -37,6 +38,21 @@ export default {
             this.dataGroups[v].isIndeterminate = false;
         },
         handleCheckedCitiesChange(v) {
+            if (this.props.limit){
+                let i = 0;
+                this.checkedCities.forEach(v => {
+                    i += v.length; 
+                });
+                if (i == this.props.limit){
+                    return this.check_submit();
+                }
+                else if(i > this.props.limit){
+                    this.$message({
+                        message: '超过最大可选数量！',
+                        type: 'warning'
+                    }) 
+                }
+            }
             let ccl = this.checkedCities[v].length, dol = this.dataOptions[v].length;
             this.dataGroups[v].checkAll = ccl === dol;
             this.dataGroups[v].isIndeterminate = ccl > 0 && ccl < dol;

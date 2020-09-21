@@ -142,6 +142,7 @@ export default {
         },
         get_datelist(d){
             let i;
+            this.datelist = [];
             for (i=0;i<this.dateCheck(d[0], d[1]);i++) {
                 let st = d[0];
                 if (st.length==10) st = st + " 00:00:00";
@@ -153,7 +154,7 @@ export default {
         get_chartData1(data) {
             let k;
             this.chartData1.data = {};
-            this.chartData1.legend = this.spec_types;
+            this.chartData1.legend = this.spec_types.map(v => v);
             this.chartData1.xAxis = this.datelist;
             this.chartData1.series = [];
 
@@ -177,6 +178,7 @@ export default {
                 areaStyle: {},
                 data: this.chartData1.data['total']
             });
+            this.chartData1.legend.push('VOCs总量');
 
             this.datelist.forEach(v => {
                 let total = 0;

@@ -103,6 +103,10 @@ export default {
                 data: [],
                 xAxis: []
             },
+            chartData2: {
+                data: [],
+                xAxis: []
+            }
         }
     },
     mounted() {
@@ -130,6 +134,7 @@ export default {
                         });
                         console.log(data)
                         this.get_chartData1(data);
+                        this.get_chartData2(data);
                         this.fullscreenLoading = false;
                     }
                     else if(d.error){
@@ -152,7 +157,7 @@ export default {
         },
         get_datelist(d){
             let i;
-            for (i=0;i<this.dateCheck(d[0], d[1]);i++) {
+            for (i=0;i<this.dateCheck(d[0], d[1])+24;i++) {
                 let st = d[0];
                 if (st.length==10) st = st + " 00:00:00";
                 st = new Date(st);
@@ -182,6 +187,21 @@ export default {
             }
             console.log(this.chartData1);
             this.chart1();
+        },
+        get_chartData2(data){
+            let k = Object.keys(data);
+            this.chartData2.data = [];
+            
+            this.datelist.forEach(v => {
+                this.chartData2.data.push([
+                    (v in data[k[0]])?data[k[0]][v]:0,
+                    (v in data[k[1]])?data[k[1]][v]:0,
+                    v
+                ])
+            });
+
+            console.log(this.chartData2.data);
+            this.chart2();
         },
         get_average(arr){
             return NP.divide(arr.reduce((a, v) => NP.plus(a, v), 0), arr.length).toFixed(3);
@@ -243,11 +263,11 @@ export default {
                 }
             })
         },
-        chart2(divid, data){
-            let myChart = this.$echarts.init(document.getElementById(divid));
+        chart2(){
+            let myChart = this.$echarts.init(document.getElementById('myChart5_2'));
             let aa = {
                 title: {
-                    text: data.title,
+                    text: '',
                     left: 'center'
                 },
                 tooltip: {
@@ -255,58 +275,31 @@ export default {
                 },
                 xAxis: [
                     {
-                        type: 'category',
-                        data: data.xAxis
+                        type: 'value'
                     }
                 ],
                 yAxis: [
                     {
-                        type: 'value',
-                        name: '浓度(ppb)'
+                        type: 'value'
                     }
                 ],
+                visualMap:{
+                    dimension: 2,
+                    orient: 'vertical',
+                    right: 10,
+                    top: 'center',
+                    text: ['HIGH', 'LOW'],
+                    calculable: true,
+                    inRange: {
+                        color: ['#f2c31a', '#24b7f2']
+                    }
+                },
                 series: [
                     {
-                        name: 'U',
-                        type: 'line',
-                        data: data.stdevp.map((v, i) => NP.plus(data.line[i], v)),
-                        lineStyle: {
-                            opacity: 0
-                        },
-                        smooth: true,
-                        areaStyle:{
-                            color: '#C0C0C0',
-                            origin: 'start',
-                            opacity: 0.5
-                        },
-                        symbol: 'none'
-                    },
-                    {
-                        name: 'L',
-                        type: 'line',
-                        data: data.stdevp.map((v, i) => NP.minus(data.line[i], v)),
-                        lineStyle: {
-                            opacity: 0
-                        },
-                        smooth: true,
-                        areaStyle:{
-                            color: '#fff',
-                            origin: 'start',
-                            shadowColor: '#FFFFFF',
-                            shadowOffsetX: 1
-                        },
-                        symbol: 'none'
-                    },
-                    {
-                        name: '浓度',
-                        type: 'line',
-                        data: data.line,
-                        symbolSize: 6,
-                        itemStyle: {
-                            color: '#c23531'
-                        },
-                        showSymbol: false
-                    },
+                        name: 'scatter',
+                        type: 'scatter',
+                        data: this.chartData2.data
+                    }
                 ]
             };
             myChart.setOption(aa)

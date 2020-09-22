@@ -70,7 +70,7 @@
     height: 480px;
     margin-left: auto;
     margin-right: auto;
-    float: right;
+    float: left;
   }
 </style>
 
@@ -79,6 +79,7 @@ import hosts from '~/assets/config/hosts'
 import rpc from '~/assets/js/rpc'
 import checkboxes from '~/components/util/checkboxes';
 import NP from 'number-precision';
+import ecStat from 'echarts-stat';
 NP.enableBoundaryChecking(false);
 
 export default {
@@ -100,12 +101,15 @@ export default {
             chartData: [],
             datelist: [],
             chartData1: {
+                title: '',
                 data: [],
                 xAxis: []
             },
             chartData2: {
                 data: [],
-                xAxis: []
+                line: [],
+                min: 0,
+                max: 0
             }
         }
     },
@@ -120,7 +124,7 @@ export default {
             if (this.search_date && this.spec_selects.length==2) {
                 this.get_datelist(this.search_date);
                 rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {spec_id: this.spec_selects}, (d) => {
-                    if(d.result){
+                    if(d.result.length){
                         let data={};
                         d.result.forEach(v => {
                             if (v[1].length==10) v[1] = v[1] + " 00:00:00";
@@ -133,9 +137,16 @@ export default {
                             data[v[5]][v[1]] = NP.plus(data[v[5]][v[1]], (v[3]));
                         });
                         console.log(data)
-                        this.get_chartData1(data);
-                        this.get_chartData2(data);
-                        this.fullscreenLoading = false;
+
+                        let k = Object.keys(data);
+                        if (k.length == 2){
+                            this.get_chartData1(data);
+                            this.get_chartData2(data);
+                        }
+                        else {
+                            this.fullscreenLoading = false;
+                            this.$message.error('没有符合条件的数据！');
+                        }
                     }
                     else if(d.error){
                         this.fullscreenLoading = false;
@@ -144,6 +155,10 @@ export default {
                             message: d.error,
                             type: 'warning'
                         })
+                    }
+                    else{
+                        this.fullscreenLoading = false;
+                        this.$message.error('没有符合条件的数据！');
                     }
                 })
             }
@@ -166,10 +181,10 @@ export default {
             }
         },
         get_chartData1(data) {
-            let k;
+            let k, a;
             this.chartData1.data = [];
             this.chartData1.xAxis = this.datelist;
-
+            this.chartData1.title = this.spec;
 
             for (k in data) {
                 let d = {
@@ -185,22 +200,26 @@ export default {
                 });
                 this.chartData1.data.push(d);
             }
-            console.log(this.chartData1);
             this.chart1();
         },
         get_chartData2(data){
             let k = Object.keys(data);
             this.chartData2.data = [];
+            this.chartData2.line = [];
+            this.chartData2.min =  NP.divide(new Date(this.datelist[0]).getTime(), 3600 * 1000);
+            this.chartData2.max =  NP.divide(new Date(this.datelist[this.datelist.length-1]).getTime(), 3600 * 1000);
             
             this.datelist.forEach(v => {
                 this.chartData2.data.push([
                     (v in data[k[0]])?data[k[0]][v]:0,
                     (v in data[k[1]])?data[k[1]][v]:0,
-                    v
+                    NP.divide(new Date(v).getTime(), 3600 * 1000)
                 ])
             });
 
-            console.log(this.chartData2.data);
+            let myRegression = ecStat.regression('linear', this.chartData2.data);
+            myRegression.points.sort((a, b) => a[0] - b[0]);
+            this.chartData2.line = myRegression.points;
             this.chart2();
         },
         get_average(arr){
@@ -273,6 +292,9 @@ export default {
                 tooltip: {
                     trigger: 'axis'
                 },
+                dataset: {
+                    source : this.chartData2.data
+                },
                 xAxis: [
                     {
                         type: 'value'
@@ -284,21 +306,28 @@ export default {
                     }
                 ],
                 visualMap:{
+                    min: this.chartData2.min,
+                    max: this.chartData2.max,
                     dimension: 2,
                     orient: 'vertical',
-                    right: 10,
+                    right: 0,
                     top: 'center',
-                    text: ['HIGH', 'LOW'],
                     calculable: true,
                     inRange: {
-                        color: ['#f2c31a', '#24b7f2']
-                    }
+                        color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
+                    },
+                    formatter: (v) => this.dateFormat('YYYY-mm-dd HH', new Date(v * 3600 * 1000))
                 },
                 series: [
                     {
                         name: 'scatter',
-                        type: 'scatter',
-                        data: this.chartData2.data
+                        type: 'scatter'
+                    },
+                    {
+                        name: 'line',
+                        type: 'line',
+                        showSymbol: false,
+                        data: this.chartData2.line
                     }
                 ]
             };
@@ -311,7 +340,7 @@ export default {
             let myChart = this.$echarts.init(document.getElementById('myChart5_1'));
             let aa = {
                 title: {
-                    text: 'VOCs体积分数平均',
+                    text: this.chartData1.title,
                     left: 'center'
                 },
                 tooltip: {

@@ -1,7 +1,8 @@
 <template> 
     <div>
         <el-row>
-            <el-col :span=24 style="display: inline-block;padding-left: 8px">
+            <el-col :span=18 style="display: inline-block;padding-left: 8px">
+
                 <el-date-picker
                     v-model="search_date"
                     type="daterange"
@@ -22,23 +23,30 @@
                     </el-tooltip>
                 </el-button-group>
             </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span=24 style="padding: 8px 12px;">
-                <div id="myChart3_1" class=charts1></div>
-                <div id="myChart3_2" class=charts2></div>
+            <el-col :span=6>
+                <el-switch
+                    v-model="freon"
+                    active-text="VOCs/氟利昂"
+                    inactive-text="VOCs">
+                </el-switch>
             </el-col>
         </el-row>
         <el-row>
             <el-col :span=24 style="padding: 8px 12px;">
-                <div id="myChart3_3" class=charts1></div>
-                <div id="myChart3_4" class=charts2></div>
+                <div id="myChart3_1" class=charts3_1></div>
+                <div id="myChart3_2" class=charts3_2></div>
             </el-col>
         </el-row>
         <el-row>
             <el-col :span=24 style="padding: 8px 12px;">
-                <div id="myChart3_5" class=charts1></div>
-                <div id="myChart3_6" class=charts2></div>
+                <div id="myChart3_3" class=charts3_1></div>
+                <div id="myChart3_4" class=charts3_2></div>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span=24 style="padding: 8px 12px;">
+                <div id="myChart3_5" class=charts3_1></div>
+                <div id="myChart3_6" class=charts3_2></div>
             </el-col>
         </el-row>
         <div>
@@ -55,7 +63,7 @@
 </template>
 
 <style>
-  .charts1 {
+  .charts3_1 {
     width: 700px;
     height: 480px;
     margin-left: auto;
@@ -63,7 +71,7 @@
     float: left;
   }
 
-  .charts2 {
+  .charts3_2 {
     width: 700px;
     height: 480px;
     margin-left: auto;
@@ -82,6 +90,7 @@ NP.enableBoundaryChecking(false);
 export default {
     data () {
         return {
+            freon: false,
             search_date: '',
             fullscreenLoading: false,
             cbs: {
@@ -105,8 +114,8 @@ export default {
             this.fullscreenLoading = true;
             if (this.search_date) {
                 rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {}, (d) => {
-                    if(d.result){
-                        let data={}, data1={}, data2={};
+                    if(d.result.length){
+                        let data={}, data1={};
                         d.result.forEach(v => {
                             if (v[1].length==10) v[1] = v[1] + " 00:00:00";
                             if (!data.hasOwnProperty(v[10])){
@@ -115,28 +124,39 @@ export default {
                             if (!data[v[10]].hasOwnProperty(v[1])){
                                 data[v[10]][v[1]] = [];
                             }
-                            data[v[10]][v[1]] = NP.plus(data[v[10]][v[1]], (v[3]));
+                            data[v[10]][v[1]] = NP.plus(data[v[10]][v[1]], v[3]);
+
+                            if (this.freon && v[5] == '氟里昂113'){
+                                if (!data1.hasOwnProperty(v[1])) data1[v[1]] = [];
+                                data1[v[1]] = NP.plus(data1[v[1]], v[3]);
+                            }
                         });
                         console.log(data);
-                        this.get_chartData1(data);
+                        this.get_chartData1(data, data1);
                     }
                     else if(d.error){
+                        this.fullscreenLoading = false;
                         throw(d.error);
                         this.$message({
                             message: d.error,
                             type: 'warning'
                         })
                     }
+                    else{
+                        this.fullscreenLoading = false;
+                        this.$message.error('没有符合条件的数据！');
+                    }
                 })
             }
             else{
+                this.fullscreenLoading = false;
                 this.$message({
                     message: '请选择时间！',
                     type: 'warning'
                 })
             }
         },
-        get_chartData1(data) {
+        get_chartData1(data, data_freon) {
             let k, t, i;
             this.chartData = [];
 
@@ -157,6 +177,14 @@ export default {
                     if (!(i in data1))
                         data1[i] = [];
 
+                    if (this.freon){
+                        if (t in data_freon){
+                            if (data_freon[t] > 0){
+                                data1[i].push(NP.divide(data[k][t], data_freon[t]).toFixed(3));
+                                continue;
+                            }
+                        }
+                    }
                     data1[i].push(data[k][t]);
                 }
 
@@ -170,9 +198,9 @@ export default {
                         d.stdevp.push(0);
                     }
                 }
-                console.log(d);
                 this.chartData.push(d);
             }
+            console.log(this.chartData);
             this.chartData.forEach((v, i) => {
                 this.chart1('myChart3_'+ (i+1), v);
             });
@@ -254,7 +282,10 @@ export default {
                 yAxis: [
                     {
                         type: 'value',
-                        name: '浓度(ppb)'
+                        name: '浓度(ppb)',
+                        splitLine: {
+                            show: false
+                        }
                     }
                 ],
                 series: [

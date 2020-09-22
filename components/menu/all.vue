@@ -76,6 +76,7 @@ NP.enableBoundaryChecking(false);
 export default {
     data () {
         return {
+            freon: false,
             search_date: '',
             fullscreenLoading: false,
             cbs: {
@@ -112,7 +113,7 @@ export default {
             this.fullscreenLoading = true;
             if (this.search_date) {
                 rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {}, (d) => {
-                    if(d.result){
+                    if(d.result.length){
                         let data={}, data1={}, data2={};
                         d.result.forEach(v => {
                             if (!data.hasOwnProperty(v[10])){
@@ -154,6 +155,10 @@ export default {
                             type: 'warning'
                         });
                         this.fullscreenLoading = false;
+                    }
+                    else{
+                        this.fullscreenLoading = false;
+                        this.$message.error('没有符合条件的数据！');
                     }
                 })
             }

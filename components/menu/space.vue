@@ -108,7 +108,7 @@ export default {
             if (this.search_date.length == 2) {
                 this.get_datelist(this.search_date);
                 rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {}, (d) => {
-                    if(d.result){
+                    if(d.result.length){
                         let data={};
                         d.result.forEach(v => {
                             if (v[1].length==10) v[1] = v[1] + " 00:00:00";
@@ -125,15 +125,21 @@ export default {
                         this.get_chartData2(data);
                     }
                     else if(d.error){
+                        this.fullscreenLoading = false;
                         throw(d.error);
                         this.$message({
                             message: d.error,
                             type: 'warning'
                         })
                     }
+                    else{
+                        this.fullscreenLoading = false;
+                        this.$message.error('没有符合条件的数据！');
+                    }
                 })
             }
             else{
+                this.fullscreenLoading = false;
                 this.$message({
                     message: '请选择时间！',
                     type: 'warning'

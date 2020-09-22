@@ -28,7 +28,7 @@
                         <el-button type="primary" icon="el-icon-search" @click="searchClick('search')" v-loading.fullscreen.lock="fullscreenLoading"></el-button>
                     </el-tooltip>
                     <el-tooltip effect="dark" :content="$t('utilSimpletable.searchreset')" placement="top">
-                        <el-button type="primary" icon="el-icon-delete" @click="search_date='';spec='';"></el-button>
+                        <el-button type="primary" icon="el-icon-delete" @click="search_date='';spec='';spec_id=0;"></el-button>
                     </el-tooltip>
                 </el-button-group>
             </el-col>
@@ -147,6 +147,7 @@ export default {
                         this.get_chartData1(data, data1);
                     }
                     else if(d.error){
+                        this.fullscreenLoading = false;
                         throw(d.error);
                         this.$message({
                             message: d.error,
@@ -160,6 +161,7 @@ export default {
                 })
             }
             else{
+                this.fullscreenLoading = false;
                 this.$message({
                     message: this.search_date?'请选择因子！':'请选择时间！',
                     type: 'warning'

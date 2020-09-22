@@ -28,7 +28,7 @@
                         <el-button type="primary" icon="el-icon-search" @click="searchClick('search')" v-loading.fullscreen.lock="fullscreenLoading"></el-button>
                     </el-tooltip>
                     <el-tooltip effect="dark" :content="$t('utilSimpletable.searchreset')" placement="top">
-                        <el-button type="primary" icon="el-icon-delete" @click="search_date='';spec='';"></el-button>
+                        <el-button type="primary" icon="el-icon-delete" @click="search_date='';spec='';spec_selects=[];"></el-button>
                     </el-tooltip>
                 </el-button-group>
             </el-col>

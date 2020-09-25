@@ -127,24 +127,30 @@ export default {
             this.fullscreenLoading = true;
             if (this.search_date && this.spec_id) {
                 rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {spec_id:[this.spec_id, 34]}, (d) => {
-                    if(d.result.length){
-                        let data={}, data1={};
-                        d.result.forEach(v => {
-                            if (v[1].length==10) v[1] = v[1] + " 00:00:00";
-                            if (!data.hasOwnProperty(v[5])){
-                                data[v[5]] = {};
-                            }
-                            if (!data[v[5]].hasOwnProperty(v[1])){
-                                data[v[5]][v[1]] = [];
-                            }
-                            data[v[5]][v[1]] = NP.plus(data[v[5]][v[1]], (v[3]));
+                    if(d.result){
+                        if(d.result.length){
+                            let data={}, data1={};
+                            d.result.forEach(v => {
+                                if (v[1].length==10) v[1] = v[1] + " 00:00:00";
+                                if (!data.hasOwnProperty(v[5])){
+                                    data[v[5]] = {};
+                                }
+                                if (!data[v[5]].hasOwnProperty(v[1])){
+                                    data[v[5]][v[1]] = [];
+                                }
+                                data[v[5]][v[1]] = NP.plus(data[v[5]][v[1]], (v[3]));
 
-                            if (this.freon && v[5] == '氟里昂113'){
-                                if (!data1.hasOwnProperty(v[1])) data1[v[1]] = [];
-                                data1[v[1]] = NP.plus(data1[v[1]], v[3]);
-                            }
-                        });
-                        this.get_chartData1(data, data1);
+                                if (this.freon && v[5] == '氟里昂113'){
+                                    if (!data1.hasOwnProperty(v[1])) data1[v[1]] = [];
+                                    data1[v[1]] = NP.plus(data1[v[1]], v[3]);
+                                }
+                            });
+                            this.get_chartData1(data, data1);
+                        }
+                        else{
+                            this.fullscreenLoading = false;
+                            this.$message.error('没有符合条件的数据！');
+                        }
                     }
                     else if(d.error){
                         this.fullscreenLoading = false;
@@ -153,10 +159,6 @@ export default {
                             message: d.error,
                             type: 'warning'
                         })
-                    }
-                    else{
-                        this.fullscreenLoading = false;
-                        this.$message.error('没有符合条件的数据！');
                     }
                 })
             }

@@ -80,7 +80,7 @@ export default {
             }
         },
         selectTab(tab){
-            console.log(tab);
+            this.$emit('selectTab', this.consoleTabs[tab.index]);
         },
         langChange() {
             this.consoleTabs.forEach((tab, index) => {
@@ -88,8 +88,8 @@ export default {
             });
         },
         childNewTab(props, r){
-            this.$emit('newTab', props, r)
-            this.addTab(props, r)
+            this.$emit('newTab', props, r);
+            this.addTab(props, r);
         }
     }
 }

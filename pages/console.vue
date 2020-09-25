@@ -10,7 +10,7 @@
             </el-aside>
 
             <el-main class="console-main">
-                <cmain class="console-main-tabs" ref="main" @newTab="childNewTab"></cmain>
+                <cmain class="console-main-tabs" ref="main" @newTab="childNewTab" @selectTab="st"></cmain>
             </el-main>
         </el-container>
     </el-container>
@@ -145,6 +145,9 @@ export default {
             this.changeHash(el.$attrs.val, el.index);
 
             this.$refs.main.addTab(el.$attrs.val, el.index);
+        },
+        st(el) {
+            this.$refs.menu.active = el.index;
         },
         menuSwitch(isCollapse) {
             if (isCollapse)

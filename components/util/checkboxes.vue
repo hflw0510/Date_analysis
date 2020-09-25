@@ -9,6 +9,7 @@
         <div style="margin: 25px 0;"></div>
     </div>
     <div align=right>
+        <el-button :type="checkAll?'primary':'info'" :icon="checkAll?'el-icon-document-checked':'el-icon-document-delete'" @click="handleCheckAll">全选</el-button>
         <el-button type="primary" icon="el-icon-check" @click="check_submit">确定</el-button>
     </div>
 </div>
@@ -20,6 +21,9 @@ export default {
     props: ['props'],
     data () {
         return {
+            checkAll: false,
+            checkAll_type: 'info',
+            checkAll_icon: 'el-icon-document-delete',
             dataGroups: [],
             dataOptions:[],
             checkedCities: [],
@@ -30,6 +34,13 @@ export default {
         this.cbs_format();
     },
     methods: {
+        handleCheckAll() {
+            this.checkAll = !this.checkAll;
+            this.dataGroups.forEach((v, index) => {
+                this.dataGroups[index].checkAll = this.checkAll;
+                this.handleCheckAllChange(index);
+            })
+        },
         handleCheckAllChange(v) {
             this.checkedCities[v] = [];
             if (this.dataGroups[v].checkAll){

@@ -104,7 +104,43 @@ export default {
                     width: i==this.spec_selects.length?'':'100'
                 }); 
             });
+            this.tableData.length = 0;
+            this.$refs.st.searchReset();
             this.centerDialogVisible = false;
+        },
+        get_tableData(search_date, d){
+            let i, data={};
+            d.forEach(v => {
+                if (v[1].length==10) v[1] = v[1] + " 00:00:00";
+                if (!data.hasOwnProperty(v[1])){
+                    data[v[1]] = {};
+                }
+                if (!data[v[1]].hasOwnProperty(v[2])){
+                    data[v[1]][v[2]] = v[3];
+                }
+            });
+            for (i=0;i<this.dateCheck(search_date[0], search_date[1])+24;i++) {
+                let st = search_date[0], x = [], k, ct, y;
+                if (st.length==10) st = st + " 00:00:00";
+                st = new Date(st);
+                st.setHours(i);
+                ct = this.dateFormat("YYYY-mm-dd HH:MM:SS", st)
+                x.push(this.dateFormat("YYYY-mm-dd HH:MM", st));
+                if (ct in data){
+                    this.spec_selects.forEach(v =>{
+                        if (v in data[ct]){
+                            x.push(data[ct][v]);
+                        }
+                        else{
+                            x.push(0);
+                        }
+                    });
+                }
+                else{
+                    x = x.concat(Array(this.spec_selects.length).fill(0));
+                }
+                tableData.unshift(x);
+            }
         },
         server_search(params){
             if (params){
@@ -113,35 +149,7 @@ export default {
                         if(d.result){
                             tableData.length = 0;
                             let current_date, i, x = [];
-                            d.result.forEach(v => {
-                                if (current_date != v[1]) {
-                                    if (x.length) {
-                                        x.unshift(this.dateFormat("YYYY-mm-dd HH:MM", current_date));
-                                        tableData.push(x);
-                                    }
-                                    for (i=-1;i>this.dateCheck(current_date, v[1]);i--) {
-                                        let c_d = current_date;
-                                        if (c_d.length==10) c_d = c_d + " 00:00:00";
-                                        c_d = new Date(c_d);
-                                        c_d.setHours(i);
-                                        x = Array(this.spec_selects.length).fill(0);
-                                        x.unshift(this.dateFormat("YYYY-mm-dd HH:MM", c_d));
-                                        tableData.push(x);
-                                    }
-                                    current_date = v[1];
-                                    x = Array(this.spec_selects.length).fill(0);
-                                    x[this.spec_position[v[2]]] = v[3];
-                                }
-                                else  {
-                                    x[this.spec_position[v[2]]] = v[3];
-                                }
-                            });
-                            if (tableData[tableData.length - 1][0] != current_date){
-                                if (x.length) {
-                                    x.unshift(this.dateFormat("YYYY-mm-dd HH:MM", current_date));
-                                    tableData.push(x);
-                                }
-                            };
+                            this.get_tableData(params, d.result);
                             this.$refs.st.searchReset();
                         }
                         else if(d.error){

@@ -115,24 +115,30 @@ export default {
             if (this.search_date) {
                 rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {}, (d) => {
                     if(d.result.length){
-                        let data={}, data1={};
-                        d.result.forEach(v => {
-                            if (v[1].length==10) v[1] = v[1] + " 00:00:00";
-                            if (!data.hasOwnProperty(v[10])){
-                                data[v[10]] = {};
-                            }
-                            if (!data[v[10]].hasOwnProperty(v[1])){
-                                data[v[10]][v[1]] = [];
-                            }
-                            data[v[10]][v[1]] = NP.plus(data[v[10]][v[1]], v[3]);
+                        if(d.result.length){
+                            let data={}, data1={};
+                            d.result.forEach(v => {
+                                if (v[1].length==10) v[1] = v[1] + " 00:00:00";
+                                if (!data.hasOwnProperty(v[10])){
+                                    data[v[10]] = {};
+                                }
+                                if (!data[v[10]].hasOwnProperty(v[1])){
+                                    data[v[10]][v[1]] = [];
+                                }
+                                data[v[10]][v[1]] = NP.plus(data[v[10]][v[1]], v[3]);
 
-                            if (this.freon && v[5] == '氟里昂113'){
-                                if (!data1.hasOwnProperty(v[1])) data1[v[1]] = [];
-                                data1[v[1]] = NP.plus(data1[v[1]], v[3]);
-                            }
-                        });
-                        console.log(data);
-                        this.get_chartData1(data, data1);
+                                if (this.freon && v[5] == '氟里昂113'){
+                                    if (!data1.hasOwnProperty(v[1])) data1[v[1]] = [];
+                                    data1[v[1]] = NP.plus(data1[v[1]], v[3]);
+                                }
+                            });
+                            console.log(data);
+                            this.get_chartData1(data, data1);
+                        }
+                        else{
+                            this.fullscreenLoading = false;
+                            this.$message.error('没有符合条件的数据！');
+                        }
                     }
                     else if(d.error){
                         this.fullscreenLoading = false;
@@ -142,10 +148,7 @@ export default {
                             type: 'warning'
                         })
                     }
-                    else{
-                        this.fullscreenLoading = false;
-                        this.$message.error('没有符合条件的数据！');
-                    }
+
                 })
             }
             else{

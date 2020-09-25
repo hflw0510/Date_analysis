@@ -113,40 +113,46 @@ export default {
             this.fullscreenLoading = true;
             if (this.search_date) {
                 rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {}, (d) => {
-                    if(d.result.length){
-                        let data={}, data1={}, data2={};
-                        d.result.forEach(v => {
-                            if (!data.hasOwnProperty(v[10])){
-                                data[v[10]] = {};
-                            }
-                            if (!data[v[10]].hasOwnProperty(v[1])){
-                                data[v[10]][v[1]] = 0;
-                            }
-                            data[v[10]][v[1]] = NP.plus(data[v[10]][v[1]], v[3]);
-
-                            if (!data1.hasOwnProperty(v[5])){
-                                data1[v[5]] = {};
-                            }
-                            if (!data1[v[5]].hasOwnProperty(v[1])){
-                                data1[v[5]][v[1]] = 0;
-                            }
-                            data1[v[5]][v[1]] = NP.plus(data1[v[5]][v[1]], v[3]);
-
-                            if (v[8] > 0) {
-                                if (!data2.hasOwnProperty(v[5])){
-                                    data2[v[5]] = {};
+                    if(d.result){
+                        if(d.result.length){
+                            let data={}, data1={}, data2={};
+                            d.result.forEach(v => {
+                                if (!data.hasOwnProperty(v[10])){
+                                    data[v[10]] = {};
                                 }
-                                if (!data2[v[5]].hasOwnProperty(v[1])){
-                                    data2[v[5]][v[1]] = 0;
+                                if (!data[v[10]].hasOwnProperty(v[1])){
+                                    data[v[10]][v[1]] = 0;
                                 }
-                                data2[v[5]][v[1]] = NP.plus(data2[v[5]][v[1]], NP.times(v[3], v[8]));
-                            }
-                        });
+                                data[v[10]][v[1]] = NP.plus(data[v[10]][v[1]], v[3]);
 
-                        this.get_chartData1(data);
-                        this.get_chartData2(data);
-                        this.get_chartData3(data1);
-                        this.get_chartData4(data2)
+                                if (!data1.hasOwnProperty(v[5])){
+                                    data1[v[5]] = {};
+                                }
+                                if (!data1[v[5]].hasOwnProperty(v[1])){
+                                    data1[v[5]][v[1]] = 0;
+                                }
+                                data1[v[5]][v[1]] = NP.plus(data1[v[5]][v[1]], v[3]);
+
+                                if (v[8] > 0) {
+                                    if (!data2.hasOwnProperty(v[5])){
+                                        data2[v[5]] = {};
+                                    }
+                                    if (!data2[v[5]].hasOwnProperty(v[1])){
+                                        data2[v[5]][v[1]] = 0;
+                                    }
+                                    data2[v[5]][v[1]] = NP.plus(data2[v[5]][v[1]], NP.times(v[3], v[8]));
+                                }
+                            });
+
+                            this.get_chartData1(data);
+                            this.get_chartData2(data);
+                            this.get_chartData3(data1);
+                            this.get_chartData4(data2)
+                        }
+                        else{
+                            this.fullscreenLoading = false;
+                            this.$message.error('没有符合条件的数据！');
+                        }
                     }
                     else if(d.error){
                         throw(d.error);
@@ -156,10 +162,7 @@ export default {
                         });
                         this.fullscreenLoading = false;
                     }
-                    else{
-                        this.fullscreenLoading = false;
-                        this.$message.error('没有符合条件的数据！');
-                    }
+
                 })
             }
             else{

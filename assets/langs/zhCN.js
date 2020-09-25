@@ -17,7 +17,8 @@ const zhCN = {
         'snapshot': '快照',
         'image': '镜像',
         'zonelist': '区域列表',
-        'echarts': '图表'
+        'echarts': '图表',
+        'docx': '生成word'
     },
     logon:{
         'title':'用户登录'

@@ -6,7 +6,7 @@
                 <span></span>
             </el-menu-item>
         </el-menu>
-        <el-menu :collapse="isCollapse" :collapse-transition="collapseTransition" :unique-opened="uniqueOpened" class="console-side-menu" background-color="#383e4b" text-color="#fff" active-text-color="#ffd04b">
+        <el-menu :default-active="active" :collapse="isCollapse" :collapse-transition="collapseTransition" :unique-opened="uniqueOpened" class="console-side-menu" background-color="#383e4b" text-color="#fff" active-text-color="#ffd04b">
                 <el-menu-item class="console-side-menu-i" v-for="menu in menus" :key="menu.index" :val="menu.props" v-if="!Object.keys(menu.sub).length" :index="menu.index" @click="rt">
                     <i :class="menu.icon"></i>
                     <span slot="title">{{$t(menu.index)}}</span>
@@ -41,6 +41,7 @@ import menus from '~/assets/config/console-menu'
 export default {
     data () {
         return {
+            'active': '',
             'collapseTransition': false,
             'uniqueOpened': true,
             'isCollapse': false,

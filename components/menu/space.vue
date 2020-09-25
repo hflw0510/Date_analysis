@@ -108,21 +108,27 @@ export default {
             if (this.search_date.length == 2) {
                 this.get_datelist(this.search_date);
                 rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {}, (d) => {
-                    if(d.result.length){
-                        let data={};
-                        d.result.forEach(v => {
-                            if (v[1].length==10) v[1] = v[1] + " 00:00:00";
-                            if (!data.hasOwnProperty(v[1])){
-                                data[v[1]] = {};
-                            }
-                            if (!data[v[1]].hasOwnProperty(v[10])){
-                                data[v[1]][v[10]] = 0;
-                            }
-                            data[v[1]][v[10]] = NP.plus(data[v[1]][v[10]], v[3]);
+                    if(d.result){
+                        if(d.result.length){
+                            let data={};
+                            d.result.forEach(v => {
+                                if (v[1].length==10) v[1] = v[1] + " 00:00:00";
+                                if (!data.hasOwnProperty(v[1])){
+                                    data[v[1]] = {};
+                                }
+                                if (!data[v[1]].hasOwnProperty(v[10])){
+                                    data[v[1]][v[10]] = 0;
+                                }
+                                data[v[1]][v[10]] = NP.plus(data[v[1]][v[10]], v[3]);
 
-                        });
-                        this.get_chartData1(data);
-                        this.get_chartData2(data);
+                            });
+                            this.get_chartData1(data);
+                            this.get_chartData2(data);
+                        }
+                        else{
+                            this.fullscreenLoading = false;
+                            this.$message.error('没有符合条件的数据！');
+                        }
                     }
                     else if(d.error){
                         this.fullscreenLoading = false;
@@ -132,10 +138,7 @@ export default {
                             type: 'warning'
                         })
                     }
-                    else{
-                        this.fullscreenLoading = false;
-                        this.$message.error('没有符合条件的数据！');
-                    }
+
                 })
             }
             else{

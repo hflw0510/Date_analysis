@@ -48,7 +48,8 @@ const m = [
             'list.mylist': '',
             'list.mysearch': '',
             'console.instance': '22',
-            'console.echarts' : ''
+            'console.echarts' : '',
+            'console.docx' : ''
         }
         
     }

@@ -35,6 +35,7 @@ const m = [
             'menu.roles': '',
             'menu.spec_type': '',
             'menu.species': '',
+            'menu.excel': '',
             'menu.log': ''
         }
     },
@@ -49,7 +50,8 @@ const m = [
             'list.mysearch': '',
             'console.instance': '22',
             'console.echarts' : '',
-            'console.docx' : ''
+            'console.docx' : '',
+            'console.excel': ''
         }
         
     }

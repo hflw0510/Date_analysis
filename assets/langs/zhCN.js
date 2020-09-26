@@ -18,7 +18,8 @@ const zhCN = {
         'image': '镜像',
         'zonelist': '区域列表',
         'echarts': '图表',
-        'docx': '生成word'
+        'docx': '生成word',
+        'excel': '导入excel'
     },
     logon:{
         'title':'用户登录'
@@ -41,7 +42,8 @@ const zhCN = {
         'day': '日变化特征',
         'day_spec': '日变化特征-单物种',
         'relevant': '相关性分析',
-        'source': '源解析'
+        'source': '源解析',
+        'excel': '物种库导入'
     },
     table: {
         'edit': '编辑',

@@ -147,7 +147,7 @@ export default {
             this.$refs.main.addTab(el.$attrs.val, el.index);
         },
         st(el) {
-            this.$refs.menu.active = el.index;
+            this.$refs.menu.active = el;
         },
         menuSwitch(isCollapse) {
             if (isCollapse)

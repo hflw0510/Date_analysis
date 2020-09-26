@@ -52,6 +52,7 @@ export default {
             else {
                 this.consoleTabsValue = isNew;
             }
+            this.$emit('selectTab', r);
         },
         removeTab(targetName, name) {
             let deleteIndex, tabs = this.consoleTabs;
@@ -80,7 +81,7 @@ export default {
             }
         },
         selectTab(tab){
-            this.$emit('selectTab', this.consoleTabs[tab.index]);
+            this.$emit('selectTab', this.consoleTabs[tab.index]['index']);
         },
         langChange() {
             this.consoleTabs.forEach((tab, index) => {

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <simpletable ref="st" :props="props" @refresh="refresh" @bclick="btnClick" @create="create"></simpletable>
+        <simpletable ref="st" :props="props" @refresh="refresh" @bclick="btnClick" @create="create" @upload="upload_excel"></simpletable>
         <el-dialog
             title="物种库"
             :visible.sync="centerDialogVisible"
@@ -149,6 +149,13 @@ const tbBtns = [
         place: 'top-end',
         btntype: 'primary',
         btnicon: 'circle-plus'
+    },
+    {
+        key: 'upload',
+        content: '导入',
+        place: 'top-end',
+        btntype: 'primary',
+        btnicon: 'upload'
     },
     {
         key: 'refresh',
@@ -332,6 +339,9 @@ export default {
             let std = this.spec_type_data
             d[13] = std[d[3]];
             return d;
+        },
+        upload_excel() {
+            this.$emit('newTab', '', 'menu.excel');
         }
     },
     components: {

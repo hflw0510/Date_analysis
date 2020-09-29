@@ -152,7 +152,7 @@ export default {
         get_datelist(d){
             let i;
             this.datelist = [];
-            for (i=0;i<this.dateCheck(d[0], d[1]);i++) {
+            for (i=0;i<this.dateCheck(d[0], d[1])+24;i++) {
                 let st = d[0];
                 if (st.length==10) st = st + " 00:00:00";
                 st = new Date(st);

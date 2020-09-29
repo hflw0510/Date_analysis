@@ -90,11 +90,13 @@
                 <el-table
                     @selection-change="handleSelectionChange"
                     @sort-change="handleTableSortChange"
+                    ref="myTable"
                     stripe
                     :data="td"
                     :default-sort = "{prop: 'date', order: 'ascending'}"
                     :height="tableHeight + 'px'"
                     :border="isBorder"
+                    :show-summary="isSum"
                     style="width: 100%"
                 >
                     <el-table-column
@@ -114,7 +116,7 @@
                         :key="index"
                         :prop="column.colname"
                         :label="column.title"
-                        :sortable="column.sortable?'custom':false"
+                        :sortable="column.sortable?true:false"
                         :width="column.width"
                         :align="column.align"
                         :show-overflow-tooltip="colShowTip"
@@ -189,6 +191,7 @@ export default {
             tbBtns: this.props['tbBtns'],
             isDown: this.props['isDown'],
             isInfo: this.props['isInfo'],
+            isSum: this.props['isSum'],
             title: [],
             td: [],
             tds: [],
@@ -216,7 +219,10 @@ export default {
     },
     methods: {
         tableSetHeight() {
-            this.tableHeight = window.innerHeight - this.topHeight - this.bottomHeight;
+            let h;
+            h = window.innerHeight - this.topHeight - this.bottomHeight;
+            //if (this.isSum) h -= 50;
+            this.tableHeight = h;
         },
         searchReset(){
             this.selectValue = '';
@@ -225,6 +231,9 @@ export default {
                 [...this.tds] = this.tableData;
                 this.dataReset();
             }
+            this.$nextTick(() => {
+                this.$refs.myTable.doLayout(); 
+            });
         },
         searchTable() {
             let ss;
@@ -242,7 +251,7 @@ export default {
         },
         dataReset() {
             let _start, _end;
-            if(!this.isSinglepage || this.tds.length > 200) {
+            if(!this.isSinglepage) {
                 this.isSinglepage = false;
                 if(this.currentPage==1) {
                     _start = 0;

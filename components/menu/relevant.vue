@@ -294,6 +294,11 @@ export default {
                 tooltip: {
                     trigger: 'axis'
                 },
+                toolbox:{
+                    feature:{
+                        saveAsImage: {}
+                    }
+                },
                 dataset: {
                     source : this.chartData2.data
                 },
@@ -348,6 +353,11 @@ export default {
                 tooltip: {
                     trigger: 'axis'
                 },
+                toolbox:{
+                    feature:{
+                        saveAsImage: {}
+                    }
+                },
                 xAxis: [
                     {
                         type: 'category',
@@ -368,12 +378,32 @@ export default {
                     {
                         name: this.chartData1.data[0].name,
                         type: 'line',
+                        markPoint:{
+                            data: [
+                                {
+                                    type: 'max', name: '最大值'
+                                },
+                                {
+                                    type: 'min', name: '最小值'
+                                }
+                            ]
+                        },
                         data: this.chartData1.data[0].data
                     },
                     {
                         name: this.chartData1.data[1].name,
                         type: 'line',
                         yAxisIndex: 1,
+                        markPoint:{
+                            data: [
+                                {
+                                    type: 'max', name: '最大值'
+                                },
+                                {
+                                    type: 'min', name: '最小值'
+                                }
+                            ]
+                        }, 
                         data: this.chartData1.data[1].data
                     }
                 ]

@@ -66,27 +66,11 @@ let tableData = [];
 
 const tbCols = [
     {
-        colname: '1',
-        title: '创建时间',
-        searchable: false,
-        sortable: false,
-        align: 'center',
-        width: '220'
-    },
-    {
-        colname: '2',
-        title: '更新时间',
-        searchable: false,
-        sortable: false,
-        align: 'center',
-        width: '220'
-    },
-    {
         colname: '13',
         title: '物种类别',
         searchable: true,
         sortable: true,
-        width: ''
+        width: '120'
     },
     {
         colname: '5',
@@ -98,22 +82,36 @@ const tbCols = [
     {
         colname: '4',
         title: 'CAS号',
-        searchable: true,
-        sortable: true,
-        width: ''
+        searchable: false,
+        sortable: false,
+        width: '140'
+    },
+    {
+        colname: '7',
+        title: 'MIR',
+        searchable: false,
+        sortable: false,
+        width: '100'
     },
     {
         colname: '6',
         title: '分子量（M值）',
-        searchable: true,
-        sortable: true,
-        width: ''
+        searchable: false,
+        sortable: false,
+        width: '120'
+    },
+    {
+        colname: '9',
+        title: '因子小数',
+        searchable: false,
+        sortable: false,
+        width: '80'
     },
     {
         colname: '11',
         title: '状态',
         searchable: true,
-        sortable: true,
+        sortable: false,
         align: 'center',
         width: '100'
     },

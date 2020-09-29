@@ -45,6 +45,7 @@ export default {
                 isDown: true,
                 isInfo: '请先选择因子，再选择日期查询。',
                 isSinglepage: true,
+                isSum: true,
                 tbCols: [
                     {
                         colname: '0',
@@ -132,12 +133,12 @@ export default {
                             x.push(data[ct][v]);
                         }
                         else{
-                            x.push(0);
+                            x.push('');
                         }
                     });
                 }
                 else{
-                    x = x.concat(Array(this.spec_selects.length).fill(0));
+                    x = x.concat(Array(this.spec_selects.length).fill(''));
                 }
                 tableData.unshift(x);
             }

@@ -301,6 +301,14 @@ export default {
                 tooltip: {
                     trigger: 'axis'
                 },
+                toolbox:{
+                    feature:{
+                        saveAsImage: {}
+                    }
+                },
+                label:{
+                    show: true
+                },
                 xAxis: [
                     {
                         type: 'category',
@@ -332,7 +340,17 @@ export default {
                         name: '标准差',
                         type: 'line',
                         yAxisIndex: 1,
-                        data: this.chartData1.line
+                        data: this.chartData1.line,
+                        markPoint:{
+                            data: [
+                                {
+                                    type: 'max', name: '最大值'
+                                },
+                                {
+                                    type: 'min', name: '最小值'
+                                }
+                            ]
+                        }
                     }
                 ]
             };
@@ -348,6 +366,14 @@ export default {
                 tooltip:{
                     trigger: 'item',
                     formatter: '{a} <br/>{b} : {c} ({d}%)'
+                },
+                toolbox:{
+                    feature:{
+                        saveAsImage: {}
+                    }
+                },
+                label:{
+                    formatter: '{b}: {d}%'
                 },
                 series:[
                     {
@@ -368,6 +394,14 @@ export default {
                 },
                 tooltip: {
                     trigger: 'axis'
+                },
+                toolbox:{
+                    feature:{
+                        saveAsImage: {}
+                    }
+                },
+                label:{
+                    show: true
                 },
                 xAxis: {
                     data: this.chartData3.xAxis,
@@ -400,6 +434,14 @@ export default {
                 },
                 tooltip: {
                     trigger: 'axis'
+                },
+                toolbox:{
+                    feature:{
+                        saveAsImage: {}
+                    }
+                },
+                label:{
+                    show: true
                 },
                 xAxis: {
                     data: this.chartData4.xAxis,

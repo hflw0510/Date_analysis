@@ -290,6 +290,11 @@ export default {
                 tooltip: {
                     trigger: 'axis'
                 },
+                toolbox:{
+                    feature:{
+                        saveAsImage: {}
+                    }
+                },
                 xAxis: [
                     {
                         type: 'category',
@@ -344,6 +349,16 @@ export default {
                         symbolSize: 6,
                         itemStyle: {
                             color: '#c23531'
+                        },
+                        markPoint:{
+                            data: [
+                                {
+                                    type: 'max', name: '最大值'
+                                },
+                                {
+                                    type: 'min', name: '最小值'
+                                }
+                            ]
                         },
                         showSymbol: false
                     },

@@ -25,6 +25,12 @@
             </el-col>
             <el-col :span=6>
                 <el-switch
+                    v-model="noppb"
+                    active-text="μg/m³"
+                    inactive-text="ppb"
+                    @change="searchClick">
+                </el-switch>
+                <el-switch
                     v-model="freon"
                     active-text="VOCs/氟利昂"
                     inactive-text="VOCs">
@@ -47,6 +53,12 @@
             <el-col :span=24 style="padding: 8px 12px;">
                 <div id="myChart3_5" class=charts3_1></div>
                 <div id="myChart3_6" class=charts3_2></div>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span=24 style="padding: 8px 12px;">
+                <div id="myChart3_7" class=charts3_1></div>
+                <div id="myChart3_8" class=charts3_2></div>
             </el-col>
         </el-row>
         <div>
@@ -91,6 +103,7 @@ export default {
     data () {
         return {
             freon: false,
+            noppb: false,
             search_date: '',
             fullscreenLoading: false,
             cbs: {
@@ -118,6 +131,8 @@ export default {
                         if(d.result.length){
                             let data={}, data1={};
                             d.result.forEach(v => {
+                                if (this.noppb) v[3] = NP.divide(v[3], 1000);
+
                                 if (v[1].length==10) v[1] = v[1] + " 00:00:00";
                                 if (!data.hasOwnProperty(v[10])){
                                     data[v[10]] = {};
@@ -127,12 +142,12 @@ export default {
                                 }
                                 data[v[10]][v[1]] = NP.plus(data[v[10]][v[1]], v[3]);
 
-                                if (this.freon && v[5] == '氟里昂113'){
+                                if (this.freon && v[5] == '氟利昂113'){
                                     if (!data1.hasOwnProperty(v[1])) data1[v[1]] = [];
                                     data1[v[1]] = NP.plus(data1[v[1]], v[3]);
                                 }
                             });
-                            console.log(data);
+                            console.log(data1);
                             this.get_chartData1(data, data1);
                         }
                         else{
@@ -183,7 +198,7 @@ export default {
                     if (this.freon){
                         if (t in data_freon){
                             if (data_freon[t] > 0){
-                                data1[i].push(NP.divide(data[k][t], data_freon[t]).toFixed(3));
+                                data1[i].push(NP.divide(data[k][t], data_freon[t]).toFixed(4));
                                 continue;
                             }
                         }
@@ -193,12 +208,22 @@ export default {
 
                 for (i=0;i<24;i++) {
                     if (i in data1) {
-                        d.line.push(this.get_average(data1[i]));
-                        d.stdevp.push(this.get_stdevp(data1[i]));
+                        if (this.freon) {
+                            d.line.push(this.get_average(data1[i]));
+                        }
+                        else {
+                            d.line.push(this.get_average(data1[i]));
+                            d.stdevp.push(this.get_stdevp(data1[i]));
+                        }
                     }
                     else {
-                        d.line.push(0);
-                        d.stdevp.push(0);
+                        if (this.freon) {
+                            d.line.push(0);
+                        }
+                        else {
+                            d.line.push(0);
+                            d.stdevp.push(0);
+                        }
                     }
                 }
                 this.chartData.push(d);
@@ -210,7 +235,7 @@ export default {
 
         },
         get_average(arr){
-            return NP.divide(arr.reduce((a, v) => NP.plus(a, v), 0), arr.length).toFixed(3);
+            return NP.divide(arr.reduce((a, v) => NP.plus(a, v), 0), arr.length).toFixed(4);
         },
         get_stdevp(arr){
             let mean = this.get_average(arr);
@@ -290,7 +315,7 @@ export default {
                 yAxis: [
                     {
                         type: 'value',
-                        name: '浓度(ppb)',
+                        name: this.noppb?'浓度(μg/m³)':'浓度(ppb)',
                         splitLine: {
                             show: false
                         }
@@ -352,7 +377,7 @@ export default {
             };
             myChart.setOption(aa)
 
-            if (divid == 'myChart3_6') {
+            if (divid == 'myChart3_'+this.chartData.length) {
                 myChart.on('finished', (params) => {
                 this.fullscreenLoading = false;
             });

@@ -33,7 +33,7 @@ export default {
     data () {
         return {
             tableData: [],
-            tbCols: ['序号','数据ID','因子字段','CAS号','物种名称','物种分类','分子量（M值）','MIR','启用','单位','传输编码','因子小数','因子序列号','是否删除'],
+            tbCols: ['序号','英文名称','物种名称','物种分类','物种细类','*(a)(b)类','CAS号','分子量（M值）','MIR','单位','因子小数'],
             tableHeight: 0,
             topHeight: 172,
             bottomHeight: 0,
@@ -47,7 +47,14 @@ export default {
         upload (){
             let data=[];
             this.tableData.forEach(v => {
-                data.push(Object.values(v))
+                let da=[];
+                this.tbCols.forEach(k => {
+                    if (k in v)
+                        da.push(v[k]);
+                    else
+                        da.push('');
+                })
+                data.push(da);
             })
             console.log(data);
             if (data.length > 0){

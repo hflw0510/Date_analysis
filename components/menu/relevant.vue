@@ -97,6 +97,7 @@ export default {
             spec: '',
             specs: {},
             spec_selects: [],
+            spec_type_data: {},
             centerDialogVisible : false,
             chartData: [],
             datelist: [],
@@ -252,17 +253,8 @@ export default {
             rpc(hosts.baseHost, 'bi.list', 'spec_type', '', (d) => {
                 if(d.result){
                     this.cbs.dataGroups.length = 0;
-                    d.result.forEach((v, i) => {
-                        this.cbs.dataGroups.push(
-                            {
-                                id: v[0],
-                                checkAll: false,
-                                isIndeterminate: false,
-                                title: v[3]
-                            }
-                        );
-                        this.cbsgroups[v[0]] = i;
-                        this.cbs.dataOptions.push([]);
+                    d.result.forEach(v => {
+                        this.spec_type_data[v[0]] = v[3];
                     });
                     this.spec_load();
                 }
@@ -271,15 +263,30 @@ export default {
         spec_load(){
             rpc(hosts.baseHost, 'bi.list', 'species', '', (d) => {
                 if(d.result){
+                    let spec_type = {}, i = 0;
                     d.result.forEach(v => {
+                        if (!spec_type.hasOwnProperty(v[3])){
+                            this.cbs.dataGroups.push(
+                                {
+                                    id: v[3],
+                                    checkAll: false,
+                                    isIndeterminate: false,
+                                    title: this.spec_type_data[v[3]]
+                                }
+                            );
+                            this.cbsgroups[v[3]] = i++;
+                            this.cbs.dataOptions.push([]);
+                            spec_type[v[3]] = '';
+                        }
+
                         this.cbs.dataOptions[this.cbsgroups[v[3]]].push(
                             {
                                 id: v[0],
                                 value: v[0],
-                                title: v[5]
+                                title: v[7]
                             }
                         );
-                        this.specs[v[0]] = v[5];
+                        this.specs[v[0]] = v[7];
                     });
                 }
             })

@@ -1,7 +1,7 @@
 <template> 
     <div>
         <el-row>
-            <el-col :span=24 style="display: inline-block;padding-left: 8px">
+            <el-col :span=18 style="display: inline-block;padding-left: 8px">
                 <el-date-picker
                     v-model="search_date"
                     type="daterange"
@@ -21,6 +21,14 @@
                         <el-button type="primary" icon="el-icon-delete" @click="search_date='';"></el-button>
                     </el-tooltip>
                 </el-button-group>
+            </el-col>
+            <el-col :span=6>
+                <el-switch
+                    v-model="noppb"
+                    active-text="μg/m³"
+                    inactive-text="ppb"
+                    @change="searchClick">
+                </el-switch>
             </el-col>
         </el-row>
         <el-row>
@@ -77,6 +85,7 @@ export default {
     data () {
         return {
             freon: false,
+            noppb: false,
             search_date: '',
             fullscreenLoading: false,
             cbs: {
@@ -117,6 +126,8 @@ export default {
                         if(d.result.length){
                             let data={}, data1={}, data2={};
                             d.result.forEach(v => {
+                                if (this.noppb) v[3] = NP.divide(v[3], 1000);
+
                                 if (!data.hasOwnProperty(v[10])){
                                     data[v[10]] = {};
                                 }
@@ -140,7 +151,12 @@ export default {
                                     if (!data2[v[5]].hasOwnProperty(v[1])){
                                         data2[v[5]][v[1]] = 0;
                                     }
-                                    data2[v[5]][v[1]] = NP.plus(data2[v[5]][v[1]], NP.times(v[3], v[8]));
+                                    let val;
+                                    if (this.noppb)
+                                        val = v[3];
+                                    else
+                                        val = NP.divide(v[3], 1000);
+                                    data2[v[5]][v[1]] = NP.plus(data2[v[5]][v[1]], NP.times(val, v[8]));
                                 }
                             });
 
@@ -235,7 +251,7 @@ export default {
             this.chart4();
         },
         get_average(arr){
-            return NP.divide(arr.reduce((a, v) => NP.plus(a, v), 0), arr.length).toFixed(3);
+            return NP.divide(arr.reduce((a, v) => NP.plus(a, v), 0), arr.length).toFixed(4);
         },
         get_stdevp(arr){
             let mean = this.get_average(arr);
@@ -318,7 +334,7 @@ export default {
                 yAxis: [
                     {
                         type: 'value',
-                        name: '浓度(ppb)'
+                        name: this.noppb?'浓度(μg/m³)':'浓度(ppb)'
                     },
                     {
                         type: 'value',
@@ -411,7 +427,7 @@ export default {
                 },
                 yAxis: {
                         type: 'value',
-                        name: '物种浓度(ppb)'
+                        name: this.noppb?'物种浓度(μg/m³)':'物种浓度(ppb)'
                     },
                 series: [{
                     name: '浓度',

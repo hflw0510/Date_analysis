@@ -34,6 +34,12 @@
             </el-col>
             <el-col :span=6>
                 <el-switch
+                    v-model="noppb"
+                    active-text="μg/m³"
+                    inactive-text="ppb"
+                    @change="searchClick">
+                </el-switch>
+                <el-switch
                     v-model="freon"
                     active-text="VOCs/氟利昂"
                     inactive-text="VOCs">
@@ -44,18 +50,6 @@
             <el-col :span=24 style="padding: 8px 12px;">
                 <div id="myChart4_1" class=charts4_1></div>
                 <div id="myChart4_2" class=charts4_2></div>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span=24 style="padding: 8px 12px;">
-                <div id="myChart4_3" class=charts4_1></div>
-                <div id="myChart4_4" class=charts4_2></div>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span=24 style="padding: 8px 12px;">
-                <div id="myChart4_5" class=charts4_1></div>
-                <div id="myChart4_6" class=charts4_2></div>
             </el-col>
         </el-row>
         <div>
@@ -101,6 +95,8 @@ export default {
         return {
             search_date: '',
             freon: false,
+            freonid: 0,
+            noppb: false,
             fullscreenLoading: false,
             cbs: {
                 limit: 1,
@@ -113,6 +109,9 @@ export default {
             spec_id: 0,
             specs: {},
             spec_selects: [],
+            spec_type_data: {},
+            spec_type_iscalc: {},
+            spec_iscalc: {},
             centerDialogVisible : false,
             chartData: []
         }
@@ -126,26 +125,43 @@ export default {
         searchClick() {
             this.fullscreenLoading = true;
             if (this.search_date && this.spec_id) {
-                rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {spec_id:[this.spec_id, 34]}, (d) => {
+                let params;
+                if (this.spec_iscalc[this.spec_id] == 1)
+                    params = {spec_id:[this.spec_id, this.freon?this.freonid:0]};
+                else{
+                    params = {spec_type_iscalc0: this.spec_id};
+                    this.freon = false;
+                }
+                rpc(hosts.baseHost, 'Search.Get_data', this.search_date, params, (d) => {
                     if(d.result){
                         if(d.result.length){
                             let data={}, data1={};
                             d.result.forEach(v => {
-                                if (v[1].length==10) v[1] = v[1] + " 00:00:00";
-                                if (!data.hasOwnProperty(v[5])){
-                                    data[v[5]] = {};
-                                }
-                                if (!data[v[5]].hasOwnProperty(v[1])){
-                                    data[v[5]][v[1]] = [];
-                                }
-                                data[v[5]][v[1]] = NP.plus(data[v[5]][v[1]], (v[3]));
+                                if (this.noppb && this.spec_iscalc[this.spec_id]) v[3] = NP.divide(v[3], 1000);
 
-                                if (this.freon && v[5] == '氟里昂113'){
+                                if (this.freon && v[5] == '氟利昂113'){
                                     if (!data1.hasOwnProperty(v[1])) data1[v[1]] = [];
                                     data1[v[1]] = NP.plus(data1[v[1]], v[3]);
                                 }
+                                else{
+                                    if (v[1].length==10) v[1] = v[1] + " 00:00:00";
+                                    if (!data.hasOwnProperty(v[5])){
+                                        data[v[5]] = {};
+                                    }
+                                    if (!data[v[5]].hasOwnProperty(v[1])){
+                                        data[v[5]][v[1]] = [];
+                                    }
+                                    data[v[5]][v[1]] = NP.plus(data[v[5]][v[1]], (v[3]));
+                                }
+
                             });
-                            this.get_chartData1(data, data1);
+                            if (Object.keys(data).length == 0){
+                                this.fullscreenLoading = false;
+                                this.$message.error('没有符合条件的数据！');
+                            }
+                            else{
+                                this.get_chartData1(data, data1);
+                            }
                         }
                         else{
                             this.fullscreenLoading = false;
@@ -194,7 +210,7 @@ export default {
                     if (this.freon){
                         if (t in data_freon){
                             if (data_freon[t] > 0){
-                                data1[i].push(NP.divide(data[k][t], data_freon[t]).toFixed(3));
+                                data1[i].push(NP.divide(data[k][t], data_freon[t]).toFixed(4));
                                 continue;
                             }
                         }
@@ -204,22 +220,31 @@ export default {
 
                 for (i=0;i<24;i++) {
                     if (i in data1) {
-                        d.line.push(this.get_average(data1[i]));
-                        d.stdevp.push(this.get_stdevp(data1[i]));
+                        if (this.freon || this.spec_iscalc[this.spec_id] == 0) {
+                            d.line.push(this.get_average(data1[i]));
+                        }
+                        else {
+                            d.line.push(this.get_average(data1[i]));
+                            d.stdevp.push(this.get_stdevp(data1[i]));
+                        }
                     }
                     else {
-                        d.line.push(0);
-                        d.stdevp.push(0);
+                        if (this.freon || this.spec_iscalc[this.spec_id] == 0) {
+                            d.line.push(0);
+                        }
+                        else {
+                            d.line.push(0);
+                            d.stdevp.push(0);
+                        }
                     }
                 }
                 this.chartData.push(d);
             }
-            this.chartData.forEach((v, i) => {
-                this.chart1('myChart4_'+ (i+1), v);
-            });
+            this.chart1('myChart4_1', this.chartData[0]);
+
         },
         get_average(arr){
-            return NP.divide(arr.reduce((a, v) => NP.plus(a, v), 0), arr.length).toFixed(3);
+            return NP.divide(arr.reduce((a, v) => NP.plus(a, v), 0), arr.length).toFixed(4);
         },
         get_stdevp(arr){
             let mean = this.get_average(arr);
@@ -248,17 +273,9 @@ export default {
             rpc(hosts.baseHost, 'bi.list', 'spec_type', '', (d) => {
                 if(d.result){
                     this.cbs.dataGroups.length = 0;
-                    d.result.forEach((v, i) => {
-                        this.cbs.dataGroups.push(
-                            {
-                                id: v[0],
-                                checkAll: false,
-                                isIndeterminate: false,
-                                title: v[3]
-                            }
-                        );
-                        this.cbsgroups[v[0]] = i;
-                        this.cbs.dataOptions.push([]);
+                    d.result.forEach(v => {
+                        this.spec_type_data[v[0]] = v[3];
+                        this.spec_type_iscalc[v[0]] = v[4];
                     });
                     this.spec_load();
                 }
@@ -267,15 +284,34 @@ export default {
         spec_load(){
             rpc(hosts.baseHost, 'bi.list', 'species', '', (d) => {
                 if(d.result){
+                    let spec_type = {}, i = 0;
                     d.result.forEach(v => {
+                        if (v[7] == '氟利昂113'){
+                            this.freonid = v[0];
+                        }
+                        if (!spec_type.hasOwnProperty(v[3])){
+                            this.cbs.dataGroups.push(
+                                {
+                                    id: v[3],
+                                    checkAll: false,
+                                    isIndeterminate: false,
+                                    title: this.spec_type_data[v[3]]
+                                }
+                            );
+                            this.cbsgroups[v[3]] = i++;
+                            this.cbs.dataOptions.push([]);
+                            spec_type[v[3]] = '';
+                        }
+
                         this.cbs.dataOptions[this.cbsgroups[v[3]]].push(
                             {
                                 id: v[0],
                                 value: v[0],
-                                title: v[5]
+                                title: v[7]
                             }
                         );
-                        this.specs[v[0]] = v[5];
+                        this.specs[v[0]] = v[7];
+                        this.spec_iscalc[v[0]] = this.spec_type_iscalc[v[3]];
                     });
                 }
             })
@@ -304,7 +340,7 @@ export default {
                 yAxis: [
                     {
                         type: 'value',
-                        name: '浓度(ppb)',
+                        name: this.spec_type_iscalc[this.spec_id]?(this.noppb?'浓度(μg/m³)':'浓度(ppb)'):'响应值',
                         splitLine: {
                             show: false
                         }
@@ -343,7 +379,7 @@ export default {
                         symbol: 'none'
                     },
                     {
-                        name: '浓度',
+                        name: this.spec_type_iscalc[this.spec_id]?'浓度':'响应值',
                         type: 'line',
                         data: data.line,
                         symbolSize: 6,

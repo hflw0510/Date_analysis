@@ -17,6 +17,9 @@
                 <el-form-item label="更新时间">
                     <el-input v-model="form.updatetime" disabled></el-input>
                 </el-form-item>
+                <el-form-item label="合计">
+                    <el-switch v-model="form.calc"></el-switch>
+                </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="form_submit">确定</el-button>
                     <el-button @click="centerDialogVisible = false">取消</el-button>
@@ -105,7 +108,8 @@ export default {
                 id: 0,
                 name: '',
                 createtime: '',
-                updatetime: ''
+                updatetime: '',
+                calc: true
             },
             rules: {
                 name: [
@@ -164,6 +168,7 @@ export default {
                     this.form.createtime = params[1][1];
                     this.form.updatetime = params[1][2];
                     this.form.name = params[1][3];
+                    this.form.calc = (params[1][4]==1)?true:false;
                     this.centerDialogVisible = true;
                     break;
                 case 'delete':
@@ -185,7 +190,8 @@ export default {
                 id: 0,
                 name: '',
                 createtime: '',
-                updatetime: ''
+                updatetime: '',
+                calc: true
             }
         },
         form_submit() {
@@ -198,7 +204,8 @@ export default {
             });
             if (!check) return;
             data = {
-                name: this.form.name
+                name: this.form.name,
+                iscalc: this.form.calc?1:0
             }
             rpc(hosts.baseHost, 'bi.Save', 'spec_type', this.form.id, data, (d) => {
                 if(d.result){

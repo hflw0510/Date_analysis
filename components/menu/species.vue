@@ -11,6 +11,9 @@
                 <el-form-item label="物种名称" prop="name">
                     <el-input v-model="form.name"></el-input>
                 </el-form-item>
+                <el-form-item label="英文名称">
+                    <el-input v-model="form.name_e"></el-input>
+                </el-form-item>
                 <el-form-item label="创建时间">
                     <el-input v-model="form.createtime" disabled></el-input>
                 </el-form-item>
@@ -28,6 +31,20 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
+                <el-form-item label="物种细类">
+                    <el-select v-model="form.spec_type_vice" clearable placeholder="请选择">
+                        <el-option
+                            v-for="item in spec_type_item"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                        >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="类型">
+                    <el-input v-model="form.class"></el-input>
+                </el-form-item>
                 <el-form-item label="CAS号">
                     <el-input v-model="form.cas"></el-input>
                 </el-form-item>
@@ -37,14 +54,8 @@
                 <el-form-item label="MIR">
                     <el-input v-model="form.mir"></el-input>
                 </el-form-item>
-                <el-form-item label="因子字段">
-                    <el-input v-model="form.fac1"></el-input>
-                </el-form-item>
                 <el-form-item label="因子小数">
-                    <el-input v-model="form.fac2"></el-input>
-                </el-form-item>
-                <el-form-item label="因子序列号">
-                    <el-input v-model="form.fac3"></el-input>
+                    <el-input v-model="form.fac"></el-input>
                 </el-form-item>
                 <el-form-item label="状态">
                     <el-switch v-model="form.status"></el-switch>
@@ -66,49 +77,56 @@ let tableData = [];
 
 const tbCols = [
     {
-        colname: '13',
-        title: '物种类别',
+        colname: '14',
+        title: '物种分类',
         searchable: true,
         sortable: true,
         width: '120'
     },
     {
-        colname: '5',
+        colname: '15',
+        title: '物种细类',
+        searchable: true,
+        sortable: true,
+        width: '120'
+    },
+    {
+        colname: '7',
         title: '物种名称',
         searchable: true,
         sortable: true,
         width: ''
     },
     {
-        colname: '4',
+        colname: '5',
         title: 'CAS号',
         searchable: false,
         sortable: false,
         width: '140'
     },
     {
-        colname: '7',
+        colname: '10',
         title: 'MIR',
         searchable: false,
         sortable: false,
         width: '100'
     },
     {
-        colname: '6',
+        colname: '9',
         title: '分子量（M值）',
         searchable: false,
         sortable: false,
         width: '120'
     },
     {
-        colname: '9',
+        colname: '11',
         title: '因子小数',
         searchable: false,
         sortable: false,
         width: '80'
     },
     {
-        colname: '11',
+        colname: '12',
         title: '状态',
         searchable: true,
         sortable: false,
@@ -170,21 +188,22 @@ export default {
             form: {
                 id: 0,
                 spec_type: '',
+                spec_type_vice: '',
                 createtime: '',
                 updatetime: '',
                 cas: '',
                 name: '',
+                name_e: '',
+                class: '',
                 m_value: '',
                 mir: '',
-                fac1: '',
-                fac2: '',
-                fac3: '',
+                fac: '',
                 status: true
             },
             rules: {
                 name: [
                     { required: true, message: '请输入物种名称', trigger: 'blur' },
-                    { min: 3, max: 12, message: '长度在 3 到 12 个字符', trigger: 'blur' }
+                    { min: 2, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur' }
                 ]
             },
             props : {
@@ -254,14 +273,15 @@ export default {
                     this.form.createtime = params[1][1];
                     this.form.updatetime = params[1][2];
                     this.form.spec_type = params[1][3];
-                    this.form.name = params[1][5];
-                    this.form.cas = params[1][4];
-                    this.form.m_value = params[1][6];
-                    this.form.mir = params[1][7];
-                    this.form.fac1 = params[1][8];
-                    this.form.fac2 = params[1][9];
-                    this.form.fac3 = params[1][10];
-                    this.form.status = (params[1][11]=='启用')?true:false;
+                    this.form.spec_type_vice = params[1][4];
+                    this.form.name = params[1][7];
+                    this.form.name_e = params[1][6];
+                    this.form.cas = params[1][5];
+                    this.form.class = params[1][8];
+                    this.form.m_value = params[1][9];
+                    this.form.mir = params[1][10];
+                    this.form.fac = params[1][11];
+                    this.form.status = (params[1][12]=='启用')?true:false;
                     this.centerDialogVisible = true;
                     break;
                 case 'delete':
@@ -282,15 +302,16 @@ export default {
             this.form = {
                 id: 0,
                 spec_type: '',
+                spec_type_vice: '',
                 createtime: '',
                 updatetime: '',
                 cas: '',
                 name: '',
                 m_value: '',
                 mir: '',
-                fac1: '',
-                fac2: '',
-                fac3: '',
+                fac: '',
+                name_e: '',
+                class: '',
                 status: true
             }
         },
@@ -306,12 +327,13 @@ export default {
             data = {
                 name: this.form.name,
                 spec_type: this.form.spec_type,
+                spec_type_vice: this.form.spec_type_vice,
                 CAS: this.form.cas,
                 M_Value: this.form.m_value,
                 MIR: this.form.mir,
-                Factor1: this.form.fac1,
-                Factor2: this.form.fac2,
-                Factor3: this.form.fac3,
+                Factor: this.form.fac,
+                Class: this.form.class,
+                Name_English: this.form.name_e,
                 isdisabled: this.form.status?0:1
             }
             rpc(hosts.baseHost, 'bi.Save', 'species', this.form.id, data, (d) => {
@@ -330,12 +352,13 @@ export default {
             this.centerDialogVisible=true;
         },
         dataRender(d) {
-            if (d[11] == 0)
-                d[11] = '启用';
+            if (d[12] == 0)
+                d[12] = '启用';
             else
-                d[11] = '禁用';
+                d[12] = '禁用';
             let std = this.spec_type_data
-            d[13] = std[d[3]];
+            d[14] = std[d[3]];
+            d[15] = std[d[4]];
             return d;
         },
         upload_excel() {

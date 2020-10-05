@@ -33,12 +33,12 @@
         </el-row>
         <el-row>
             <el-col :span=24 style="padding: 8px 12px;">
-                <div id="myChart2_1" class=charts2_1></div>
+                <div id="myChart6_1" class=charts6_1></div>
             </el-col>
         </el-row>
         <el-row>
             <el-col :span=24 style="padding: 8px 12px;">
-                <div id="myChart2_2" class=charts2_2></div>
+                <div id="myChart6_2" class=charts6_2></div>
             </el-col>
         </el-row>
         <div>
@@ -55,7 +55,7 @@
 </template>
 
 <style>
-  .charts2_1 {
+  .charts6_1 {
     width: 1400px;
     height: 480px;
     margin-left: auto;
@@ -63,7 +63,7 @@
     float: left;
   }
 
-  .charts2_2 {
+  .charts6_2 {
     width: 1400px;
     height: 480px;
     margin-left: auto;
@@ -116,7 +116,7 @@ export default {
             this.fullscreenLoading = true;
             if (this.search_date.length == 2) {
                 this.get_datelist(this.search_date);
-                rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {}, (d) => {
+                rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {spec_type_ext:[]}, (d) => {
                     if(d.result){
                         if(d.result.length){
                             let data={}, data1={};
@@ -319,7 +319,7 @@ export default {
             })
         },
         chart1(){
-            let myChart = this.$echarts.init(document.getElementById('myChart2_1'));
+            let myChart = this.$echarts.init(document.getElementById('myChart6_1'));
             let aa = {
                 tooltip: {
                     trigger: 'axis'
@@ -355,7 +355,7 @@ export default {
             myChart.setOption(aa)
         },
         chart2() {
-            let myChart = this.$echarts.init(document.getElementById('myChart2_2'));
+            let myChart = this.$echarts.init(document.getElementById('myChart6_2'));
             myChart.setOption({
                 tooltip: {
                     trigger: 'axis'

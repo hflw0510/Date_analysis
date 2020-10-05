@@ -39,6 +39,7 @@ const zhCN = {
         'analysis': '专业分析',
         'all': '总体特征',
         'space': '时空分布特征',
+        'space_ext': '时空分布特征-外标',
         'day': '日变化特征',
         'day_spec': '日变化特征-单物种',
         'relevant': '相关性分析',

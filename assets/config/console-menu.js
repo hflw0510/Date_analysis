@@ -19,6 +19,7 @@ const m = [
         'sub': {
             'menu.all': '',
             'menu.space': '',
+            'menu.space_ext': '',
             'menu.day': '',
             'menu.day_spec': '',
             'menu.relevant': '',

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <simpletable ref="st" :props="props" @refresh="refresh" @tts="tts" @search="server_search" @select="spec_select"></simpletable>
+        <simpletable ref="st" :props="props" @refresh="refresh" @dtc="dtc" @search="server_search" @select="spec_select" @analysis="Analysis"></simpletable>
         <el-dialog
             title="因子选择"
             :visible.sync="centerDialogVisible"
@@ -24,6 +24,13 @@ const tbBtns = [
         place: 'top-end',
         btntype: 'warning',
         btnicon: 'document-add'
+    },
+    {
+        key: 'analysis',
+        content: '提交源解析',
+        place: 'top-end',
+        btntype: 'primary',
+        btnicon: 'data-analysis'
     },
     {
         key: 'refresh',
@@ -66,6 +73,7 @@ export default {
                 dataOptions: []
             },
             cbsgroups:{},
+            search_date: '',
             specs:{},
             spec_selects: [],
             spec_position: {},
@@ -82,8 +90,8 @@ export default {
             this.tableData.length = 0;
             this.$refs.st.searchReset();
         },
-        tts(params) {
-            console.log(params);
+        dtc(params) {
+            this.search_date = params;
         },
         spec_select(){
             this.centerDialogVisible = true;
@@ -144,8 +152,51 @@ export default {
                 tableData.unshift(x);
             }
         },
+        Analysis(){
+            this.$prompt('请输入一个名称', '提交源解析申请', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消'
+            }).then(({ value }) => {
+                this.Source_Analysis(value);
+            }).catch(() => {
+
+            });
+        },
+        Source_Analysis(name){
+            if (this.search_date){
+                if (this.spec_selects.length > 0){
+                    rpc(hosts.baseHost, 'Search.Source_Analysis', name, this.search_date, {spec_id: this.spec_selects}, (d) => {
+                        if(d.result){
+                            this.$message({
+                                message: '源解析提交成功，ID：' + d.result + '请在源解析功能里查看结果。',
+                                type: 'success'
+                            });
+                        }
+                        else if(d.error){
+                            this.$message({
+                                message: d.error,
+                                type: 'warning'
+                            })
+                        }
+                    });
+                }
+                else{
+                    this.$message({
+                        message: '请选择因子！',
+                        type: 'warning'
+                    }) 
+                }
+            }
+            else{
+                this.$message({
+                    message: '请选择时间！',
+                    type: 'warning'
+                })
+            }
+        },
         server_search(params){
             if (params){
+                this.search_date = params;
                 if (this.spec_selects.length > 0){
                     rpc(hosts.baseHost, 'Search.Get_data', params, {spec_id: this.spec_selects}, (d) => {
                         if(d.result){

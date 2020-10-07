@@ -11,6 +11,7 @@
                     range-separator="至"
                     start-placeholder="开始日期"
                     end-placeholder="结束日期"
+                    @change="date_change"
                 >
                 </el-date-picker>
             </el-col>
@@ -282,6 +283,9 @@ export default {
         },
         btnClick(k, params){
             this.$emit(k, params);
+        },
+        date_change(){
+            this.$emit('dtc', this.search_date);
         },
         exportExecl(){
             const filename = (this.props['title']?this.props['title']:'table') + '.' + (new Date()).getMilliseconds() + '.xlsx';

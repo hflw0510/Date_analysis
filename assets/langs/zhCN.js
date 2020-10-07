@@ -48,7 +48,8 @@ const zhCN = {
     },
     table: {
         'edit': '编辑',
-        'delete': '删除'
+        'delete': '删除',
+        'view': '查看'
     },
     list: {
         'mylist': '简单表格',

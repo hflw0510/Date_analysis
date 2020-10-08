@@ -24,6 +24,7 @@ const m = [
             'menu.day_spec': '',
             'menu.relevant': '',
             'menu.source': '',
+            'menu.report': ''
         }
     },
     {

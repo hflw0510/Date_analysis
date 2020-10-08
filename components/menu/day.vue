@@ -241,7 +241,7 @@ export default {
             let mean = this.get_average(arr);
             return Math.sqrt(
                 NP.divide(arr.reduce((acc, val) => acc.concat(NP.minus(val, mean) ** 2), []).reduce((acc, val) => NP.plus(acc, val), 0), arr.length)
-            ).toFixed(3);
+            ).toFixed(4);
         },
         spec_select(){
             this.centerDialogVisible = true;

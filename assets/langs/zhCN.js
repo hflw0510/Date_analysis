@@ -45,7 +45,8 @@ const zhCN = {
         'relevant': '相关性分析',
         'source': '源解析',
         'source_analysis': '源解析结果',
-        'excel': '物种库导入'
+        'excel': '物种库导入',
+        'report': '科学报告'
     },
     table: {
         'edit': '编辑',

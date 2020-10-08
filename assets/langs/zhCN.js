@@ -44,6 +44,7 @@ const zhCN = {
         'day_spec': '日变化特征-单物种',
         'relevant': '相关性分析',
         'source': '源解析',
+        'source_analysis': '源解析结果',
         'excel': '物种库导入'
     },
     table: {

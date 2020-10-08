@@ -117,7 +117,7 @@ export default {
         btnClick(params) {
             if (params[0] == 'view'){
                 if (params[1][7]=='处理完成') {
-                    this.$emit('newTab', params[1], 'menu.analysis');
+                    this.$emit('newTab', params[1], 'menu.source_analysis');
                 }
                 else{
                     this.$message({

@@ -111,6 +111,7 @@ export default {
             });
             myChart.on('finished', (params) => {
                 this.dataurl = myChart.getDataURL({
+                    type: 'png',
                     pixelRatio: 1,
                     backgroundColor: '#fff'
                 });

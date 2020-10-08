@@ -9,6 +9,25 @@
         >
         <checkboxes ref="cbs" :props="cbs" @event="checkboxes_event"></checkboxes>
         </el-dialog>
+        <el-dialog
+            title="提交源解析申请"
+            :visible.sync="analysisDialogVisible"
+            width="40%"
+            center
+        >
+            <el-form ref="form" :model="form" :rules="rules" ret="form" label-width="80px" label-position="left">
+                <el-form-item label="输入名称" prop="name">
+                    <el-input v-model="form.name"></el-input>
+                </el-form-item>
+                <el-form-item label="解析因子">
+                    <el-slider v-model="form.factors" show-input :min="1"></el-slider>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="Source_Analysis">确定</el-button>
+                    <el-button @click="analysisDialogVisible = false">取消</el-button>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
     </div>
 </template>
 <script>
@@ -72,12 +91,17 @@ export default {
                 dataGroups: [],
                 dataOptions: []
             },
+            form: {
+                name: '',
+                factors: 4
+            },
             cbsgroups:{},
             search_date: '',
             specs:{},
             spec_selects: [],
             spec_position: {},
             centerDialogVisible : false,
+            analysisDialogVisible: false,
             spec_type_data: {},
             tableData
         }
@@ -153,30 +177,25 @@ export default {
             }
         },
         Analysis(){
-            this.$prompt('请输入一个名称', '提交源解析申请', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消'
-            }).then(({ value }) => {
-                this.Source_Analysis(value);
-            }).catch(() => {
-
-            });
+            this.analysisDialogVisible = true;
         },
-        Source_Analysis(name){
+        Source_Analysis(){
             if (this.search_date){
                 if (this.spec_selects.length > 0){
-                    rpc(hosts.baseHost, 'Search.Source_Analysis', name, this.search_date, {spec_id: this.spec_selects}, (d) => {
+                    rpc(hosts.baseHost, 'Search.Source_Analysis', this.form.name, this.form.factors, this.search_date, {spec_id: this.spec_selects}, (d) => {
                         if(d.result){
                             this.$message({
                                 message: '源解析提交成功，ID：' + d.result + '请在源解析功能里查看结果。',
                                 type: 'success'
                             });
+                            this.form.name = '';
+                            this.form.factors = 4;
                         }
                         else if(d.error){
                             this.$message({
                                 message: d.error,
                                 type: 'warning'
-                            })
+                            });
                         }
                     });
                 }
@@ -184,15 +203,16 @@ export default {
                     this.$message({
                         message: '请选择因子！',
                         type: 'warning'
-                    }) 
+                    });
                 }
             }
             else{
                 this.$message({
                     message: '请选择时间！',
                     type: 'warning'
-                })
+                });
             }
+            this.analysisDialogVisible = false;
         },
         server_search(params){
             if (params){

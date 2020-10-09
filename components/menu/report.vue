@@ -76,8 +76,11 @@ export default {
             spec_type_count: {},
             spec_type_avg: {},
             spec_type_vice_percent: {},
-            spec_avg: {},
+            spec_avg: [],
             tableData1: {},
+            spec_range: [],
+            spec_type_range: {},
+            spec_type_space: {}
         }
     },
     created() {
@@ -107,6 +110,14 @@ export default {
                 da.push(k + ' ' + this.spec_type_vice_percent[k] + '%');
             }
             ret.push(da.join(','));
+
+            let spec_avg = this.spec_avg.slice(0, 10);
+            ret.push('体积分数平均值最高的前十种VOCs分别为: ' + spec_avg.map(v => v[0]).join(','));
+            ret.push('体积分数平均值分别为: ' + spec_avg.map(v => v[1]).join(','));
+
+            let spec_count = this.spec_avg.map(v => v[1]).reduce((x, y) => NP.plus(x, y));
+            let spec_top10_count = spec_avg.map(v => v[1]).reduce((x, y) => NP.plus(x, y));
+            ret.push('VOCs总体积分数占比为: ' + this.get_percent(spec_top10_count, spec_count) + '%');
             this.mytext = ret.join('\n');
         },
         search(){
@@ -114,8 +125,10 @@ export default {
                 rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {}, (d) => {
                     if(d.result){
                         if(d.result.length){
-                            let data={}, spec_vice, data1={}, data2={};
+                            let data={}, spec_vice, data1={}, data2={}, data3={}, data4={};
                             d.result.forEach(v => {
+                                if (v[1].length==10) v[1] = v[1] + " 00:00:00";
+
                                 if (!data.hasOwnProperty(v[10])){
                                     data[v[10]] = [];
                                 }
@@ -134,16 +147,37 @@ export default {
                                     data2[v[10]][v[2]] = [];
                                 }
                                 data2[v[10]][v[2]].push(v[3]);
+
+                                if (!data3.hasOwnProperty(v[10])){
+                                    data3[v[10]] = {};
+                                }
+                                if (!data3[v[10]].hasOwnProperty(v[1])){
+                                    data3[v[10]][v[1]] = 0;
+                                }
+                                data3[v[10]][v[1]] = NP.plus(data3[v[10]][v[1]], v[3]);
+
+                                if (!data4.hasOwnProperty(v[1])){
+                                    data4[v[1]] = 0;
+                                }
+                                data4[v[1]] = NP.plus(data4[v[1]], v[3]);
                             });
 
-                            console.log(data2)
-                            let k;
+
+                            let k, da1 = {};
                             this.tableData1 = {};
                             for (k in data2){
                                 this.tableData1[k] = Object.keys(data2[k]).map(v => this.specs[v].join('')).join(' ');
                                 this.spec_type_count[k] = Object.keys(data2[k]).length;
+                                Object.assign(da1, data2[k]);
                             }
                             this.spec_count = Object.values(this.spec_type_count).reduce((x, y) => NP.plus(x, y));
+                            for (k in da1){
+                               this.spec_avg.push([
+                                    this.specs[k][0],
+                                    this.get_average(da1[k])
+                               ]);
+                            }
+                            this.spec_avg.sort((x, y) => y[1] - x[1]);
 
                             for (k in data) {
                                 this.spec_type_avg[k] = [this.get_average(Object.values(data[k])), this.get_stdevp(Object.values(data[k]))];
@@ -153,6 +187,18 @@ export default {
                             for (k in data1){
                                 this.spec_type_vice_percent[k] = this.get_percent(data1[k], total);
                             }
+
+                            let str_arr;
+                            this.spec_type_space = data3
+                            for (k in data3){
+                                str_arr = Object.keys(data3[k]).map(v => [v, data3[k][v]]).sort((x, y) => y[1] - x[1]);
+                                this.spec_type_range[k] = [str_arr[0], str_arr[str_arr.length - 1]];
+                            }
+                            console.log(this.spec_type_range);
+
+                            str_arr = Object.keys(data4).map(v => [v, data4[v]]).sort((x, y) => y[1] - x[1]);
+                            this.spec_range = [str_arr[0], str_arr[str_arr.length - 1]];
+                            console.log(this.spec_range);
 
                             this.text_set();
                         }

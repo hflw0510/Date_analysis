@@ -15,7 +15,7 @@
             width="40%"
             center
         >
-            <el-form ref="form" :model="form" :rules="rules" ret="form" label-width="80px" label-position="left">
+            <el-form ref="form" :model="form" ret="form" label-width="80px" label-position="left">
                 <el-form-item label="输入名称" prop="name">
                     <el-input v-model="form.name"></el-input>
                 </el-form-item>

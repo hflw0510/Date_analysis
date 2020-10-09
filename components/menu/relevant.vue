@@ -138,7 +138,6 @@ export default {
                                 }
                                 data[v[5]][v[1]] = NP.plus(data[v[5]][v[1]], (v[3]));
                             });
-                            console.log(data)
 
                             let k = Object.keys(data);
                             if (k.length == 2){
@@ -175,6 +174,7 @@ export default {
         },
         get_datelist(d){
             let i;
+            this.datelist = [];
             for (i=0;i<this.dateCheck(d[0], d[1])+24;i++) {
                 let st = d[0];
                 if (st.length==10) st = st + " 00:00:00";
@@ -220,9 +220,6 @@ export default {
                 ])
             });
 
-            let myRegression = ecStat.regression('linear', this.chartData2.data);
-            myRegression.points.sort((a, b) => a[0] - b[0]);
-            this.chartData2.line = myRegression.points;
             this.chart2();
         },
         get_average(arr){
@@ -292,6 +289,8 @@ export default {
             })
         },
         chart2(){
+            let myRegression = ecStat.regression('linear', this.chartData2.data);
+            myRegression.points.sort((a, b) => a[0] - b[0]);
             let myChart = this.$echarts.init(document.getElementById('myChart5_2'));
             let aa = {
                 title: {
@@ -341,7 +340,22 @@ export default {
                         name: 'line',
                         type: 'line',
                         showSymbol: false,
-                        data: this.chartData2.line
+                        data: myRegression.points,
+                        markPoint: {
+                            itemStyle: {
+                                color: 'transparent'
+                            },
+                            label: {
+                                show: true,
+                                position: 'left',
+                                formatter: myRegression.expression,
+                                color: '#333',
+                                fontSize: 16
+                            },
+                            data: [{
+                                coord: myRegression.points[myRegression.points.length - 1]
+                            }]
+                        }
                     }
                 ]
             };

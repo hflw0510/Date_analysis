@@ -284,7 +284,7 @@ export default {
                                 title: v[7]
                             }
                         );
-                        this.specs[v[0]] = v[5] + '_' + v[7];
+                        this.specs[v[0]] = v[13] + ') ' + v[7];
                     });
                 }
             })

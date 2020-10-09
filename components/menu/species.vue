@@ -7,8 +7,11 @@
             width="40%"
             center
         >
-            <el-form ref="form" :model="form" :rules="rules" ret="form" label-width="100px" label-position="left">
-                <el-form-item label="物种名称" prop="name">
+            <el-form ref="form" :model="form" ret="form" label-width="100px" label-position="left">
+                <el-form-item label="序号">
+                    <el-input v-model="form.no"></el-input>
+                </el-form-item>
+                <el-form-item label="物种名称">
                     <el-input v-model="form.name"></el-input>
                 </el-form-item>
                 <el-form-item label="英文名称">
@@ -77,18 +80,11 @@ let tableData = [];
 
 const tbCols = [
     {
-        colname: '14',
-        title: '物种分类',
+        colname: '13',
+        title: '序号',
         searchable: true,
         sortable: true,
-        width: '120'
-    },
-    {
-        colname: '15',
-        title: '物种细类',
-        searchable: true,
-        sortable: true,
-        width: '120'
+        width: '60'
     },
     {
         colname: '7',
@@ -96,6 +92,20 @@ const tbCols = [
         searchable: true,
         sortable: true,
         width: ''
+    },
+    {
+        colname: '15',
+        title: '物种分类',
+        searchable: true,
+        sortable: true,
+        width: '120'
+    },
+    {
+        colname: '16',
+        title: '物种细类',
+        searchable: true,
+        sortable: true,
+        width: '120'
     },
     {
         colname: '5',
@@ -187,6 +197,7 @@ export default {
         return {
             form: {
                 id: 0,
+                no: '',
                 spec_type: '',
                 spec_type_vice: '',
                 createtime: '',
@@ -200,17 +211,12 @@ export default {
                 fac: '',
                 status: true
             },
-            rules: {
-                name: [
-                    { required: true, message: '请输入物种名称', trigger: 'blur' },
-                    { min: 2, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur' }
-                ]
-            },
             props : {
                 title: 'species',
                 isDown: true,
                 isInfo: '物种列表',
                 isSinglepage: true,
+                noSelect: true,
                 tbCols,
                 tbBtns,
                 tbData: tableData
@@ -270,6 +276,7 @@ export default {
             switch (params[0]){
                 case 'edit' :
                     this.form.id = params[1][0];
+                    this.form.no = params[1][13];
                     this.form.createtime = params[1][1];
                     this.form.updatetime = params[1][2];
                     this.form.spec_type = params[1][3];
@@ -301,6 +308,7 @@ export default {
         form_refush(){
             this.form = {
                 id: 0,
+                no: '',
                 spec_type: '',
                 spec_type_vice: '',
                 createtime: '',
@@ -326,6 +334,7 @@ export default {
             if (!check) return;
             data = {
                 name: this.form.name,
+                no: this.form.no,
                 spec_type: this.form.spec_type,
                 spec_type_vice: this.form.spec_type_vice,
                 CAS: this.form.cas,
@@ -357,8 +366,8 @@ export default {
             else
                 d[12] = '禁用';
             let std = this.spec_type_data
-            d[14] = std[d[3]];
-            d[15] = std[d[4]];
+            d[15] = std[d[3]];
+            d[16] = std[d[4]];
             return d;
         },
         upload_excel() {

@@ -43,16 +43,6 @@
                 <div id="myChart1_4" class=charts1_2></div>
             </el-col>
         </el-row>
-        <div>
-            <el-dialog
-                title="多选框"
-                :visible.sync="centerDialogVisible"
-                width="80%"
-                center
-            >
-                <checkboxes ref="cbs" :props="cbs" @event="checkboxes_event"></checkboxes>
-            </el-dialog>
-        </div>
     </div>
 </template>
 
@@ -88,12 +78,7 @@ export default {
             noppb: false,
             search_date: '',
             fullscreenLoading: false,
-            cbs: {
-                data: '',
-                dataGroups: [],
-                dataOptions: []
-            },
-            cbsgroups:{},
+            specs_type: {},
             specs:{},
             spec_selects: [],
             centerDialogVisible : false,
@@ -114,7 +99,7 @@ export default {
         }
     },
     mounted() {
-        //this.echartsInit()
+        this.spec_type_load();
         //this.echartsInit2()
     },
     methods: {
@@ -126,7 +111,7 @@ export default {
                         if(d.result.length){
                             let data={}, data1={}, data2={};
                             d.result.forEach(v => {
-                                if (this.noppb) v[3] = NP.divide(v[3], 1000);
+                                if (this.noppb) v[3] = this.get_μg(v[2], v[3]);
 
                                 if (!data.hasOwnProperty(v[10])){
                                     data[v[10]] = {};
@@ -155,7 +140,7 @@ export default {
                                     if (this.noppb)
                                         val = v[3];
                                     else
-                                        val = NP.divide(v[3], 1000);
+                                        val = this.get_μg(v[2], v[3]);
                                     data2[v[5]][v[1]] = NP.plus(data2[v[5]][v[1]], NP.times(val, v[8]));
                                 }
                             });
@@ -250,6 +235,9 @@ export default {
             });
             this.chart4();
         },
+        get_μg(spec_id, value){
+            return NP.divide(NP.times(value, this.specs[spec_id][9]), 22.4).toFixed(4);
+        },
         get_average(arr){
             return NP.divide(arr.reduce((a, v) => NP.plus(a, v), 0), arr.length).toFixed(4);
         },
@@ -262,30 +250,11 @@ export default {
         spec_select(){
             this.centerDialogVisible = true;
         },
-        checkboxes_event(d){
-            this.spec_selects = [];
-            d.forEach(v => {
-                if (v.length){
-                    this.spec_selects = this.spec_selects.concat(v);
-                }
-            });
-            this.centerDialogVisible = false;
-        },
         spec_type_load(){
             rpc(hosts.baseHost, 'bi.list', 'spec_type', '', (d) => {
                 if(d.result){
-                    this.cbs.dataGroups.length = 0;
                     d.result.forEach((v, i) => {
-                        this.cbs.dataGroups.push(
-                            {
-                                id: v[0],
-                                checkAll: false,
-                                isIndeterminate: false,
-                                title: v[3]
-                            }
-                        );
-                        this.cbsgroups[v[0]] = i;
-                        this.cbs.dataOptions.push([]);
+                        this.specs_type[v[0]] = v;
                     });
                     this.spec_load();
                 }
@@ -295,15 +264,9 @@ export default {
             rpc(hosts.baseHost, 'bi.list', 'species', '', (d) => {
                 if(d.result){
                     d.result.forEach(v => {
-                        this.cbs.dataOptions[this.cbsgroups[v[3]]].push(
-                            {
-                                id: v[0],
-                                value: v[0],
-                                title: v[5]
-                            }
-                        );
-                        this.specs[v[0]] = v[5];
+                        this.specs[v[0]] = v;
                     });
+                    console.log(this.specs)
                 }
             })
         },

@@ -41,16 +41,6 @@
                 <div id="myChart2_2" class=charts2_2></div>
             </el-col>
         </el-row>
-        <div>
-            <el-dialog
-                title="多选框"
-                :visible.sync="centerDialogVisible"
-                width="80%"
-                center
-            >
-                <checkboxes ref="cbs" :props="cbs" @event="checkboxes_event"></checkboxes>
-            </el-dialog>
-        </div>
     </div>
 </template>
 
@@ -84,12 +74,7 @@ export default {
             search_date: '',
             noppb: false,
             fullscreenLoading: false,
-            cbs: {
-                data: '',
-                dataGroups: [],
-                dataOptions: []
-            },
-            cbsgroups:{},
+            specs_type: {},
             specs:{},
             spec_selects: [],
             centerDialogVisible : false,
@@ -121,7 +106,7 @@ export default {
                         if(d.result.length){
                             let data={}, data1={};
                             d.result.forEach(v => {
-                                if (this.noppb) v[3] = NP.divide(v[3], 1000);
+                                if (this.noppb) v[3] = this.get_μg(v[2], v[3]);
 
                                 if (v[1].length==10) v[1] = v[1] + " 00:00:00";
                                 if (!data.hasOwnProperty(v[1])){
@@ -269,6 +254,9 @@ export default {
             });
             this.chart2();
         },
+        get_μg(spec_id, value){
+            return NP.divide(NP.times(value, this.specs[spec_id][9]), 22.4).toFixed(4);
+        },
         get_percent(n, t){
             return t<=0?0:Math.round(NP.divide(n, t) * 10000) / 100;
         },
@@ -297,8 +285,9 @@ export default {
             rpc(hosts.baseHost, 'bi.list', 'spec_type', '', (d) => {
                 if(d.result){
                     d.result.forEach((v, i) => {
-                        this.spec_types.push(v[3]);
+                        this.specs_type[v[0]] = v;
                     });
+                    this.spec_load();
                 }
             })
         },
@@ -306,14 +295,7 @@ export default {
             rpc(hosts.baseHost, 'bi.list', 'species', '', (d) => {
                 if(d.result){
                     d.result.forEach(v => {
-                        this.cbs.dataOptions[this.cbsgroups[v[3]]].push(
-                            {
-                                id: v[0],
-                                value: v[0],
-                                title: v[5]
-                            }
-                        );
-                        this.specs[v[0]] = v[5];
+                        this.specs[v[0]] = v;
                     });
                 }
             })

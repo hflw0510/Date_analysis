@@ -83,7 +83,6 @@ export default {
     mounted() {
         //this.spec_type_load();
         this.spec_load();
-        this.searchClick();
     },
     methods: {
         searchClick() {
@@ -92,7 +91,8 @@ export default {
             rpc(hosts.baseHost, 'Bi.Load', 'source_analysis', id, (d) => {
                 if(d.result){
                     if(Object.keys(d.result).length){
-                        this.get_datelist(JSON.parse(d.result['date_range']))
+                        //this.get_datelist(JSON.parse(d.result['date_range']));
+                        this.get_datelist_data(JSON.parse(d.result['data'])['result']);
                         this.get_chartData1(JSON.parse(d.result['spec_id']), JSON.parse(d.result['F_FACTOR']));
                         this.get_chartData2(JSON.parse(d.result['G_FACTOR']));
                         this.get_chartData3(JSON.parse(d.result['G_FACTOR']));
@@ -124,6 +124,16 @@ export default {
                 st.setHours(i);
                 this.datelist.push(this.dateFormat("YYYY-mm-dd HH:MM:SS", st));
             }
+        },
+        get_datelist_data(d){
+            let dt={};
+            this.datelist = [];
+            d.forEach(v => {
+                if (!dt.hasOwnProperty(v[0]))
+                    dt[v[0]] = '';
+
+            })
+            this.datelist = Object.keys(dt);
         },
         get_chartData1(spec_id, data) {
             let k;
@@ -240,6 +250,7 @@ export default {
                     d.result.forEach(v => {
                         this.specs[v[0]] = v[7];
                     });
+                    this.searchClick();
                 }
             })
         },

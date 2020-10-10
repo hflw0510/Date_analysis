@@ -4,10 +4,10 @@
             <el-col :span=6 style="display: inline-block;padding-left: 8px">
                 <el-date-picker
                     v-model="search_date"
-                    type="daterange"
                     unlink-panels
-                    value-format="yyyy-MM-dd"
-                    format="yyyy 年 MM 月 dd 日"
+                    type="datetimerange"
+                    value-format="yyyy-MM-dd HH:00:00"
+                    :default-time="['00:00:00', '23:00:00']"
                     range-separator="至"
                     start-placeholder="开始日期"
                     end-placeholder="结束日期"

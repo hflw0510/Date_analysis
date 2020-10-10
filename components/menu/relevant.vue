@@ -11,9 +11,9 @@
             <el-col :span=20 style="display: inline-block;padding-left: 8px">
                 <el-date-picker
                     v-model="search_date"
-                    type="daterange"
-                    value-format="yyyy-MM-dd"
-                    format="yyyy 年 MM 月 dd 日"
+                    type="datetimerange"
+                    value-format="yyyy-MM-dd HH:00:00"
+                    :default-time="['00:00:00', '23:00:00']"
                     unlink-panels
                     range-separator="至"
                     start-placeholder="开始日期"
@@ -175,7 +175,7 @@ export default {
         get_datelist(d){
             let i;
             this.datelist = [];
-            for (i=0;i<this.dateCheck(d[0], d[1])+24;i++) {
+            for (i=0;i<this.dateCheck(d[0], d[1])+1;i++) {
                 let st = d[0];
                 if (st.length==10) st = st + " 00:00:00";
                 st = new Date(st);
@@ -184,7 +184,7 @@ export default {
             }
         },
         get_chartData1(data) {
-            let k, a;
+            let k, a, dtlist=[];
             this.chartData1.data = [];
             this.chartData1.xAxis = this.datelist;
             this.chartData1.title = this.spec;
@@ -196,12 +196,12 @@ export default {
                 };
 
                 this.datelist.forEach(v => {
-                    if (v in data[k])
+                    if (v in data[k]){
                         d.data.push(data[k][v]);
-                    else
-                        d.data.push(0);
+                        dtlist.push(v);
+                    }
                 });
-                this.chartData1.data.push(d);
+                if (d.data.length) this.chartData1.data.push(d);
             }
             this.chart1();
         },

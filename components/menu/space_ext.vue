@@ -4,9 +4,9 @@
             <el-col :span=18 style="display: inline-block;padding-left: 8px">
                 <el-date-picker
                     v-model="search_date"
-                    type="daterange"
-                    value-format="yyyy-MM-dd"
-                    format="yyyy 年 MM 月 dd 日"
+                    type="datetimerange"
+                    value-format="yyyy-MM-dd HH:00:00"
+                    :default-time="['00:00:00', '23:00:00']"
                     unlink-panels
                     range-separator="至"
                     start-placeholder="开始日期"
@@ -41,16 +41,6 @@
                 <div id="myChart6_2" class=charts6_2></div>
             </el-col>
         </el-row>
-        <div>
-            <el-dialog
-                title="多选框"
-                :visible.sync="centerDialogVisible"
-                width="80%"
-                center
-            >
-                <checkboxes ref="cbs" :props="cbs" @event="checkboxes_event"></checkboxes>
-            </el-dialog>
-        </div>
     </div>
 </template>
 
@@ -84,16 +74,8 @@ export default {
             search_date: '',
             noppb: false,
             fullscreenLoading: false,
-            cbs: {
-                data: '',
-                dataGroups: [],
-                dataOptions: []
-            },
-            cbsgroups:{},
             specs:{},
-            spec_selects: [],
-            centerDialogVisible : false,
-            spec_types: [],
+            specs_type: {},
             datelist: [],
             chartData1: {
                 legend: [],
@@ -121,7 +103,9 @@ export default {
                         if(d.result.length){
                             let data={}, data1={};
                             d.result.forEach(v => {
-                                if (this.noppb) v[3] = NP.divide(v[3], 1000);
+                                if (this.noppb){
+                                    v[3] = this.get_μg(v[2], v[3]);
+                                }
 
                                 if (v[1].length==10) v[1] = v[1] + " 00:00:00";
                                 if (!data.hasOwnProperty(v[1])){
@@ -176,10 +160,10 @@ export default {
             }
         },
         get_chartData1(data) {
-            let k;
+            let k, dtlist = [];
             this.chartData1.data = {};
             this.chartData1.legend = this.spec_types.map(v => v);
-            this.chartData1.xAxis = this.datelist;
+            this.chartData1.xAxis = dtlist;
             this.chartData1.series = [];
 
             this.spec_types.forEach(v => {
@@ -216,17 +200,18 @@ export default {
                         else
                             this.chartData1.data[w].push(0);
                     }
-                    else
-                        this.chartData1.data[w].push(0);
                 });
-                this.chartData1.data['total'].push(total);
+                if (total > 0){
+                    dtlist.push(v);
+                    this.chartData1.data['total'].push(total);
+                }
             });
             this.chart1();
         },
         get_chartData2(data) {
-            let k;
+            let k, dtlist = [];
             this.chartData2.data = {};
-            this.chartData2.xAxis = this.datelist;
+            this.chartData2.xAxis = dtlist;
             this.chartData2.series = [];
 
             this.spec_types.forEach(v => {
@@ -240,34 +225,33 @@ export default {
                     data: this.chartData2.data[v]
                 })
             });
-
+            
             this.datelist.forEach(v => {
                 let total = 0;
                 this.spec_types.forEach(w => {
                     if (v in data) {
                         if (w in data[v]){
-                            this.chartData1.data[w].push(data[v][w]);
                             total = NP.plus(total, data[v][w]);
                         }
-                        else
-                            this.chartData1.data[w].push(0);
                     }
-                    else
-                        this.chartData1.data[w].push(0);
                 });
-                this.spec_types.forEach(w => {
-                    if (v in data) {
-                        if (w in data[v]){
-                            this.chartData2.data[w].push(this.get_percent(data[v][w], total));
+                if (total > 0){
+                    dtlist.push(v);
+                    this.spec_types.forEach(w => {
+                        if (v in data) {
+                            if (w in data[v]){
+                                this.chartData2.data[w].push(this.get_percent(data[v][w], total));
+                            }
+                            else
+                                this.chartData2.data[w].push(0);
                         }
-                        else
-                            this.chartData2.data[w].push(0);
-                    }
-                    else
-                        this.chartData2.data[w].push(0);
-                });
+                    });
+                }
             });
             this.chart2();
+        },
+        get_μg(spec_id, value){
+            return NP.divide(NP.times(value, this.specs[spec_id][9]), 22.4).toFixed(4);
         },
         get_percent(n, t){
             return t<=0?0:Math.round(NP.divide(n, t) * 10000) / 100;
@@ -281,24 +265,13 @@ export default {
                 NP.divide(arr.reduce((acc, val) => acc.concat(NP.minus(val, mean) ** 2), []).reduce((acc, val) => NP.plus(acc, val), 0), arr.length)
             ).toFixed(3);
         },
-        spec_select(){
-            this.centerDialogVisible = true;
-        },
-        checkboxes_event(d){
-            this.spec_selects = [];
-            d.forEach(v => {
-                if (v.length){
-                    this.spec_selects = this.spec_selects.concat(v);
-                }
-            });
-            this.centerDialogVisible = false;
-        },
         spec_type_load(){
             rpc(hosts.baseHost, 'bi.list', 'spec_type', '', (d) => {
                 if(d.result){
                     d.result.forEach((v, i) => {
-                        this.spec_types.push(v[3]);
+                        this.specs_type[v[0]] = v;
                     });
+                    this.spec_load();
                 }
             })
         },
@@ -306,14 +279,7 @@ export default {
             rpc(hosts.baseHost, 'bi.list', 'species', '', (d) => {
                 if(d.result){
                     d.result.forEach(v => {
-                        this.cbs.dataOptions[this.cbsgroups[v[3]]].push(
-                            {
-                                id: v[0],
-                                value: v[0],
-                                title: v[5]
-                            }
-                        );
-                        this.specs[v[0]] = v[5];
+                        this.specs[v[0]] = v;
                     });
                 }
             })

@@ -4,9 +4,9 @@
             <el-col :span=18 style="display: inline-block;padding-left: 8px">
                 <el-date-picker
                     v-model="search_date"
-                    type="daterange"
-                    value-format="yyyy-MM-dd"
-                    format="yyyy 年 MM 月 dd 日"
+                    type="datetimerange"
+                    value-format="yyyy-MM-dd HH:00:00"
+                    :default-time="['00:00:00', '23:00:00']"
                     unlink-panels
                     range-separator="至"
                     start-placeholder="开始日期"
@@ -76,8 +76,6 @@ export default {
             fullscreenLoading: false,
             specs_type: {},
             specs:{},
-            spec_selects: [],
-            centerDialogVisible : false,
             spec_types: [],
             datelist: [],
             chartData1: {
@@ -152,7 +150,7 @@ export default {
         get_datelist(d){
             let i;
             this.datelist = [];
-            for (i=0;i<this.dateCheck(d[0], d[1])+24;i++) {
+            for (i=0;i<this.dateCheck(d[0], d[1])+1;i++) {
                 let st = d[0];
                 if (st.length==10) st = st + " 00:00:00";
                 st = new Date(st);
@@ -161,10 +159,10 @@ export default {
             }
         },
         get_chartData1(data) {
-            let k;
+            let k, dtlist = [];
             this.chartData1.data = {};
             this.chartData1.legend = this.spec_types.map(v => v);
-            this.chartData1.xAxis = this.datelist;
+            this.chartData1.xAxis = dtlist;
             this.chartData1.series = [];
 
             this.spec_types.forEach(v => {
@@ -201,17 +199,18 @@ export default {
                         else
                             this.chartData1.data[w].push(0);
                     }
-                    else
-                        this.chartData1.data[w].push(0);
                 });
-                this.chartData1.data['total'].push(total);
+                if (total > 0){
+                    dtlist.push(v);
+                    this.chartData1.data['total'].push(total);
+                }
             });
             this.chart1();
         },
         get_chartData2(data) {
-            let k;
+            let k, dtlist = [];
             this.chartData2.data = {};
-            this.chartData2.xAxis = this.datelist;
+            this.chartData2.xAxis = dtlist;
             this.chartData2.series = [];
 
             this.spec_types.forEach(v => {
@@ -225,32 +224,28 @@ export default {
                     data: this.chartData2.data[v]
                 })
             });
-
+            
             this.datelist.forEach(v => {
                 let total = 0;
                 this.spec_types.forEach(w => {
                     if (v in data) {
                         if (w in data[v]){
-                            this.chartData1.data[w].push(data[v][w]);
                             total = NP.plus(total, data[v][w]);
                         }
-                        else
-                            this.chartData1.data[w].push(0);
                     }
-                    else
-                        this.chartData1.data[w].push(0);
                 });
-                this.spec_types.forEach(w => {
-                    if (v in data) {
-                        if (w in data[v]){
-                            this.chartData2.data[w].push(this.get_percent(data[v][w], total));
+                if (total > 0){
+                    dtlist.push(v);
+                    this.spec_types.forEach(w => {
+                        if (v in data) {
+                            if (w in data[v]){
+                                this.chartData2.data[w].push(this.get_percent(data[v][w], total));
+                            }
+                            else
+                                this.chartData2.data[w].push(0);
                         }
-                        else
-                            this.chartData2.data[w].push(0);
-                    }
-                    else
-                        this.chartData2.data[w].push(0);
-                });
+                    });
+                }
             });
             this.chart2();
         },
@@ -268,18 +263,6 @@ export default {
             return Math.sqrt(
                 NP.divide(arr.reduce((acc, val) => acc.concat(NP.minus(val, mean) ** 2), []).reduce((acc, val) => NP.plus(acc, val), 0), arr.length)
             ).toFixed(4);
-        },
-        spec_select(){
-            this.centerDialogVisible = true;
-        },
-        checkboxes_event(d){
-            this.spec_selects = [];
-            d.forEach(v => {
-                if (v.length){
-                    this.spec_selects = this.spec_selects.concat(v);
-                }
-            });
-            this.centerDialogVisible = false;
         },
         spec_type_load(){
             rpc(hosts.baseHost, 'bi.list', 'spec_type', '', (d) => {

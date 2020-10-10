@@ -11,9 +11,9 @@
             <el-col :span=16 style="display: inline-block;padding-left: 8px">
                 <el-date-picker
                     v-model="search_date"
-                    type="daterange"
-                    value-format="yyyy-MM-dd"
-                    format="yyyy 年 MM 月 dd 日"
+                    type="datetimerange"
+                    value-format="yyyy-MM-dd HH:00:00"
+                    :default-time="['00:00:00', '23:00:00']"
                     unlink-panels
                     range-separator="至"
                     start-placeholder="开始日期"
@@ -107,6 +107,7 @@ export default {
             cbsgroups:{},
             spec: '',
             spec_id: 0,
+            specs_type: {},
             specs: {},
             spec_selects: [],
             spec_type_data: {},
@@ -137,7 +138,7 @@ export default {
                         if(d.result.length){
                             let data={}, data1={};
                             d.result.forEach(v => {
-                                if (this.noppb && this.spec_iscalc[this.spec_id]) v[3] = NP.divide(v[3], 1000);
+                                if (this.noppb && this.spec_iscalc[this.spec_id]) v[3] = this.get_μg(v[2], v[3]);
 
                                 if (this.freon && v[5] == '氟利昂113'){
                                     if (!data1.hasOwnProperty(v[1])) data1[v[1]] = [];
@@ -187,13 +188,13 @@ export default {
             }
         },
         get_chartData1(data, data_freon) {
-            let k, t, i;
+            let k, t, i, dtlist = [];
             this.chartData = [];
 
             for (k in data) {
                 let d = ({
                     title: k,
-                    xAxis: Array(24).fill(0).map((v, i) => i),
+                    xAxis: dtlist,
                     line: [],
                     stdevp: []
                 });
@@ -220,28 +221,26 @@ export default {
 
                 for (i=0;i<24;i++) {
                     if (i in data1) {
-                        if (this.freon || this.spec_iscalc[this.spec_id] == 0) {
+                        if (this.freon) {
                             d.line.push(this.get_average(data1[i]));
+                        }
+                        else if (this.spec_iscalc[this.spec_id] == 0) {
+                            d.line.push(data1[i].reduce((a, v) => NP.plus(a, v), 0));
                         }
                         else {
                             d.line.push(this.get_average(data1[i]));
                             d.stdevp.push(this.get_stdevp(data1[i]));
                         }
-                    }
-                    else {
-                        if (this.freon || this.spec_iscalc[this.spec_id] == 0) {
-                            d.line.push(0);
-                        }
-                        else {
-                            d.line.push(0);
-                            d.stdevp.push(0);
-                        }
+                        dtlist.push(i);
                     }
                 }
                 this.chartData.push(d);
             }
             this.chart1('myChart4_1', this.chartData[0]);
 
+        },
+        get_μg(spec_id, value){
+            return NP.divide(NP.times(value, this.specs[spec_id][9]), 22.4).toFixed(4);
         },
         get_average(arr){
             return NP.divide(arr.reduce((a, v) => NP.plus(a, v), 0), arr.length).toFixed(4);
@@ -274,8 +273,7 @@ export default {
                 if(d.result){
                     this.cbs.dataGroups.length = 0;
                     d.result.forEach(v => {
-                        this.spec_type_data[v[0]] = v[3];
-                        this.spec_type_iscalc[v[0]] = v[4];
+                        this.spec_type_data[v[0]] = v;
                     });
                     this.spec_load();
                 }
@@ -295,7 +293,7 @@ export default {
                                     id: v[3],
                                     checkAll: false,
                                     isIndeterminate: false,
-                                    title: this.spec_type_data[v[3]]
+                                    title: this.spec_type_data[v[3]][3]
                                 }
                             );
                             this.cbsgroups[v[3]] = i++;
@@ -310,8 +308,8 @@ export default {
                                 title: v[7]
                             }
                         );
-                        this.specs[v[0]] = v[7];
-                        this.spec_iscalc[v[0]] = this.spec_type_iscalc[v[3]];
+                        this.specs[v[0]] = v;
+                        this.spec_iscalc[v[0]] = this.spec_type_data[v[3]][4];
                     });
                 }
             })
@@ -340,7 +338,7 @@ export default {
                 yAxis: [
                     {
                         type: 'value',
-                        name: this.spec_type_iscalc[this.spec_id]?(this.noppb?'浓度(μg/m³)':'浓度(ppb)'):'响应值',
+                        name: this.spec_iscalc[this.spec_id]?(this.noppb?'浓度(μg/m³)':'浓度(ppb)'):'响应值',
                         splitLine: {
                             show: false
                         }
@@ -379,7 +377,7 @@ export default {
                         symbol: 'none'
                     },
                     {
-                        name: this.spec_type_iscalc[this.spec_id]?'浓度':'响应值',
+                        name: this.spec_iscalc[this.spec_id]?'浓度':'响应值',
                         type: 'line',
                         data: data.line,
                         symbolSize: 6,

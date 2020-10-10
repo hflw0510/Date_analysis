@@ -5,9 +5,9 @@
 
                 <el-date-picker
                     v-model="search_date"
-                    type="daterange"
-                    value-format="yyyy-MM-dd"
-                    format="yyyy 年 MM 月 dd 日"
+                    type="datetimerange"
+                    value-format="yyyy-MM-dd HH:00:00"
+                    :default-time="['00:00:00', '23:00:00']"
                     unlink-panels
                     range-separator="至"
                     start-placeholder="开始日期"
@@ -61,16 +61,6 @@
                 <div id="myChart3_8" class=charts3_2></div>
             </el-col>
         </el-row>
-        <div>
-            <el-dialog
-                title="多选框"
-                :visible.sync="centerDialogVisible"
-                width="80%"
-                center
-            >
-                <checkboxes ref="cbs" :props="cbs" @event="checkboxes_event"></checkboxes>
-            </el-dialog>
-        </div>
     </div>
 </template>
 
@@ -106,12 +96,7 @@ export default {
             noppb: false,
             search_date: '',
             fullscreenLoading: false,
-            cbs: {
-                data: '',
-                dataGroups: [],
-                dataOptions: []
-            },
-            cbsgroups:{},
+            specs_type: {},
             specs:{},
             spec_selects: [],
             centerDialogVisible : false,
@@ -119,7 +104,7 @@ export default {
         }
     },
     mounted() {
-        //this.echartsInit()
+        this.spec_type_load();
         //this.echartsInit2()
     },
     methods: {
@@ -131,7 +116,7 @@ export default {
                         if(d.result.length){
                             let data={}, data1={};
                             d.result.forEach(v => {
-                                if (this.noppb) v[3] = NP.divide(v[3], 1000);
+                                if (this.noppb) v[3] = this.get_μg(v[2], v[3]);
 
                                 if (v[1].length==10) v[1] = v[1] + " 00:00:00";
                                 if (!data.hasOwnProperty(v[10])){
@@ -234,6 +219,9 @@ export default {
             });
 
         },
+        get_μg(spec_id, value){
+            return NP.divide(NP.times(value, this.specs[spec_id][9]), 22.4).toFixed(4);
+        },
         get_average(arr){
             return NP.divide(arr.reduce((a, v) => NP.plus(a, v), 0), arr.length).toFixed(4);
         },
@@ -243,33 +231,11 @@ export default {
                 NP.divide(arr.reduce((acc, val) => acc.concat(NP.minus(val, mean) ** 2), []).reduce((acc, val) => NP.plus(acc, val), 0), arr.length)
             ).toFixed(4);
         },
-        spec_select(){
-            this.centerDialogVisible = true;
-        },
-        checkboxes_event(d){
-            this.spec_selects = [];
-            d.forEach(v => {
-                if (v.length){
-                    this.spec_selects = this.spec_selects.concat(v);
-                }
-            });
-            this.centerDialogVisible = false;
-        },
         spec_type_load(){
             rpc(hosts.baseHost, 'bi.list', 'spec_type', '', (d) => {
                 if(d.result){
-                    this.cbs.dataGroups.length = 0;
                     d.result.forEach((v, i) => {
-                        this.cbs.dataGroups.push(
-                            {
-                                id: v[0],
-                                checkAll: false,
-                                isIndeterminate: false,
-                                title: v[3]
-                            }
-                        );
-                        this.cbsgroups[v[0]] = i;
-                        this.cbs.dataOptions.push([]);
+                        this.specs_type[v[0]] = v;
                     });
                     this.spec_load();
                 }
@@ -279,14 +245,7 @@ export default {
             rpc(hosts.baseHost, 'bi.list', 'species', '', (d) => {
                 if(d.result){
                     d.result.forEach(v => {
-                        this.cbs.dataOptions[this.cbsgroups[v[3]]].push(
-                            {
-                                id: v[0],
-                                value: v[0],
-                                title: v[5]
-                            }
-                        );
-                        this.specs[v[0]] = v[5];
+                        this.specs[v[0]] = v;
                     });
                 }
             })

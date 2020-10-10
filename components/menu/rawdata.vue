@@ -153,14 +153,14 @@ export default {
                     data[v[1]][v[2]] = v[3];
                 }
             });
-            for (i=0;i<this.dateCheck(search_date[0], search_date[1])+24;i++) {
+            for (i=0;i<this.dateCheck(search_date[0], search_date[1])+1;i++) {
                 let st = search_date[0], x = [], k, ct, y;
                 if (st.length==10) st = st + " 00:00:00";
                 st = new Date(st);
                 st.setHours(i);
                 ct = this.dateFormat("YYYY-mm-dd HH:MM:SS", st)
-                x.push(this.dateFormat("YYYY-mm-dd HH:MM", st));
                 if (ct in data){
+                    x.push(this.dateFormat("YYYY-mm-dd HH:MM", st));
                     this.spec_selects.forEach(v =>{
                         if (v in data[ct]){
                             x.push(data[ct][v]);
@@ -169,11 +169,8 @@ export default {
                             x.push('');
                         }
                     });
-                }
-                else{
-                    x = x.concat(Array(this.spec_selects.length).fill(''));
-                }
                 tableData.unshift(x);
+                }
             }
         },
         Analysis(){

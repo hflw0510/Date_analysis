@@ -208,11 +208,11 @@ export default {
                                 }
                                 data4[v[1]] = NP.plus(data4[v[1]], v[3]);
                                 
-                                if (this.specs[v[2]][10] > 0) {
+                                if (v[8] > 0) {
                                     if (!data5.hasOwnProperty(v[2])){
                                         data5[v[2]] = 0;
                                     }
-                                    data5[v[2]] = NP.plus(data5[v[2]], NP.times(v[3], this.specs[v[2]][10]));
+                                    data5[v[2]] = NP.plus(data5[v[2]], NP.times(v[3], v[8]));
                                 }
                             });
 

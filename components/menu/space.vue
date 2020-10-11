@@ -289,6 +289,7 @@ export default {
                 tooltip: {
                     trigger: 'axis'
                 },
+                color: ['#5d9cd3','#eb7b2e','#ff3299','#9369fe','#9369fe','#03ffff','#dfeb00'],
                 legend:{
                     icon: 'rect',
                     data: this.chartData1.legend
@@ -325,6 +326,7 @@ export default {
                 tooltip: {
                     trigger: 'axis'
                 },
+                color: ['#5d9cd3','#eb7b2e','#ff3299','#9369fe','#9369fe','#03ffff','#dfeb00'],
                 toolbox:{
                     feature:{
                         saveAsImage: {}

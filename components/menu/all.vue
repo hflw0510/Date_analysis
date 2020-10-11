@@ -310,7 +310,7 @@ export default {
                         data: this.chartData1.bar,
                         itemStyle: {
                             normal: {
-                                color: (params) => ['#c23531','#2f4554', '#61a0a8', '#d48265', '#91c7ae','#749f83',  '#ca8622', '#bda29a','#6e7074', '#546570', '#c4ccd3'][params.dataIndex]
+                                color: (params) => ['#5a9dd7','#ee751d','#ff339c','#9d78ff','#58ff25','#00fff7'][params.dataIndex]
                             }
                         }
                     },
@@ -327,7 +327,8 @@ export default {
                                 {
                                     type: 'min', name: '最小值'
                                 }
-                            ]
+                            ],
+                            
                         }
                     }
                 ]
@@ -341,6 +342,7 @@ export default {
                     text: 'VOCs组成特征',
                     left: 'center'
                 },
+                color: ['#5a9dd7','#ee751d','#ff339c','#9d78ff','#58ff25','#00fff7'],
                 tooltip:{
                     trigger: 'item',
                     formatter: '{a} <br/>{b} : {c} ({d}%)'
@@ -397,7 +399,7 @@ export default {
                     data: this.chartData3.bar,
                     itemStyle: {
                         normal: {
-                            color: (params) => ['#c23531','#2f4554', '#61a0a8', '#d48265', '#91c7ae','#749f83',  '#ca8622', '#bda29a','#6e7074', '#546570', '#c4ccd3'][params.dataIndex]
+                            color: (params) => ['#0100fe','#03ffff','#ec7c31','#7501e8','#9c007a','#c1c1ff','#86e3bf','#f6f784','#ceccce','#ffc0db'][params.dataIndex]
                         }
                     }
                 }]
@@ -437,7 +439,7 @@ export default {
                     data: this.chartData4.bar,
                     itemStyle: {
                         normal: {
-                            color: (params) => ['#c23531','#2f4554', '#61a0a8', '#d48265', '#91c7ae','#749f83',  '#ca8622', '#bda29a','#6e7074', '#546570', '#c4ccd3'][params.dataIndex]
+                            color: (params) => ['#0100fe','#03ffff','#ec7c31','#7501e8','#9c007a','#c1c1ff','#86e3bf','#f6f784','#ceccce','#ffc0db'][params.dataIndex]
                         }
                     }
                 }]

@@ -203,11 +203,11 @@ export default {
                     }
                     else {
                         if (this.freon) {
-                            d.line.push(0);
+                            d.line.push('-');
                         }
                         else {
-                            d.line.push(0);
-                            d.stdevp.push(0);
+                            d.line.push('-');
+                            d.stdevp.push('-');
                         }
                     }
                 }

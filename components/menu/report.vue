@@ -80,7 +80,10 @@ export default {
             tableData1: {},
             spec_range: [],
             spec_type_range: {},
-            spec_type_space: {}
+            spec_type_space: {},
+            spec_type_hours: {},
+            spec_hours: {},
+            OFP: {}
         }
     },
     created() {
@@ -118,6 +121,50 @@ export default {
             let spec_count = this.spec_avg.map(v => v[1]).reduce((x, y) => NP.plus(x, y));
             let spec_top10_count = spec_avg.map(v => v[1]).reduce((x, y) => NP.plus(x, y));
             ret.push('VOCs总体积分数占比为: ' + this.get_percent(spec_top10_count, spec_count) + '%');
+
+            ret.push('体积分数变化范围: ' + this.spec_range[0][1] + '-' + this.spec_range[1][1]);
+            ret.push('分别出现在: ' +  this.spec_range[0][0] + '和' + this.spec_range[1][0]);
+
+            ret.push('其中:' + Object.keys(this.spec_type_range).map(v => [v, this.spec_type_range[v].map(w => w[1]).join('-')].join('体积分数变化范围为') + 'ppb').join(',') +'.')
+            
+            let spec_hours = Object.keys(this.spec_hours).map(v => [v, this.spec_hours[v]]);
+            let spec_hours_light = spec_hours.filter(v => (v[0]>=8 && v[0]<=18)).sort((x, y) => x[1] - y[1]);
+            let spec_hours_night = spec_hours.filter(v => (v[0]<8 || v[0]>18)).sort((x, y) => x[1] - y[1]);
+            let spec_hours_range = spec_hours.sort((x, y) => x[1] - y[1]);
+
+            ret.push('夜间体积分数平均值: ' + this.get_average(spec_hours_night.map(v => v[1])));
+            ret.push('夜间体积分数在: ' + spec_hours_night[0][1] + '-' + spec_hours_night[spec_hours_night.length-1][1] + 'ppb');
+            ret.push('昼间体积分数平均值: ' + this.get_average(spec_hours_light.map(v => v[1])));
+            ret.push('昼间体积分数在: ' + spec_hours_light[0][1] + '-' + spec_hours_light[spec_hours_light.length-1][1] + 'ppb');
+
+            ret.push('VOCs体积分数 于' + spec_hours_range[spec_hours_range.length-1][0] + '时出现最大值' + spec_hours_range[spec_hours_range.length-1][1] + 'ppb, 于' + spec_hours_range[0][0] + '时出现最小值'+ spec_hours_range[0][1] + 'ppb');
+
+            let sth, spec_type_hours=[[],[],[]], spec_type_hours_light, spec_type_hours_night, spec_type_hours_range;
+            for (k in this.spec_type_hours){
+                sth = Object.keys(this.spec_type_hours[k]).map(v => [v, this.spec_type_hours[k][v]]);
+                spec_type_hours_light = sth.filter(v => (v[0]>=8 && v[0]<=18));
+                spec_type_hours_night = sth.filter(v => (v[0]<8 || v[0]>18));
+                spec_type_hours_range = sth.sort((x, y) => x[1] - y[1]);
+                spec_type_hours[0].push(k);
+                spec_type_hours[1].push(this.get_average(spec_type_hours_light.map(v => v[1])));
+                spec_type_hours[2].push(this.get_average(spec_type_hours_night.map(v => v[1])));
+                ret.push(k + ' 于' + spec_type_hours_range[spec_type_hours_range.length-1][0] + '时出现最大值' + spec_type_hours_range[spec_type_hours_range.length-1][1] + 'ppb, 于' + spec_type_hours_range[0][0] + '时出现最小值'+ spec_type_hours_range[0][1] + 'ppb');
+            }
+            ret.push('各大类VOCs: ' +  spec_type_hours[0].join(','));
+            ret.push('夜间体积分数平均值: ' +  spec_type_hours[2].join(','));
+            ret.push('昼间体积分数平均值: ' +  spec_type_hours[1].join(','));
+
+            let ofp, ofp_total, ofp_top10, ofp_top10_per, ofp_top1_per;
+            ofp = Object.keys(this.OFP).map(v => [v, this.OFP[v]]).sort((x, y) => y[1] - x[1]);
+            ofp_total = ofp.map(v => v[1]).reduce((x, y) => NP.plus(x, y));
+            ofp_top10 = ofp.slice(0, 10);
+            ofp_top10_per = this.get_percent(ofp_top10.map(v => v[1]).reduce((x, y) => NP.plus(x, y)), ofp_total);
+            ofp_top1_per = this.get_percent(ofp_top10[0][1], ofp_total);
+
+            ret.push('臭氧生成趋势最高的前十种VOCs: ' +  ofp_top10.map(v => this.specs[v[0]][7]).join(','));
+            ret.push('总计占: ' +  ofp_top10_per +'%');
+            ret.push(this.specs[ofp_top10[0][0]][7] + ' 是臭氧生成趋势最高的VOCs物种， 贡献了 ' +  ofp_top1_per +'%');
+
             this.mytext = ret.join('\n');
         },
         search(){
@@ -125,7 +172,7 @@ export default {
                 rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {}, (d) => {
                     if(d.result){
                         if(d.result.length){
-                            let data={}, spec_vice, data1={}, data2={}, data3={}, data4={};
+                            let data={}, spec_vice, data1={}, data2={}, data3={}, data4={}, data5={};
                             d.result.forEach(v => {
                                 if (v[1].length==10) v[1] = v[1] + " 00:00:00";
 
@@ -160,20 +207,28 @@ export default {
                                     data4[v[1]] = 0;
                                 }
                                 data4[v[1]] = NP.plus(data4[v[1]], v[3]);
+                                
+                                if (this.specs[v[2]][10] > 0) {
+                                    if (!data5.hasOwnProperty(v[2])){
+                                        data5[v[2]] = 0;
+                                    }
+                                    data5[v[2]] = NP.plus(data5[v[2]], NP.times(v[3], this.specs[v[2]][10]));
+                                }
                             });
-
 
                             let k, da1 = {};
                             this.tableData1 = {};
+
                             for (k in data2){
-                                this.tableData1[k] = Object.keys(data2[k]).map(v => this.specs[v].join('')).join(' ');
+                                this.tableData1[k] = Object.keys(data2[k]).map(v => (this.specs[v][7] + this.specs[v][8])).join(' ');
                                 this.spec_type_count[k] = Object.keys(data2[k]).length;
                                 Object.assign(da1, data2[k]);
                             }
                             this.spec_count = Object.values(this.spec_type_count).reduce((x, y) => NP.plus(x, y));
+
                             for (k in da1){
                                this.spec_avg.push([
-                                    this.specs[k][0],
+                                    this.specs[k][7],
                                     this.get_average(da1[k])
                                ]);
                             }
@@ -188,17 +243,40 @@ export default {
                                 this.spec_type_vice_percent[k] = this.get_percent(data1[k], total);
                             }
 
-                            let str_arr;
-                            this.spec_type_space = data3
+                            let str_arr, l, i;
+                            this.spec_type_space = data3;
                             for (k in data3){
-                                str_arr = Object.keys(data3[k]).map(v => [v, data3[k][v]]).sort((x, y) => y[1] - x[1]);
+                                str_arr = Object.keys(data3[k]).map(v => [v, data3[k][v]]).sort((x, y) => x[1] - y[1]);
                                 this.spec_type_range[k] = [str_arr[0], str_arr[str_arr.length - 1]];
-                            }
-                            console.log(this.spec_type_range);
 
-                            str_arr = Object.keys(data4).map(v => [v, data4[v]]).sort((x, y) => y[1] - x[1]);
+                                this.spec_type_hours[k]= {};
+                                for (l in data3[k]){
+                                    i = new Date(l).getHours();
+                                    if (!(i in this.spec_type_hours[k]))
+                                        this.spec_type_hours[k][i] = [];
+                                    this.spec_type_hours[k][i].push(data3[k][l]);
+                                }
+                            }
+                            for (k in this.spec_type_hours){
+                                for (l in this.spec_type_hours[k]){
+                                    this.spec_type_hours[k][l] = this.get_average(this.spec_type_hours[k][l]);
+                                }
+                            }
+
+                            str_arr = Object.keys(data4).map(v => [v, data4[v]]).sort((x, y) => x[1] - y[1]);
                             this.spec_range = [str_arr[0], str_arr[str_arr.length - 1]];
-                            console.log(this.spec_range);
+                            for (k in data4){
+                                i = new Date(k).getHours();
+                                if (!(i in this.spec_hours))
+                                    this.spec_hours[i] = [];
+                                this.spec_hours[i].push(data4[k]);
+                            }
+
+                            for (k in this.spec_hours){
+                                this.spec_hours[k] = this.get_average(this.spec_hours[k]);
+                            }
+
+                            this.OFP = data5;
 
                             this.text_set();
                         }
@@ -288,7 +366,7 @@ export default {
             rpc(hosts.baseHost, 'bi.list', 'species', '', (d) => {
                 if(d.result)
                     d.result.forEach(v => {
-                        this.specs[v[0]] = [v[7], v[8]];
+                        this.specs[v[0]] = v;
                         this.specs_type_vice[v[0]] = this.spec_type_data[v[4]];
                     });
             })

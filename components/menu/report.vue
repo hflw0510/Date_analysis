@@ -29,10 +29,30 @@
                 <div>
                     <el-input type="textarea" v-model="mytext" :rows="30"></el-input>
                 </div>
-                <div id="myChart_test1" class=charts_test1></div>
             </el-col>
         </el-row>
-        <img src="" id="chartimg">
+        <el-row>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test1" class=charts_test1></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test2" class=charts_test1></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test3" class=charts_test1></div>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test4" class=charts_test1></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test5" class=charts_test1></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test6" class=charts_test1></div>
+            </el-col>
+        </el-row>       
     </div>
 </template>
 
@@ -42,7 +62,14 @@
     height: 390px;
     margin-left: auto;
     margin-right: auto;
-    float: center;
+  }
+
+.charts_test2 {
+    width: 520px;
+    height: 390px;
+    margin-left: auto;
+    margin-right: auto;
+    float: right;
   }
 
 </style>
@@ -67,10 +94,14 @@ export default {
             specs: {},
             specs_type_vice: {},
             search_date: '',
+            datelist: [],
             fullscreenLoading: false,
             data: [],
-            dataurl: '',
+            dataurl: {},
+            chartData1: {},
             chartData2: [],
+            chartData3: {},
+            chartData4: {},
             mytext: '',
             spec_count: 0,
             spec_type_count: {},
@@ -167,8 +198,13 @@ export default {
 
             this.mytext = ret.join('\n');
         },
+        reset(){
+
+        },
         search(){
+            this.fullscreenLoading = true;
             if (this.search_date) {
+                this.get_datelist(this.search_date);
                 rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {}, (d) => {
                     if(d.result){
                         if(d.result.length){
@@ -218,7 +254,8 @@ export default {
 
                             let k, da1 = {};
                             this.tableData1 = {};
-
+                            this.spec_type_count = {};
+                            this.spec_count = 0;
                             for (k in data2){
                                 this.tableData1[k] = Object.keys(data2[k]).map(v => (this.specs[v][7] + this.specs[v][8])).join(' ');
                                 this.spec_type_count[k] = Object.keys(data2[k]).length;
@@ -226,6 +263,8 @@ export default {
                             }
                             this.spec_count = Object.values(this.spec_type_count).reduce((x, y) => NP.plus(x, y));
 
+                            this.spec_avg = [];
+                            this.spec_type_avg = {};
                             for (k in da1){
                                this.spec_avg.push([
                                     this.specs[k][7],
@@ -237,7 +276,9 @@ export default {
                             for (k in data) {
                                 this.spec_type_avg[k] = [this.get_average(Object.values(data[k])), this.get_stdevp(Object.values(data[k]))];
                             }
-                            let total;
+
+                            let total=0;
+                            this.spec_type_vice_percent = {};
                             total = Object.values(data1).reduce((x, y) => NP.plus(x, y));
                             for (k in data1){
                                 this.spec_type_vice_percent[k] = this.get_percent(data1[k], total);
@@ -245,6 +286,8 @@ export default {
 
                             let str_arr, l, i;
                             this.spec_type_space = data3;
+                            this.spec_type_range = {};
+                            this.spec_type_hours = {};
                             for (k in data3){
                                 str_arr = Object.keys(data3[k]).map(v => [v, data3[k][v]]).sort((x, y) => x[1] - y[1]);
                                 this.spec_type_range[k] = [str_arr[0], str_arr[str_arr.length - 1]];
@@ -263,6 +306,7 @@ export default {
                                 }
                             }
 
+                            this.spec_hours = {};
                             str_arr = Object.keys(data4).map(v => [v, data4[v]]).sort((x, y) => x[1] - y[1]);
                             this.spec_range = [str_arr[0], str_arr[str_arr.length - 1]];
                             for (k in data4){
@@ -279,10 +323,16 @@ export default {
                             this.OFP = data5;
 
                             this.text_set();
+                            this.get_chartData1(data);
+                            this.get_chartData3(this.spec_avg);
+                            this.get_chartData4(data3);
+
+                            this.fullscreenLoading = false;
                         }
                     }
                     else if(d.error){
                         throw(d.error);
+                        this.fullscreenLoading = false;
                         this.$message({
                             message: d.error,
                             type: 'warning'
@@ -298,28 +348,102 @@ export default {
                 })
             }
         },
-        get_chartData2(data) {
-            let k;
+        get_datelist(d){
+            let i;
+            this.datelist = [];
+            for (i=0;i<this.dateCheck(d[0], d[1])+1;i++) {
+                let st = d[0];
+                if (st.length==10) st = st + " 00:00:00";
+                st = new Date(st);
+                st.setHours(i);
+                this.datelist.push(this.dateFormat("YYYY-mm-dd HH:MM:SS", st));
+            }
+        },
+        get_chartData1(data) {
+            let k, v;
+            this.chartData1.xAxis = [];
+            this.chartData1.bar = [];
+            this.chartData1.line = [];
             this.chartData2 = [];
 
             for (k in data) {
+                this.chartData1.xAxis.push(k);
+                this.chartData1.line.push(this.get_stdevp(Object.values(data[k])));
+                
+                v = this.get_average(Object.values(data[k]));
+                this.chartData1.bar.push(v);
                 this.chartData2.push({
                     name: k,
-                    value: this.get_average(Object.values(data[k]))
+                    value: v
                 })
             }
+            this.chart1();
             this.chart2();
         },
-        chart2() {
+        chart1(){
             let myChart = this.$echarts.init(document.getElementById('myChart_test1'));
+            let aa = {
+                title: {
+                    text: 'VOCs体积分数平均',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                label:{
+                    show: true
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: this.chartData1.xAxis
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: this.noppb?'浓度(μg/m³)':'浓度(ppb)'
+                    },
+                    {
+                        type: 'value',
+                        name: '标准差'
+                    }
+                ],
+                series: [
+                    {
+                        name: '浓度',
+                        type: 'bar',
+                        data: this.chartData1.bar,
+                        itemStyle: {
+                            normal: {
+                                color: (params) => ['#5a9dd7','#ee751d','#ff339c','#9d78ff','#58ff25','#00fff7'][params.dataIndex]
+                            }
+                        }
+                    },
+                    {
+                        name: '标准差',
+                        type: 'line',
+                        yAxisIndex: 1,
+                        data: this.chartData1.line
+                    }
+                ]
+            };
+            myChart.setOption(aa);
+        },
+        chart2() {
+            let myChart = this.$echarts.init(document.getElementById('myChart_test2'));
             myChart.setOption({
                 title: {
                     text: 'VOCs组成特征',
                     left: 'center'
                 },
+                color: ['#5a9dd7','#ee751d','#ff339c','#9d78ff','#58ff25','#00fff7','#c23531','#2f4554', '#61a0a8'],
                 tooltip:{
                     trigger: 'item',
                     formatter: '{a} <br/>{b} : {c} ({d}%)'
+                },
+                label:{
+                    formatter: '{b}: {d}%'
                 },
                 series:[
                     {
@@ -330,7 +454,7 @@ export default {
                     }
                 ]
             });
-            myChart.on('finished', (params) => {
+            /* myChart.on('finished', (params) => {
                 this.dataurl = myChart.getDataURL({
                     type: 'png',
                     pixelRatio: 1,
@@ -338,7 +462,138 @@ export default {
                 });
                 document.getElementById('chartimg').src = this.dataurl;
                 this.btn = false;
+            }); */
+        },
+        get_chartData3(data){
+            let k, d;
+            this.chartData3.xAxis = [];
+            this.chartData3.bar = [];
+
+            d = data.slice(0, 10);
+            this.chartData3.xAxis = d.map(v => v[0]);
+            this.chartData3.bar = d.map(v => v[1]);
+
+            this.chart3();
+        },
+        chart3 () {
+            let myChart = this.$echarts.init(document.getElementById('myChart_test3'))
+            myChart.setOption({
+                title: {
+                    text: '体积分数前10种VOCs物种',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                label:{
+                    show: true
+                },
+                xAxis: {
+                    data: this.chartData3.xAxis,
+                    axisLabel: {
+                        interval: 0
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                },
+                series: [{
+                    name: '浓度',
+                    type: 'bar',
+                    data: this.chartData3.bar,
+                    itemStyle: {
+                        normal: {
+                            color: (params) => ['#0100fe','#03ffff','#ec7c31','#7501e8','#9c007a','#c1c1ff','#86e3bf','#f6f784','#ceccce','#ffc0db'][params.dataIndex]
+                        }
+                    }
+                }]
             });
+        },
+        get_chartData4(data) {
+            let k, dtlist = [];
+            this.chartData4.data = {};
+            this.chartData4.legend = Object.keys(data);
+            this.chartData4.xAxis = dtlist;
+            this.chartData4.series = [];
+
+            Object.keys(data).forEach(v => {
+                this.chartData4.data[v] = [];
+                this.chartData4.series.push({
+                    name: v,
+                    type: 'line',
+                    stack: 'total',
+                    showSymbol: false,
+                    areaStyle: {},
+                    data: this.chartData4.data[v]
+                })
+            });
+            this.chartData4.data['total'] = [];
+            this.chartData4.series.push({
+                name: 'VOCs总量',
+                type: 'line',
+                stack: 'total',
+                showSymbol: false,
+                areaStyle: {},
+                data: this.chartData4.data['total']
+            });
+            this.chartData4.legend.push('VOCs总量');
+
+            this.datelist.forEach(w => {
+                let total = 0;
+                Object.keys(data).forEach(v => {
+                    if (w in data[v]){
+                        let val = data[v][w];
+                        this.chartData4.data[v].push(val);
+                        total = NP.plus(total, val);
+                    }
+                    else
+                        this.chartData4.data[v].push(0);
+                });
+                if (total > 0){
+                    dtlist.push(w);
+                    this.chartData4.data['total'].push(total);
+                }
+            });
+            this.chart4();
+        },
+        chart4(){
+            let myChart = this.$echarts.init(document.getElementById('myChart_test4'));
+            let aa = {
+                title: {
+                    text: '时空分布特征-浓度累计',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                color: ['#5d9cd3','#eb7b2e','#ff3299','#9369fe','#9369fe','#03ffff','#dfeb00','#c23531','#2f4554', '#61a0a8'],
+                legend:{
+                    icon: 'pin',
+                    right: "0%",
+                    orient: "vertical",
+                    data: this.chartData4.legend
+                },
+                grid:{
+                    left: '8%',
+                    right: '4%',
+                    bottom: '100'
+                },
+                dataZoom:[{}],
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: this.chartData4.xAxis
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '浓度累计'
+                    }
+                ],
+                series: this.chartData4.series
+            };
+            myChart.setOption(aa)
         },
         get_percent(n, t){
             return t<=0?0:Math.round(NP.divide(n, t) * 10000) / 100;
@@ -370,6 +625,40 @@ export default {
                         this.specs_type_vice[v[0]] = this.spec_type_data[v[4]];
                     });
             })
+        },
+        dateFormat(fmt, date) {
+            let ret;
+            if (!(date instanceof Date)) {
+                if (date.length==10) date = date + " 00:00:00";
+                date = new Date(date)
+            }
+            const opt = {
+                "Y+": date.getFullYear().toString(),        // 年
+                "m+": (date.getMonth() + 1).toString(),     // 月
+                "d+": date.getDate().toString(),            // 日
+                "H+": date.getHours().toString(),           // 时
+                "M+": date.getMinutes().toString(),         // 分
+                "S+": date.getSeconds().toString()          // 秒
+            };
+            for (let k in opt) {
+                ret = new RegExp("(" + k + ")").exec(fmt);
+                if (ret) {
+                    fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, "0")))
+                };
+            };
+            return fmt;
+        },
+        dateCheck(d1, d2) {
+            if (typeof(d1) == 'undefined') return -1;
+            if (!(d1 instanceof Date)){
+                if (d1.length==10) d1 = d1 + " 00:00:00";
+                d1 = new Date(d1)
+            };
+            if (!(d2 instanceof Date)){
+                if (d2.length==10) d2 = d2 + " 00:00:00";
+                d2 = new Date(d2)
+            };
+            return parseInt((d2.getTime() - d1.getTime())/(3600*1000))
         },
         work (){
             let d=[], k;

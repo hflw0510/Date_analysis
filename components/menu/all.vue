@@ -114,12 +114,9 @@ export default {
                                 if (this.noppb) v[3] = this.get_μg(v[2], v[3]);
 
                                 if (!data.hasOwnProperty(v[10])){
-                                    data[v[10]] = {};
+                                    data[v[10]] = [];
                                 }
-                                if (!data[v[10]].hasOwnProperty(v[1])){
-                                    data[v[10]][v[1]] = 0;
-                                }
-                                data[v[10]][v[1]] = NP.plus(data[v[10]][v[1]], v[3]);
+                                data[v[10]].push(v[3]);
 
                                 if (!data1.hasOwnProperty(v[5])){
                                     data1[v[5]] = {};
@@ -185,6 +182,7 @@ export default {
                 this.chartData1.bar.push(this.get_average(Object.values(data[k])));
                 this.chartData1.line.push(this.get_stdevp(Object.values(data[k])));
             }
+            
             this.chart1();
         },
         get_chartData2(data) {
@@ -245,7 +243,7 @@ export default {
             let mean = this.get_average(arr);
             return Math.sqrt(
                 NP.divide(arr.reduce((acc, val) => acc.concat(NP.minus(val, mean) ** 2), []).reduce((acc, val) => NP.plus(acc, val), 0), arr.length)
-            ).toFixed(3);
+            ).toFixed(4);
         },
         spec_select(){
             this.centerDialogVisible = true;

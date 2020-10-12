@@ -52,7 +52,29 @@
             <el-col :span=8 style="padding: 8px 12px;">
                 <div id="myChart_test6" class=charts_test1></div>
             </el-col>
-        </el-row>       
+        </el-row>
+        <el-row>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test7" class=charts_test1></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test8" class=charts_test1></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test9" class=charts_test1></div>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test10" class=charts_test1></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test11" class=charts_test1></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test12" class=charts_test1></div>
+            </el-col>
+        </el-row>
     </div>
 </template>
 
@@ -102,6 +124,8 @@ export default {
             chartData2: [],
             chartData3: {},
             chartData4: {},
+            chartData5: {},
+            chartData6: {},
             mytext: '',
             spec_count: 0,
             spec_type_count: {},
@@ -186,7 +210,7 @@ export default {
             ret.push('昼间体积分数平均值: ' +  spec_type_hours[1].join(','));
 
             let ofp, ofp_total, ofp_top10, ofp_top10_per, ofp_top1_per;
-            ofp = Object.keys(this.OFP).map(v => [v, this.OFP[v]]).sort((x, y) => y[1] - x[1]);
+            ofp = this.OFP;
             ofp_total = ofp.map(v => v[1]).reduce((x, y) => NP.plus(x, y));
             ofp_top10 = ofp.slice(0, 10);
             ofp_top10_per = this.get_percent(ofp_top10.map(v => v[1]).reduce((x, y) => NP.plus(x, y)), ofp_total);
@@ -208,7 +232,7 @@ export default {
                 rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {}, (d) => {
                     if(d.result){
                         if(d.result.length){
-                            let data={}, spec_vice, data1={}, data2={}, data3={}, data4={}, data5={};
+                            let data={}, spec_vice, data1={}, data2={}, data3={}, data4={}, data5={}, data6={};
                             d.result.forEach(v => {
                                 if (v[1].length==10) v[1] = v[1] + " 00:00:00";
 
@@ -238,6 +262,14 @@ export default {
                                     data3[v[10]][v[1]] = 0;
                                 }
                                 data3[v[10]][v[1]] = NP.plus(data3[v[10]][v[1]], v[3]);
+
+                                if (!data6.hasOwnProperty(v[1])){
+                                    data6[v[1]] = {};
+                                }
+                                if (!data6[v[1]].hasOwnProperty(v[10])){
+                                    data6[v[1]][v[10]] = 0;
+                                }
+                                data6[v[1]][v[10]] = NP.plus(data6[v[1]][v[10]], v[3]);
 
                                 if (!data4.hasOwnProperty(v[1])){
                                     data4[v[1]] = 0;
@@ -306,6 +338,7 @@ export default {
                                 }
                             }
 
+                            console.log(data4);
                             this.spec_hours = {};
                             str_arr = Object.keys(data4).map(v => [v, data4[v]]).sort((x, y) => x[1] - y[1]);
                             this.spec_range = [str_arr[0], str_arr[str_arr.length - 1]];
@@ -320,12 +353,13 @@ export default {
                                 this.spec_hours[k] = this.get_average(this.spec_hours[k]);
                             }
 
-                            this.OFP = data5;
+                            this.OFP = Object.keys(data5).map(v => [v, data5[v]]).sort((x, y) => y[1] - x[1]);
 
                             this.text_set();
                             this.get_chartData1(data);
                             this.get_chartData3(this.spec_avg);
-                            this.get_chartData4(data3);
+                            this.get_chartData4(data, data6);
+                            this.get_chartData6(this.OFP);
 
                             this.fullscreenLoading = false;
                         }
@@ -509,12 +543,16 @@ export default {
                 }]
             });
         },
-        get_chartData4(data) {
+        get_chartData4(data, data1) {
             let k, dtlist = [];
             this.chartData4.data = {};
             this.chartData4.legend = Object.keys(data);
             this.chartData4.xAxis = dtlist;
             this.chartData4.series = [];
+            this.chartData5.data = {};
+            this.chartData5.legend = Object.keys(data);
+            this.chartData5.xAxis = dtlist;
+            this.chartData5.series = [];
 
             Object.keys(data).forEach(v => {
                 this.chartData4.data[v] = [];
@@ -525,6 +563,15 @@ export default {
                     showSymbol: false,
                     areaStyle: {},
                     data: this.chartData4.data[v]
+                });
+                this.chartData5.data[v] = [];
+                this.chartData5.series.push({
+                    name: v,
+                    type: 'line',
+                    stack: 'total',
+                    showSymbol: false,
+                    areaStyle: {},
+                    data: this.chartData5.data[v]
                 })
             });
             this.chartData4.data['total'] = [];
@@ -538,23 +585,35 @@ export default {
             });
             this.chartData4.legend.push('VOCs总量');
 
-            this.datelist.forEach(w => {
+            this.datelist.forEach(v => {
                 let total = 0;
-                Object.keys(data).forEach(v => {
-                    if (w in data[v]){
-                        let val = data[v][w];
-                        this.chartData4.data[v].push(val);
-                        total = NP.plus(total, val);
+                Object.keys(data).forEach(w => {
+                    if (v in data1) {
+                        if (w in data1[v]){
+                            let val = data1[v][w];
+                            this.chartData4.data[w].push(val);
+                            total = NP.plus(total, val);
+                        }
+                        else
+                            this.chartData4.data[w].push(0);
                     }
-                    else
-                        this.chartData4.data[v].push(0);
                 });
                 if (total > 0){
-                    dtlist.push(w);
+                    dtlist.push(this.dateFormat("YYYY-mm-dd HH", v));
                     this.chartData4.data['total'].push(total);
+                    Object.keys(data).forEach(w => {
+                        if (v in data1) {
+                            if (w in data1[v]){
+                                this.chartData5.data[w].push(this.get_percent(data1[v][w], total));
+                            }
+                            else
+                                this.chartData5.data[w].push(0);
+                        }
+                    });
                 }
             });
             this.chart4();
+            this.chart5();
         },
         chart4(){
             let myChart = this.$echarts.init(document.getElementById('myChart_test4'));
@@ -569,16 +628,14 @@ export default {
                 color: ['#5d9cd3','#eb7b2e','#ff3299','#9369fe','#9369fe','#03ffff','#dfeb00','#c23531','#2f4554', '#61a0a8'],
                 legend:{
                     icon: 'pin',
-                    right: "0%",
-                    orient: "vertical",
+                    bottom: "0%",
                     data: this.chartData4.legend
                 },
                 grid:{
-                    left: '8%',
-                    right: '4%',
+                    left: '10%',
+                    right: '15%',
                     bottom: '100'
                 },
-                dataZoom:[{}],
                 xAxis: [
                     {
                         type: 'category',
@@ -594,6 +651,88 @@ export default {
                 series: this.chartData4.series
             };
             myChart.setOption(aa)
+        },
+        chart5() {
+            let myChart = this.$echarts.init(document.getElementById('myChart_test5'));
+            myChart.setOption({
+                tooltip: {
+                    trigger: 'axis'
+                },
+                color: ['#5d9cd3','#eb7b2e','#ff3299','#9369fe','#9369fe','#03ffff','#dfeb00'],
+                legend:{
+                    icon: 'pin',
+                    bottom: "0%",
+                    data: this.chartData5.legend
+                },
+                grid:{
+                    left: '10%',
+                    right: '4%'
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: this.chartData5.xAxis
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '浓度占比(%)',
+                        min: 0,
+                        max: 100,
+                        axisLabel: {
+                            formatter: '{value} %'
+                        }
+                    }
+                ],
+                series: this.chartData5.series
+            });
+        },
+        get_chartData6(data){
+            let k, d=[];
+            this.chartData6.xAxis = [];
+            this.chartData6.bar = [];
+
+            data.splice(0, 10).forEach(v => {
+                this.chartData6.xAxis.push(this.specs[v[0]][7]);
+                this.chartData6.bar.push(v[1]);
+            });
+            this.chart6();
+        },
+        chart6() {
+            let myChart = this.$echarts.init(document.getElementById('myChart_test6'))
+            myChart.setOption({
+                title: {
+                    text: '臭氧生成潜势前10种VOCs物种',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                label:{
+                    show: true
+                },
+                xAxis: {
+                    data: this.chartData6.xAxis,
+                    axisLabel: {
+                        interval: 0
+                    }
+                },
+                yAxis: {
+                        type: 'value',
+                        name: '物种浓度'
+                    },
+                series: [{
+                    name: '浓度',
+                    type: 'bar',
+                    data: this.chartData6.bar,
+                    itemStyle: {
+                        normal: {
+                            color: (params) => ['#0100fe','#03ffff','#ec7c31','#7501e8','#9c007a','#c1c1ff','#86e3bf','#f6f784','#ceccce','#ffc0db'][params.dataIndex]
+                        }
+                    }
+                }]
+            });
         },
         get_percent(n, t){
             return t<=0?0:Math.round(NP.divide(n, t) * 10000) / 100;

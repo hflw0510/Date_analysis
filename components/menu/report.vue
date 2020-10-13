@@ -75,6 +75,39 @@
                 <div id="myChart_test12" class=charts_test1></div>
             </el-col>
         </el-row>
+        <el-row>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test13" class=charts_test1></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test14" class=charts_test1></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test15" class=charts_test1></div>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test16" class=charts_test1></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test17" class=charts_test1></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test18" class=charts_test1></div>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test19" class=charts_test1></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test20" class=charts_test1></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test21" class=charts_test1></div>
+            </el-col>
+        </el-row>
     </div>
 </template>
 
@@ -381,10 +414,6 @@ export default {
                                 this.spec_hours[k] = this.get_average(this.spec_hours[k]);
                             }
 
-                            console.log(this.spec_hours_stdevp);
-                            console.log(this.spec_hours_freon);
-                            console.log(this.spec_hours);
-
                             this.OFP = Object.keys(data5).map(v => [v, data5[v]]).sort((x, y) => y[1] - x[1]);
 
                             this.text_set();
@@ -392,13 +421,14 @@ export default {
                             this.get_chartData3(this.spec_avg);
                             this.get_chartData4(data, data6);
                             this.get_chartData6(this.OFP);
+                            this.get_chartData7();
 
                             this.fullscreenLoading = false;
                         }
                     }
                     else if(d.error){
-                        throw(d.error);
                         this.fullscreenLoading = false;
+                        throw(d.error);
                         this.$message({
                             message: d.error,
                             type: 'warning'
@@ -767,22 +797,34 @@ export default {
             });
         },
         get_chartData7() {
-            let k, t, i, chartData = [];
+            let k, d, chartData = [], chartData1 = [];
 
             //this.spec_type_hours_freon
 
             for (k in this.spec_type_hours) {
-                let d = ({
+                d = ({
                     title: k,
                     xAxis: Array(24).fill(0).map((v, i) => i),
-                    line: this.spec_type_hours,
-                    stdevp: this.spec_type_hours_stdevp
+                    line: Object.values(this.spec_type_hours[k]),
+                    stdevp: Object.values(this.spec_type_hours_stdevp[k])
                 });
-                this.chartData.push(d);
+                chartData.push(d);
+
+                d = ({
+                    title: k,
+                    xAxis: Array(24).fill(0).map((v, i) => i),
+                    line: Object.values(this.spec_type_hours_freon[k]),
+                    stdevp: []
+                });
+                chartData1.push(d);
             }
-            console.log(this.chartData);
-            this.chartData.forEach((v, i) => {
-                this.chart1('myChart_test'+ (i+7), v);
+
+            chartData.forEach((v, i) => {
+                this.chart7('myChart_test'+ (i+7), v);
+            });
+
+            chartData1.forEach((v, i) => {
+                this.chart7('myChart_test'+ (i+7+chartData.length), v);
             });
 
         },
@@ -805,7 +847,7 @@ export default {
                 yAxis: [
                     {
                         type: 'value',
-                        name: this.noppb?'浓度(μg/m³)':'浓度(ppb)',
+                        name: '浓度(ppb)',
                         splitLine: {
                             show: false
                         }
@@ -866,12 +908,6 @@ export default {
                 ]
             };
             myChart.setOption(aa)
-
-            if (divid == 'myChart3_'+this.chartData.length) {
-                myChart.on('finished', (params) => {
-                this.fullscreenLoading = false;
-            });
-            }
         },
         get_percent(n, t){
             return t<=0?0:Math.round(NP.divide(n, t) * 10000) / 100;

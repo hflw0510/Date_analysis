@@ -384,7 +384,9 @@ export default {
                 xAxis: {
                     data: this.chartData3.xAxis,
                     axisLabel: {
-                        interval: 0
+                        interval: 0,
+                        rotate: 35,
+                        fontSize: 10
                     }
                 },
                 yAxis: {
@@ -424,7 +426,9 @@ export default {
                 xAxis: {
                     data: this.chartData4.xAxis,
                     axisLabel: {
-                        interval: 0
+                        interval: 0,
+                        rotate: 35,
+                        fontSize: 10
                     }
                 },
                 yAxis: {

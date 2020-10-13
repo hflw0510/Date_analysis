@@ -587,7 +587,9 @@ export default {
                 xAxis: {
                     data: this.chartData3.xAxis,
                     axisLabel: {
-                        interval: 0
+                        interval: 0,
+                        rotate: 35,
+                        fontSize: 10
                     }
                 },
                 yAxis: {
@@ -777,7 +779,9 @@ export default {
                 xAxis: {
                     data: this.chartData6.xAxis,
                     axisLabel: {
-                        interval: 0
+                        interval: 0,
+                        rotate: 35,
+                        fontSize: 10
                     }
                 },
                 yAxis: {
@@ -819,12 +823,26 @@ export default {
                 chartData1.push(d);
             }
 
+            this.chart7('myChart_test7', {
+                title: '',
+                xAxis: Array(24).fill(0).map((v, i) => i),
+                line: Object.values(this.spec_hours),
+                stdevp: Object.values(this.spec_hours_stdevp)
+            });
+
+            this.chart7('myChart_test8', {
+                title: '',
+                xAxis: Array(24).fill(0).map((v, i) => i),
+                line: Object.values(this.spec_hours_freon),
+                stdevp: []
+            });
+
             chartData.forEach((v, i) => {
-                this.chart7('myChart_test'+ (i+7), v);
+                this.chart7('myChart_test'+ (i+9), v);
             });
 
             chartData1.forEach((v, i) => {
-                this.chart7('myChart_test'+ (i+7+chartData.length), v);
+                this.chart7('myChart_test'+ (i+9+chartData.length), v);
             });
 
         },

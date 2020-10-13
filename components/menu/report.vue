@@ -135,9 +135,12 @@ export default {
             tableData1: {},
             spec_range: [],
             spec_type_range: {},
-            spec_type_space: {},
             spec_type_hours: {},
+            spec_type_hours_stdevp: {},
+            spec_type_hours_freon: {},
             spec_hours: {},
+            spec_hours_stdevp: {},
+            spec_hours_freon: {},
             OFP: {}
         }
     },
@@ -232,7 +235,7 @@ export default {
                 rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {}, (d) => {
                     if(d.result){
                         if(d.result.length){
-                            let data={}, spec_vice, data1={}, data2={}, data3={}, data4={}, data5={}, data6={};
+                            let data={}, spec_vice, data1={}, data2={}, data3={}, data4={}, data5={}, data6={}, data7={};
                             d.result.forEach(v => {
                                 if (v[1].length==10) v[1] = v[1] + " 00:00:00";
 
@@ -282,6 +285,11 @@ export default {
                                     }
                                     data5[v[2]] = NP.plus(data5[v[2]], NP.times(v[3], v[8]));
                                 }
+
+                                if (v[5] == '氟利昂113'){
+                                    if (!data7.hasOwnProperty(v[1])) data7[v[1]] = [];
+                                    data7[v[1]] = NP.plus(data7[v[1]], v[3]);
+                                }
                             });
 
                             let k, da1 = {};
@@ -317,41 +325,65 @@ export default {
                             }
 
                             let str_arr, l, i;
-                            this.spec_type_space = data3;
                             this.spec_type_range = {};
                             this.spec_type_hours = {};
+                            this.spec_type_hours_stdevp = {};
+                            this.spec_type_hours_freon = {};
                             for (k in data3){
                                 str_arr = Object.keys(data3[k]).map(v => [v, data3[k][v]]).sort((x, y) => x[1] - y[1]);
                                 this.spec_type_range[k] = [str_arr[0], str_arr[str_arr.length - 1]];
 
                                 this.spec_type_hours[k]= {};
+                                this.spec_type_hours_freon[k]= {};
                                 for (l in data3[k]){
                                     i = new Date(l).getHours();
                                     if (!(i in this.spec_type_hours[k]))
                                         this.spec_type_hours[k][i] = [];
+                                    if (!(i in this.spec_type_hours_freon[k]))
+                                        this.spec_type_hours_freon[k][i] = [];
                                     this.spec_type_hours[k][i].push(data3[k][l]);
+                                    if (l in data7)
+                                        this.spec_type_hours_freon[k][i].push(NP.divide(data3[k][l], data7[l]).toFixed(4));
+                                    else
+                                        this.spec_type_hours_freon[k][i].push(data3[k][l]);
                                 }
                             }
                             for (k in this.spec_type_hours){
+                                this.spec_type_hours_stdevp[k] = {};
                                 for (l in this.spec_type_hours[k]){
+                                    this.spec_type_hours_stdevp[k][l] = this.get_stdevp(this.spec_type_hours[k][l]);
+                                    this.spec_type_hours_freon[k][l] = this.get_average(this.spec_type_hours_freon[k][l]);
                                     this.spec_type_hours[k][l] = this.get_average(this.spec_type_hours[k][l]);
                                 }
                             }
 
-                            console.log(data4);
                             this.spec_hours = {};
+                            this.spec_hours_stdevp = {};
+                            this.spec_hours_freon = {};
                             str_arr = Object.keys(data4).map(v => [v, data4[v]]).sort((x, y) => x[1] - y[1]);
                             this.spec_range = [str_arr[0], str_arr[str_arr.length - 1]];
                             for (k in data4){
                                 i = new Date(k).getHours();
                                 if (!(i in this.spec_hours))
                                     this.spec_hours[i] = [];
+                                if (!(i in this.spec_hours_freon))
+                                    this.spec_hours_freon[i] = [];
                                 this.spec_hours[i].push(data4[k]);
+                                if (k in data7)
+                                    this.spec_hours_freon[i].push(NP.divide(data4[k], data7[k]).toFixed(4));
+                                else
+                                    this.spec_hours_freon[i].push(data4[k]);
                             }
 
                             for (k in this.spec_hours){
+                                this.spec_hours_stdevp[k] = this.get_stdevp(this.spec_hours[k]);
+                                this.spec_hours_freon[k] = this.get_average(this.spec_hours_freon[k]);
                                 this.spec_hours[k] = this.get_average(this.spec_hours[k]);
                             }
+
+                            console.log(this.spec_hours_stdevp);
+                            console.log(this.spec_hours_freon);
+                            console.log(this.spec_hours);
 
                             this.OFP = Object.keys(data5).map(v => [v, data5[v]]).sort((x, y) => y[1] - x[1]);
 
@@ -733,6 +765,113 @@ export default {
                     }
                 }]
             });
+        },
+        get_chartData7() {
+            let k, t, i, chartData = [];
+
+            //this.spec_type_hours_freon
+
+            for (k in this.spec_type_hours) {
+                let d = ({
+                    title: k,
+                    xAxis: Array(24).fill(0).map((v, i) => i),
+                    line: this.spec_type_hours,
+                    stdevp: this.spec_type_hours_stdevp
+                });
+                this.chartData.push(d);
+            }
+            console.log(this.chartData);
+            this.chartData.forEach((v, i) => {
+                this.chart1('myChart_test'+ (i+7), v);
+            });
+
+        },
+        chart7(divid, data){
+            let myChart = this.$echarts.init(document.getElementById(divid));
+            let aa = {
+                title: {
+                    text: data.title,
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: data.xAxis
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: this.noppb?'浓度(μg/m³)':'浓度(ppb)',
+                        splitLine: {
+                            show: false
+                        }
+                    }
+                ],
+                series: [
+                    {
+                        name: 'U',
+                        type: 'line',
+                        data: data.stdevp.map((v, i) => NP.plus(data.line[i], v)),
+                        lineStyle: {
+                            opacity: 0
+                        },
+                        smooth: true,
+                        areaStyle:{
+                            color: '#C0C0C0',
+                            origin: 'start',
+                            opacity: 0.5
+                        },
+                        symbol: 'none'
+                    },
+                    {
+                        name: 'L',
+                        type: 'line',
+                        data: data.stdevp.map((v, i) => NP.minus(data.line[i], v)),
+                        lineStyle: {
+                            opacity: 0
+                        },
+                        smooth: true,
+                        areaStyle:{
+                            color: '#fff',
+                            origin: 'start',
+                            shadowColor: '#FFFFFF',
+                            shadowOffsetX: 1
+                        },
+                        symbol: 'none'
+                    },
+                    {
+                        name: '浓度',
+                        type: 'line',
+                        data: data.line,
+                        symbolSize: 6,
+                        itemStyle: {
+                            color: '#c23531'
+                        },
+                        markPoint:{
+                            data: [
+                                {
+                                    type: 'max', name: '最大值'
+                                },
+                                {
+                                    type: 'min', name: '最小值'
+                                }
+                            ]
+                        },
+                        showSymbol: false
+                    },
+                ]
+            };
+            myChart.setOption(aa)
+
+            if (divid == 'myChart3_'+this.chartData.length) {
+                myChart.on('finished', (params) => {
+                this.fullscreenLoading = false;
+            });
+            }
         },
         get_percent(n, t){
             return t<=0?0:Math.round(NP.divide(n, t) * 10000) / 100;

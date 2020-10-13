@@ -132,7 +132,6 @@ export default {
                                     data1[v[1]] = NP.plus(data1[v[1]], v[3]);
                                 }
                             });
-                            console.log(data1);
                             this.get_chartData1(data, data1);
                         }
                         else{

@@ -108,6 +108,17 @@
                 <div id="myChart_test21" class=charts_test1></div>
             </el-col>
         </el-row>
+        <el-row>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test22" class=charts_test1></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test23" class=charts_test1></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test24" class=charts_test1></div>
+            </el-col>
+        </el-row>
     </div>
 </template>
 
@@ -174,7 +185,8 @@ export default {
             spec_hours: {},
             spec_hours_stdevp: {},
             spec_hours_freon: {},
-            OFP: {}
+            OFP: {},
+            docx_data: {}
         }
     },
     created() {
@@ -188,49 +200,90 @@ export default {
         text_set(){
             let ret=[], k, da=[];
             this.mytext = '';
-            ret.push('时间: ' + this.search_date[0] + ' ' + this.search_date[1]);
-            ret.push('VOCs物种总数: ' + this.spec_count);
+
+            this.docx_data["datefrom"] = this.search_date[0];
+            this.docx_data["dateto"] = this.search_date[1];
+            ret.push('时间: ' + this.docx_data["datefrom"] + ' ' + this.docx_data["dateto"]);
+
+            this.docx_data["spec_count"] = this.spec_count;
+            ret.push('VOCs物种总数: ' + this.docx_data["spec_count"]);
+            
             for (k in this.spec_type_count){
                 da.push(k + ' ' + this.spec_type_count[k] + '种');
             }
-            ret.push(da.join(','));
+            this.docx_data["spec_type_list"] = da.join(',');
+            ret.push(this.docx_data["spec_type_list"]);
+
+            let stc=0, sta=0;
             da = [];
             for (k in this.spec_type_avg){
                 da.push(k + ' ' + this.spec_type_avg[k][0] + '±' + this.spec_type_avg[k][1]);
+                stc = NP.plus(stc, this.spec_type_avg[k][0]);
+                sta = NP.plus(sta, this.spec_type_avg[k][1]);
             }
-            ret.push(da.join(','));
+
+            this.docx_data["spec_total_avg"] = stc + '±' + sta;
+            ret.push('体积分数平均值: ' + this.docx_data["spec_total_avg"]);
+
+            this.docx_data["spec_type_avg"] = da.join(',');
+            ret.push(this.docx_data["spec_type_avg"]);
+
             da = [];
             for (k in this.spec_type_vice_percent){
                 da.push(k + ' ' + this.spec_type_vice_percent[k] + '%');
             }
-            ret.push(da.join(','));
+
+            this.docx_data["spec_type_vice_percent"] = da.join(',');
+            ret.push(this.docx_data["spec_type_vice_percent"]);
+
+            this.docx_data["specs"] = this.tableData1;
 
             let spec_avg = this.spec_avg.slice(0, 10);
-            ret.push('体积分数平均值最高的前十种VOCs分别为: ' + spec_avg.map(v => v[0]).join(','));
-            ret.push('体积分数平均值分别为: ' + spec_avg.map(v => v[1]).join(','));
+            this.docx_data["spec_top10"] = spec_avg.map(v => v[0]).join(',')
+            this.docx_data["spec_top10_ppb"] = spec_avg.map(v => v[1]).join(',')
+            ret.push('体积分数平均值最高的前十种VOCs分别为: ' + this.docx_data["spec_top10"]);
+            ret.push('体积分数平均值分别为: ' + this.docx_data["spec_top10_ppb"]);
 
             let spec_count = this.spec_avg.map(v => v[1]).reduce((x, y) => NP.plus(x, y));
             let spec_top10_count = spec_avg.map(v => v[1]).reduce((x, y) => NP.plus(x, y));
-            ret.push('VOCs总体积分数占比为: ' + this.get_percent(spec_top10_count, spec_count) + '%');
 
-            ret.push('体积分数变化范围: ' + this.spec_range[0][1] + '-' + this.spec_range[1][1]);
-            ret.push('分别出现在: ' +  this.spec_range[0][0] + '和' + this.spec_range[1][0]);
+            this.docx_data["spec_total_percent"] = this.get_percent(spec_top10_count, spec_count) + '%';
+            ret.push('VOCs总体积分数占比为: ' + this.docx_data["spec_total_percent"]);
 
-            ret.push('其中:' + Object.keys(this.spec_type_range).map(v => [v, this.spec_type_range[v].map(w => w[1]).join('-')].join('体积分数变化范围为') + 'ppb').join(',') +'.')
+            this.docx_data["spec_range"] = this.spec_range[0][1] + '-' + this.spec_range[1][1];
+            ret.push('体积分数变化范围: ' +  this.docx_data["spec_range"]);
+
+            this.docx_data["spec_range_time"] = this.spec_range[0][0] + '和' + this.spec_range[1][0];
+            ret.push('分别出现在: ' +  this.docx_data["spec_range_time"]);
+
+            this.docx_data["spec_type_range"] = Object.keys(this.spec_type_range).map(v => [v, this.spec_type_range[v].map(w => w[1]).join('-')].join('体积分数变化范围为') + 'ppb').join(',') +'.';
+            ret.push('其中:' + this.docx_data["spec_type_range"]);
             
             let spec_hours = Object.keys(this.spec_hours).map(v => [v, this.spec_hours[v]]);
             let spec_hours_light = spec_hours.filter(v => (v[0]>=8 && v[0]<=18)).sort((x, y) => x[1] - y[1]);
             let spec_hours_night = spec_hours.filter(v => (v[0]<8 || v[0]>18)).sort((x, y) => x[1] - y[1]);
             let spec_hours_range = spec_hours.sort((x, y) => x[1] - y[1]);
 
-            ret.push('夜间体积分数平均值: ' + this.get_average(spec_hours_night.map(v => v[1])));
-            ret.push('夜间体积分数在: ' + spec_hours_night[0][1] + '-' + spec_hours_night[spec_hours_night.length-1][1] + 'ppb');
-            ret.push('昼间体积分数平均值: ' + this.get_average(spec_hours_light.map(v => v[1])));
-            ret.push('昼间体积分数在: ' + spec_hours_light[0][1] + '-' + spec_hours_light[spec_hours_light.length-1][1] + 'ppb');
+            this.docx_data["spec_hours_night"] = this.get_average(spec_hours_night.map(v => v[1]));
+            ret.push('夜间体积分数平均值: ' + this.docx_data["spec_hours_night"]);
 
-            ret.push('VOCs体积分数 于' + spec_hours_range[spec_hours_range.length-1][0] + '时出现最大值' + spec_hours_range[spec_hours_range.length-1][1] + 'ppb, 于' + spec_hours_range[0][0] + '时出现最小值'+ spec_hours_range[0][1] + 'ppb');
+            this.docx_data["spec_hours_night_range"] = spec_hours_night[0][1] + '-' + spec_hours_night[spec_hours_night.length-1][1] + 'ppb';
+            ret.push('夜间体积分数在: ' + this.docx_data["spec_hours_night_range"]);
+
+            this.docx_data["spec_hours_light"] = this.get_average(spec_hours_light.map(v => v[1]));
+            ret.push('昼间体积分数平均值: ' + this.docx_data["spec_hours_light"]);
+
+            this.docx_data["spec_hours_light_range"] = spec_hours_light[0][1] + '-' + spec_hours_light[spec_hours_light.length-1][1] + 'ppb';
+            ret.push('昼间体积分数在: ' + this.docx_data["spec_hours_light_range"]);
+
+            this.docx_data["spec_hours_range_max"] = spec_hours_range[spec_hours_range.length-1][0];
+            this.docx_data["spec_hours_range_max_value"] = spec_hours_range[spec_hours_range.length-1][1] + 'ppb';
+            this.docx_data["spec_hours_range_min"] = spec_hours_range[0][0];
+            this.docx_data["spec_hours_range_min_value"] = spec_hours_range[0][1] + 'ppb';
+            ret.push('VOCs体积分数 于' + this.docx_data["spec_hours_range_max"] + '时出现最大值' + this.docx_data["spec_hours_range_max_value"] + ', 于' + this.docx_data["spec_hours_range_min"] + '时出现最小值'+ this.docx_data["spec_hours_range_min_value"]);
 
             let sth, spec_type_hours=[[],[],[]], spec_type_hours_light, spec_type_hours_night, spec_type_hours_range;
+            this.docx_data["spec_type_hours"] = []
             for (k in this.spec_type_hours){
                 sth = Object.keys(this.spec_type_hours[k]).map(v => [v, this.spec_type_hours[k][v]]);
                 spec_type_hours_light = sth.filter(v => (v[0]>=8 && v[0]<=18));
@@ -239,11 +292,18 @@ export default {
                 spec_type_hours[0].push(k);
                 spec_type_hours[1].push(this.get_average(spec_type_hours_light.map(v => v[1])));
                 spec_type_hours[2].push(this.get_average(spec_type_hours_night.map(v => v[1])));
-                ret.push(k + ' 于' + spec_type_hours_range[spec_type_hours_range.length-1][0] + '时出现最大值' + spec_type_hours_range[spec_type_hours_range.length-1][1] + 'ppb, 于' + spec_type_hours_range[0][0] + '时出现最小值'+ spec_type_hours_range[0][1] + 'ppb');
+                this.docx_data["spec_type_hours"].push(k + ' 于' + spec_type_hours_range[spec_type_hours_range.length-1][0] + '时出现最大值' + spec_type_hours_range[spec_type_hours_range.length-1][1] + 'ppb, 于' + spec_type_hours_range[0][0] + '时出现最小值'+ spec_type_hours_range[0][1] + 'ppb');
             }
-            ret.push('各大类VOCs: ' +  spec_type_hours[0].join(','));
-            ret.push('夜间体积分数平均值: ' +  spec_type_hours[2].join(','));
-            ret.push('昼间体积分数平均值: ' +  spec_type_hours[1].join(','));
+            this.docx_data["spec_type_count"] = Object.keys(this.spec_type_hours).length;
+            this.docx_data["spec_type_hours"] = this.docx_data["spec_type_hours"].join(';');
+            ret.push(this.docx_data["spec_type_hours"]);
+
+            this.docx_data["spec_type_hour"] = spec_type_hours[0].join(',');
+            this.docx_data["spec_type_night"] = spec_type_hours[2].join(',');
+            this.docx_data["spec_type_light"] = spec_type_hours[1].join(',');
+            ret.push('各大类VOCs: ' +  this.docx_data["spec_type_hour"]);
+            ret.push('夜间体积分数平均值: ' +  this.docx_data["spec_type_night"]);
+            ret.push('昼间体积分数平均值: ' +  this.docx_data["spec_type_light"]);
 
             let ofp, ofp_total, ofp_top10, ofp_top10_per, ofp_top1_per;
             ofp = this.OFP;
@@ -252,14 +312,16 @@ export default {
             ofp_top10_per = this.get_percent(ofp_top10.map(v => v[1]).reduce((x, y) => NP.plus(x, y)), ofp_total);
             ofp_top1_per = this.get_percent(ofp_top10[0][1], ofp_total);
 
-            ret.push('臭氧生成趋势最高的前十种VOCs: ' +  ofp_top10.map(v => this.specs[v[0]][7]).join(','));
-            ret.push('总计占: ' +  ofp_top10_per +'%');
-            ret.push(this.specs[ofp_top10[0][0]][7] + ' 是臭氧生成趋势最高的VOCs物种， 贡献了 ' +  ofp_top1_per +'%');
+            this.docx_data["ofp_top10"] = ofp_top10.map(v => this.specs[v[0]][7]).join(',');
+            this.docx_data["ofp_top10_per"] = ofp_top10_per +'%';
+            ret.push('臭氧生成趋势最高的前十种VOCs: ' +  this.docx_data["ofp_top10"]);
+            ret.push('总计占: ' +  this.docx_data["ofp_top10_per"]);
+
+            this.docx_data["ofp_top1"] = this.specs[ofp_top10[0][0]][7];
+            this.docx_data["ofp_top1_per"] = ofp_top1_per +'%';
+            ret.push(this.docx_data["ofp_top1"] + ' 是臭氧生成趋势最高的VOCs物种， 贡献了 ' +  this.docx_data["ofp_top1_per"]);
 
             this.mytext = ret.join('\n');
-        },
-        reset(){
-
         },
         search(){
             this.fullscreenLoading = true;
@@ -326,11 +388,14 @@ export default {
                             });
 
                             let k, da1 = {};
-                            this.tableData1 = {};
+                            this.tableData1 = [];
                             this.spec_type_count = {};
                             this.spec_count = 0;
                             for (k in data2){
-                                this.tableData1[k] = Object.keys(data2[k]).map(v => (this.specs[v][7] + this.specs[v][8])).join(' ');
+                                this.tableData1.push({
+                                    spec_type: k,
+                                    spec: Object.keys(data2[k]).map(v => (this.specs[v][7] + this.specs[v][8])).join(' ')
+                                });
                                 this.spec_type_count[k] = Object.keys(data2[k]).length;
                                 Object.assign(da1, data2[k]);
                             }
@@ -424,6 +489,7 @@ export default {
                             this.get_chartData7();
 
                             this.fullscreenLoading = false;
+                            this.btn = false;
                         }
                     }
                     else if(d.error){
@@ -525,6 +591,13 @@ export default {
                 ]
             };
             myChart.setOption(aa);
+            myChart.on('finished', (params) => {
+                this.docx_data['image1'] = myChart.getDataURL({
+                    type: 'png',
+                    pixelRatio: 1,
+                    backgroundColor: '#fff'
+                });
+            });
         },
         chart2() {
             let myChart = this.$echarts.init(document.getElementById('myChart_test2'));
@@ -550,15 +623,13 @@ export default {
                     }
                 ]
             });
-            /* myChart.on('finished', (params) => {
-                this.dataurl = myChart.getDataURL({
+            myChart.on('finished', (params) => {
+                this.docx_data['image2'] = myChart.getDataURL({
                     type: 'png',
                     pixelRatio: 1,
                     backgroundColor: '#fff'
                 });
-                document.getElementById('chartimg').src = this.dataurl;
-                this.btn = false;
-            }); */
+            });
         },
         get_chartData3(data){
             let k, d;
@@ -605,6 +676,13 @@ export default {
                         }
                     }
                 }]
+            });
+            myChart.on('finished', (params) => {
+                this.docx_data['image3'] = myChart.getDataURL({
+                    type: 'png',
+                    pixelRatio: 1,
+                    backgroundColor: '#fff'
+                });
             });
         },
         get_chartData4(data, data1) {
@@ -715,6 +793,13 @@ export default {
                 series: this.chartData4.series
             };
             myChart.setOption(aa)
+            myChart.on('finished', (params) => {
+                this.docx_data['image4'] = myChart.getDataURL({
+                    type: 'png',
+                    pixelRatio: 1,
+                    backgroundColor: '#fff'
+                });
+            });
         },
         chart5() {
             let myChart = this.$echarts.init(document.getElementById('myChart_test5'));
@@ -750,6 +835,13 @@ export default {
                     }
                 ],
                 series: this.chartData5.series
+            });
+            myChart.on('finished', (params) => {
+                this.docx_data['image5'] = myChart.getDataURL({
+                    type: 'png',
+                    pixelRatio: 1,
+                    backgroundColor: '#fff'
+                });
             });
         },
         get_chartData6(data){
@@ -799,6 +891,13 @@ export default {
                     }
                 }]
             });
+            myChart.on('finished', (params) => {
+                this.docx_data['image6'] = myChart.getDataURL({
+                    type: 'png',
+                    pixelRatio: 1,
+                    backgroundColor: '#fff'
+                });
+            });
         },
         get_chartData7() {
             let k, d, chartData = [], chartData1 = [];
@@ -823,14 +922,14 @@ export default {
                 chartData1.push(d);
             }
 
-            this.chart7('myChart_test7', {
+            this.chart7('myChart_test7', 7, {
                 title: '',
                 xAxis: Array(24).fill(0).map((v, i) => i),
                 line: Object.values(this.spec_hours),
                 stdevp: Object.values(this.spec_hours_stdevp)
             });
 
-            this.chart7('myChart_test8', {
+            this.chart7('myChart_test8', 8, {
                 title: '',
                 xAxis: Array(24).fill(0).map((v, i) => i),
                 line: Object.values(this.spec_hours_freon),
@@ -838,15 +937,15 @@ export default {
             });
 
             chartData.forEach((v, i) => {
-                this.chart7('myChart_test'+ (i+9), v);
+                this.chart7('myChart_test' + (i+9), i+9, v);
             });
 
             chartData1.forEach((v, i) => {
-                this.chart7('myChart_test'+ (i+9+chartData.length), v);
+                this.chart7('myChart_test' + (i+9+chartData.length), (i+18), v);
             });
 
         },
-        chart7(divid, data){
+        chart7(divid, i, data){
             let myChart = this.$echarts.init(document.getElementById(divid));
             let aa = {
                 title: {
@@ -926,6 +1025,13 @@ export default {
                 ]
             };
             myChart.setOption(aa)
+            myChart.on('finished', (params) => {
+                this.docx_data['image'+i] = myChart.getDataURL({
+                    type: 'png',
+                    pixelRatio: 1,
+                    backgroundColor: '#fff'
+                });
+            });
         },
         get_percent(n, t){
             return t<=0?0:Math.round(NP.divide(n, t) * 10000) / 100;
@@ -993,17 +1099,6 @@ export default {
             return parseInt((d2.getTime() - d1.getTime())/(3600*1000))
         },
         work (){
-            let d=[], k;
-
-            for (k in this.tableData){
-                d.push({
-                    spec_type: k,
-                    spec: this.tableData[k].join()
-                })
-            }
-
-            console.log(d);
-            this.data = d;
             this.exportWord();
         },
         base64DataURLToArrayBuffer(dataURL) {
@@ -1028,7 +1123,7 @@ export default {
         },
         exportWord () {
             let that = this;
-            JSZipUtils.getBinaryContent("/docx/specs.docx", function(error, content) {
+            JSZipUtils.getBinaryContent("/docx/rt1.docx", function(error, content) {
                 if (error) {
                     throw error;
                 }
@@ -1048,10 +1143,8 @@ export default {
                 doc.attachModule(imageModule);
                 doc.loadZip(zip);  
 
-                doc.setData({
-                    specs: that.data,
-                    image: that.dataurl
-                });
+                console.log(that.docx_data);
+                doc.setData(that.docx_data);
             
                 try {
                     doc.render();
@@ -1070,7 +1163,7 @@ export default {
                     type: "blob",
                     mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 });
-                saveAs(out, "specs.docx");
+                saveAs(out, "report_template.docx");
             });
         }
     }

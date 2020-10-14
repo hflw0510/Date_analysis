@@ -1,6 +1,6 @@
 <template>
     <div>
-        <simpletable ref="st" :props="props" @refresh="refresh" @bclick="btnClick" @create="create"></simpletable>
+        <simpletable ref="st" :props="props" @refresh="refresh" @bclick="btnClick"></simpletable>
     </div>
 </template>
 <script>
@@ -68,6 +68,13 @@ const tbCols = [
                 size: 'mini',
                 type: 'primary',
                 event: 'bclick'
+            },
+            {
+                key: 'delete',
+                text: 'table.delete',
+                size: 'mini',
+                type: 'danger',
+                event: 'bclick'
             }
         ]
     }
@@ -126,11 +133,33 @@ export default {
                     }) 
                 }
             }
+            if (params[0] == 'delete') {
+                this.$confirm('是否确定删除？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.delete(params[1][0])
+                }).catch(() => {
+
+                });
+            }
 
         },
-        create() {
-            this.form_refush();
-            this.centerDialogVisible=true;
+        delete(id) {
+            if (!id) return 
+            rpc(hosts.baseHost, 'bi.delete', 'source_analysis', id, (d) => {
+                if(d.result){
+                    this.$message({
+                        message: '删除成功',
+                        type: 'warning'
+                    });
+                    this.load();
+                }
+                else {
+                    this.$message.error('删除失败');
+                }
+            })
         },
         dataRender(d) {
             d[4] = JSON.parse(d[4]).join(',');

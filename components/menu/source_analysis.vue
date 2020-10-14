@@ -2,7 +2,9 @@
     <div>
         <el-row>
             <el-col :span=24 style="padding: 8px 12px;">
-                <div :id="'myChart7_'+props[0]+'_1'" class=charts7_1></div>
+                <div v-for="(item, index) in divs" :key="index">
+                    <div :id="item" class=charts7_2></div>
+                </div>
             </el-col>
         </el-row>
         <el-row>
@@ -34,7 +36,7 @@
 
   .charts7_2 {
     width: 1400px;
-    height: 480px;
+    height: 280px;
     margin-left: auto;
     margin-right: auto;
     float: left;
@@ -59,11 +61,9 @@ export default {
             centerDialogVisible : false,
             spec_types: [],
             datelist: [],
-            chartData1: {
-                legend: [],
-                xAxis: [],
-                series: []
-            },
+            chartData1: [],
+            divs: [],
+            color: ['#c23531','#2f4554', '#61a0a8', '#d48265', '#91c7ae','#749f83',  '#ca8622', '#bda29a','#6e7074', '#546570', '#c4ccd3'],
             chartData2: {
                 legend: [],
                 xAxis: [],
@@ -88,6 +88,7 @@ export default {
         searchClick() {
             this.fullscreenLoading = false;
             let id = this.props[0];
+            console.log(this.divs)
             rpc(hosts.baseHost, 'Bi.Load', 'source_analysis', id, (d) => {
                 if(d.result){
                     if(Object.keys(d.result).length){
@@ -136,22 +137,38 @@ export default {
             this.datelist = Object.keys(dt);
         },
         get_chartData1(spec_id, data) {
-            let k;
-            this.chartData1.legend = [];
-            this.chartData1.xAxis = spec_id.map(v => this.specs[v]);
-            this.chartData1.series = [];
+            let k, d, divid;
+            this.divs = [];
+            this.chartData1 = [];
 
             data.forEach((v, index) => {
-                this.chartData1.legend.push('因子' + (index+1));
-                this.chartData1.series.push({
-                    name: '因子' + (index+1),
-                    type: 'bar',
-                    showSymbol: false,
-                    areaStyle: {},
-                    data: v
+                divid = 'myChart7_'+this.props[0]+'_1_' + index;
+                this.divs.push(divid);
+                d = {
+                    title : '因子' + (index+1),
+                    xAxis : spec_id.map(v => this.specs[v]),
+                    series : [{
+                        name: '因子' + (index+1),
+                        type: 'bar',
+                        showSymbol: false,
+                        areaStyle: {},
+                        data: v,
+                        itemStyle: {
+                            normal: {
+                                color: this.color[index]
+                            }
+                        }
+                    }]
+                };
+                this.chartData1.push(d);
+            });
+            console.log(this.chartData1);
+            this.$nextTick(() => {
+                this.divs.forEach((v, i) => {
+                    this.chart1(v, this.chartData1[i]);
                 })
             });
-            this.chart1();
+            
         },
         get_chartData2(data) {
             let k;
@@ -254,15 +271,15 @@ export default {
                 }
             })
         },
-        chart1(){
-            let myChart = this.$echarts.init(document.getElementById('myChart7_'+this.props[0]+'_1'));
+        chart1(divid, data){
+            let myChart = this.$echarts.init(document.getElementById(divid));
             let aa = {
+                title: {
+                    text: data.title,
+                    left: 'center'
+                },
                 tooltip: {
                     trigger: 'axis'
-                },
-                legend:{
-                    icon: 'rect',
-                    data: this.chartData1.legend
                 },
                 toolbox:{
                     feature:{
@@ -272,15 +289,15 @@ export default {
                 grid:{
                     left: '4%',
                     right: '4%',
-                    bottom: '15%'
+                    bottom: '20%'
                 },
                 xAxis: [
                     {
                         type: 'category',
-                        data: this.chartData1.xAxis,
+                        data: data.xAxis,
                         axisLabel: {
                             interval: 0,
-                            rotate: 45,
+                            rotate: 35,
                             fontSize: 10
                         }
                     }
@@ -290,8 +307,9 @@ export default {
                         type: 'value'
                     }
                 ],
-                series: this.chartData1.series
+                series: data.series
             };
+            console.log()
             myChart.setOption(aa)
         },
         chart2(){

@@ -84,7 +84,7 @@ const tbCols = [
         title: '序号',
         searchable: true,
         sortable: true,
-        width: '60'
+        width: '80'
     },
     {
         colname: '7',
@@ -110,7 +110,7 @@ const tbCols = [
     {
         colname: '5',
         title: 'CAS号',
-        searchable: false,
+        searchable: true,
         sortable: false,
         width: '140'
     },

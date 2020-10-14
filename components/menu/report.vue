@@ -61,62 +61,73 @@
                 <div id="myChart_test8" class=charts_test1></div>
             </el-col>
             <el-col :span=8 style="padding: 8px 12px;">
-                <div id="myChart_test9" class=charts_test1></div>
+                <div id="myChart_test9" class=charts_test2></div>
             </el-col>
         </el-row>
         <el-row>
             <el-col :span=8 style="padding: 8px 12px;">
-                <div id="myChart_test10" class=charts_test1></div>
+                <div id="myChart_test10" class=charts_test2></div>
             </el-col>
             <el-col :span=8 style="padding: 8px 12px;">
-                <div id="myChart_test11" class=charts_test1></div>
+                <div id="myChart_test11" class=charts_test2></div>
             </el-col>
             <el-col :span=8 style="padding: 8px 12px;">
-                <div id="myChart_test12" class=charts_test1></div>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span=8 style="padding: 8px 12px;">
-                <div id="myChart_test13" class=charts_test1></div>
-            </el-col>
-            <el-col :span=8 style="padding: 8px 12px;">
-                <div id="myChart_test14" class=charts_test1></div>
-            </el-col>
-            <el-col :span=8 style="padding: 8px 12px;">
-                <div id="myChart_test15" class=charts_test1></div>
+                <div id="myChart_test12" class=charts_test2></div>
             </el-col>
         </el-row>
         <el-row>
             <el-col :span=8 style="padding: 8px 12px;">
-                <div id="myChart_test16" class=charts_test1></div>
+                <div id="myChart_test13" class=charts_test2></div>
             </el-col>
             <el-col :span=8 style="padding: 8px 12px;">
-                <div id="myChart_test17" class=charts_test1></div>
+                <div id="myChart_test14" class=charts_test2></div>
             </el-col>
             <el-col :span=8 style="padding: 8px 12px;">
-                <div id="myChart_test18" class=charts_test1></div>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span=8 style="padding: 8px 12px;">
-                <div id="myChart_test19" class=charts_test1></div>
-            </el-col>
-            <el-col :span=8 style="padding: 8px 12px;">
-                <div id="myChart_test20" class=charts_test1></div>
-            </el-col>
-            <el-col :span=8 style="padding: 8px 12px;">
-                <div id="myChart_test21" class=charts_test1></div>
+                <div id="myChart_test15" class=charts_test2></div>
             </el-col>
         </el-row>
         <el-row>
             <el-col :span=8 style="padding: 8px 12px;">
-                <div id="myChart_test22" class=charts_test1></div>
+                <div id="myChart_test16" class=charts_test2></div>
             </el-col>
             <el-col :span=8 style="padding: 8px 12px;">
-                <div id="myChart_test23" class=charts_test1></div>
+                <div id="myChart_test17" class=charts_test2></div>
             </el-col>
             <el-col :span=8 style="padding: 8px 12px;">
-                <div id="myChart_test24" class=charts_test1></div>
+                <div id="myChart_test18" class=charts_test2></div>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test19" class=charts_test2></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test20" class=charts_test2></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test21" class=charts_test2></div>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test22" class=charts_test2></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test23" class=charts_test2></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test24" class=charts_test2></div>
+            </el-col>
+        </el-row>
+<el-row>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test25" class=charts_test2></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test26" class=charts_test2></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test27" class=charts_test2></div>
             </el-col>
         </el-row>
     </div>
@@ -135,7 +146,6 @@
     height: 390px;
     margin-left: auto;
     margin-right: auto;
-    float: right;
   }
 
 </style>
@@ -1010,16 +1020,6 @@ export default {
                         itemStyle: {
                             color: '#c23531'
                         },
-                        markPoint:{
-                            data: [
-                                {
-                                    type: 'max', name: '最大值'
-                                },
-                                {
-                                    type: 'min', name: '最小值'
-                                }
-                            ]
-                        },
                         showSymbol: false
                     },
                 ]
@@ -1123,7 +1123,7 @@ export default {
         },
         exportWord () {
             let that = this;
-            JSZipUtils.getBinaryContent("/docx/rt1.docx", function(error, content) {
+            JSZipUtils.getBinaryContent("/docx/specs.docx", function(error, content) {
                 if (error) {
                     throw error;
                 }
@@ -1143,7 +1143,6 @@ export default {
                 doc.attachModule(imageModule);
                 doc.loadZip(zip);  
 
-                console.log(that.docx_data);
                 doc.setData(that.docx_data);
             
                 try {

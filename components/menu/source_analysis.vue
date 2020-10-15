@@ -63,7 +63,7 @@ export default {
             datelist: [],
             chartData1: [],
             divs: [],
-            color: ['#c23531','#2f4554', '#61a0a8', '#d48265', '#91c7ae','#749f83',  '#ca8622', '#bda29a','#6e7074', '#546570', '#c4ccd3'],
+            color: ['#0100fe','#03ffff', '#ec7c31', '#7501e8', '#9c007a','#c1c1ff',  '#86e3bf', '#f6f784','#ceccce', '#ffc0db'],
             chartData2: {
                 legend: [],
                 xAxis: [],
@@ -327,6 +327,7 @@ export default {
                         saveAsImage: {}
                     }
                 },
+                color: this.color,
                 grid:{
                     left: '4%',
                     right: '4%'
@@ -358,6 +359,7 @@ export default {
                         saveAsImage: {}
                     }
                 },
+                color: this.color,
                 grid:{
                     left: '4%',
                     right: '4%'
@@ -398,6 +400,7 @@ export default {
                         saveAsImage: {}
                     }
                 },
+                color: this.color,
                 legend:{
                     bottom: 'bottom',
                     data: this.chartData4.legend

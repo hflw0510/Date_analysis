@@ -299,6 +299,7 @@ export default {
                         saveAsImage: {}
                     }
                 },
+                color: ['#5d9cd3','#eb7b2e','#ff3299','#9369fe','#9369fe','#03ffff','#dfeb00','#ceccce'],
                 grid:{
                     left: '4%',
                     right: '4%'
@@ -331,6 +332,7 @@ export default {
                         saveAsImage: {}
                     }
                 },
+                color: ['#5d9cd3','#eb7b2e','#ff3299','#9369fe','#9369fe','#03ffff','#dfeb00','#ceccce'],
                 grid:{
                     left: '4%',
                     right: '4%'

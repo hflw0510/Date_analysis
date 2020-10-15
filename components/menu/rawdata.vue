@@ -1,6 +1,6 @@
 <template>
     <div>
-        <simpletable ref="st" :props="props" @refresh="refresh" @dtc="dtc" @search="server_search" @select="spec_select" @analysis="Analysis"></simpletable>
+        <simpletable ref="st" :props="props" @refresh="refresh" @dtc="dtc" @search="server_search" @select="spec_select" @select_ppb="ppb_select" @analysis="Analysis"></simpletable>
         <el-dialog
             title="因子选择"
             :visible.sync="centerDialogVisible"
@@ -28,6 +28,19 @@
                 </el-form-item>
             </el-form>
         </el-dialog>
+        <el-dialog
+            title="单位选择"
+            :visible.sync="ppbDialogVisible"
+            width="20%"
+            center
+        >
+        <el-switch
+            v-model="noppb"
+            active-text="μg/m³"
+            inactive-text="ppb"
+            @change="ppb_click">
+        </el-switch>
+        </el-dialog>
     </div>
 </template>
 <script>
@@ -35,6 +48,8 @@ import simpletable from '~/components/util/simpletable';
 import checkboxes from '~/components/util/checkboxes';
 import hosts from '~/assets/config/hosts'
 import rpc from '~/assets/js/rpc'
+import NP from 'number-precision';
+NP.enableBoundaryChecking(false);
 
 const tbBtns = [
     {
@@ -43,6 +58,13 @@ const tbBtns = [
         place: 'top-end',
         btntype: 'warning',
         btnicon: 'document-add'
+    },
+    {
+        key: 'select_ppb',
+        content: '单位选择',
+        place: 'top-end',
+        btntype: 'primary',
+        btnicon: 'set-up'
     },
     {
         key: 'analysis',
@@ -95,6 +117,7 @@ export default {
                 name: '',
                 factors: 4
             },
+            noppb: false,
             cbsgroups:{},
             search_date: '',
             specs:{},
@@ -102,6 +125,7 @@ export default {
             spec_position: {},
             centerDialogVisible : false,
             analysisDialogVisible: false,
+            ppbDialogVisible: false,
             spec_type_data: {},
             tableData
         }
@@ -120,6 +144,13 @@ export default {
         spec_select(){
             this.centerDialogVisible = true;
         },
+        ppb_select(){
+            this.ppbDialogVisible = true;
+        },
+        ppb_click(){
+            this.ppbDialogVisible = false;
+            this.server_search(this.search_date);
+        },
         checkboxes_event(d){
             this.spec_selects = [];
             d.forEach(v => {
@@ -132,7 +163,7 @@ export default {
                 this.spec_position[v] = i;
                 this.props.tbCols.push({
                     colname:  (++i).toString(),
-                    title: this.specs[v],
+                    title: this.specs[v][13] + ') ' + this.specs[v][7],
                     searchable: false,
                     sortable: false,
                     width: i==this.spec_selects.length?'':'100'
@@ -146,6 +177,7 @@ export default {
             let i, data={};
             d.forEach(v => {
                 if (v[1].length==10) v[1] = v[1] + " 00:00:00";
+                if (this.noppb) v[3] = this.get_μg(v[2], v[3]);
                 if (!data.hasOwnProperty(v[1])){
                     data[v[1]] = {};
                 }
@@ -166,7 +198,7 @@ export default {
                             x.push(data[ct][v]);
                         }
                         else{
-                            x.push('');
+                            x.push(0);
                         }
                     });
                 tableData.unshift(x);
@@ -244,6 +276,9 @@ export default {
                 })
             }
         },
+        get_μg(spec_id, value){
+            return NP.divide(NP.times(value, this.specs[spec_id][9]), 22.4).toFixed(4);
+        },
         spec_type_load(){
             rpc(hosts.baseHost, 'bi.list', 'spec_type', '', (d) => {
                 if(d.result){
@@ -281,7 +316,7 @@ export default {
                                 title: v[7]
                             }
                         );
-                        this.specs[v[0]] = v[13] + ') ' + v[7];
+                        this.specs[v[0]] = v;
                     });
                 }
             })

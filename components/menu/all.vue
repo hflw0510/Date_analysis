@@ -308,7 +308,7 @@ export default {
                         data: this.chartData1.bar,
                         itemStyle: {
                             normal: {
-                                color: (params) => ['#5a9dd7','#ee751d','#ff339c','#9d78ff','#58ff25','#00fff7'][params.dataIndex]
+                                color: (params) => ['#5a9dd7','#ee751d','#ff339c','#9d78ff','#58ff25','#00fff7', '#c1c1ff'][params.dataIndex]
                             }
                         }
                     },
@@ -317,6 +317,9 @@ export default {
                         type: 'line',
                         yAxisIndex: 1,
                         data: this.chartData1.line,
+                        lineStyle: {
+                            color: '#ceccce'
+                        },
                         markPoint:{
                             data: [
                                 {
@@ -326,6 +329,11 @@ export default {
                                     type: 'min', name: '最小值'
                                 }
                             ],
+                            symbol: "arrow",
+                            symbolSize: 20,
+                            label: {
+                                show: false
+                            }
                             
                         }
                     }
@@ -340,7 +348,7 @@ export default {
                     text: 'VOCs组成特征',
                     left: 'center'
                 },
-                color: ['#5a9dd7','#ee751d','#ff339c','#9d78ff','#58ff25','#00fff7'],
+                color: ['#5a9dd7','#ee751d','#ff339c','#9d78ff','#58ff25','#00fff7', '#c1c1ff'],
                 tooltip:{
                     trigger: 'item',
                     formatter: '{a} <br/>{b} : {c} ({d}%)'

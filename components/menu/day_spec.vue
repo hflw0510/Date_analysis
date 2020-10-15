@@ -42,7 +42,8 @@
                 <el-switch
                     v-model="freon"
                     active-text="VOCs/氟利昂"
-                    inactive-text="VOCs">
+                    inactive-text="VOCs"
+                    @change="searchClick">
                 </el-switch>
             </el-col>
         </el-row>
@@ -190,7 +191,6 @@ export default {
         get_chartData1(data, data_freon) {
             let k, t, i, dtlist = [];
             this.chartData = [];
-
             for (k in data) {
                 let d = ({
                     title: k,
@@ -199,42 +199,53 @@ export default {
                     stdevp: []
                 });
 
-                let data1 = {};
-                for (t in data[k]){
-                    let st = t;
-                    if (st.length==10) st = st + " 00:00:00";
-                    st = new Date(st);
-                    i = st.getHours();
-                    if (!(i in data1))
-                        data1[i] = [];
+                if (this.spec_iscalc[this.spec_id]){
 
-                    if (this.freon){
-                        if (t in data_freon){
-                            if (data_freon[t] > 0){
-                                data1[i].push(NP.divide(data[k][t], data_freon[t]).toFixed(4));
-                                continue;
+                    let data1 = {};
+                    for (t in data[k]){
+                        let st = t;
+                        if (st.length==10) st = st + " 00:00:00";
+                        st = new Date(st);
+                        i = st.getHours();
+                        if (!(i in data1))
+                            data1[i] = [];
+
+                        if (this.freon){
+                            if (t in data_freon){
+                                if (data_freon[t] > 0){
+                                    data1[i].push(NP.divide(data[k][t], data_freon[t]).toFixed(4));
+                                    continue;
+                                }
                             }
                         }
+                        data1[i].push(data[k][t]);
                     }
-                    data1[i].push(data[k][t]);
-                }
 
-                for (i=0;i<24;i++) {
-                    if (i in data1) {
-                        if (this.freon) {
-                            d.line.push(this.get_average(data1[i]));
+                    for (i=0;i<24;i++) {
+                        if (i in data1) {
+                            if (this.freon) {
+                                d.line.push(this.get_average(data1[i]));
+                            }
+                            else if (this.spec_iscalc[this.spec_id] == 0) {
+                                d.line.push(data1[i].reduce((a, v) => NP.plus(a, v), 0));
+                            }
+                            else {
+                                d.line.push(this.get_average(data1[i]));
+                                d.stdevp.push(this.get_stdevp(data1[i]));
+                            }
+                            dtlist.push(i);
                         }
-                        else if (this.spec_iscalc[this.spec_id] == 0) {
-                            d.line.push(data1[i].reduce((a, v) => NP.plus(a, v), 0));
-                        }
-                        else {
-                            d.line.push(this.get_average(data1[i]));
-                            d.stdevp.push(this.get_stdevp(data1[i]));
-                        }
-                        dtlist.push(i);
                     }
+                    this.chartData.push(d);
                 }
-                this.chartData.push(d);
+                else{
+                    let da1;
+                    da1 = Object.keys(data[k]).map(v => [v, data[k][v]]).sort((x, y) => this.dateCheck(y[0], x[0]));
+
+                    d.xAxis = da1.map(v => v[0]);
+                    d.line = da1.map(v => v[1]);
+                    this.chartData.push(d);
+                }
             }
             this.chart1('myChart4_1', this.chartData[0]);
 
@@ -257,15 +268,17 @@ export default {
         },
         checkboxes_event(d){
             this.spec_selects = [];
+           
             d.forEach(v => {
                 if (v.length){
                     this.spec_selects = this.spec_selects.concat(v);
                 }
             });
             if (this.spec_selects.length == 1){
-                this.spec = this.specs[this.spec_selects[0]];
+                this.spec = this.specs[this.spec_selects[0]][7];
                 this.spec_id = this.spec_selects[0];
             }
+            
             this.centerDialogVisible = false;
         },
         spec_type_load(){
@@ -354,7 +367,7 @@ export default {
                         },
                         smooth: true,
                         areaStyle:{
-                            color: '#C0C0C0',
+                            color: '#5a9dd7',
                             origin: 'start',
                             opacity: 0.5
                         },
@@ -382,7 +395,7 @@ export default {
                         data: data.line,
                         symbolSize: 6,
                         itemStyle: {
-                            color: '#c23531'
+                            color: '#5a9dd7'
                         },
                         markPoint:{
                             data: [
@@ -424,6 +437,18 @@ export default {
                 };
             };
             return fmt;
+        },
+        dateCheck(d1, d2) {
+            if (typeof(d1) == 'undefined') return -1;
+            if (!(d1 instanceof Date)){
+                if (d1.length==10) d1 = d1 + " 00:00:00";
+                d1 = new Date(d1)
+            };
+            if (!(d2 instanceof Date)){
+                if (d2.length==10) d2 = d2 + " 00:00:00";
+                d2 = new Date(d2)
+            };
+            return parseInt((d2.getTime() - d1.getTime())/(3600*1000))
         }
     },
     components: {

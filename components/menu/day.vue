@@ -33,7 +33,8 @@
                 <el-switch
                     v-model="freon"
                     active-text="VOCs/氟利昂"
-                    inactive-text="VOCs">
+                    inactive-text="VOCs"
+                    @change="searchClick">
                 </el-switch>
             </el-col>
         </el-row>
@@ -160,6 +161,7 @@ export default {
         },
         get_chartData1(data, data_freon) {
             let k, t, i;
+            let color = ['#5a9dd7', '#ee751d', '#ff339c', '#9d78ff', '#58ff25', '#00fff7', '#c1c1ff'];
             this.chartData = [];
 
             for (k in data) {
@@ -214,7 +216,7 @@ export default {
             }
             console.log(this.chartData);
             this.chartData.forEach((v, i) => {
-                this.chart1('myChart3_'+ (i+1), v);
+                this.chart1('myChart3_'+ (i+1), v, color[i]);
             });
 
         },
@@ -249,7 +251,7 @@ export default {
                 }
             })
         },
-        chart1(divid, data){
+        chart1(divid, data, color){
             let myChart = this.$echarts.init(document.getElementById(divid));
             let aa = {
                 title: {
@@ -289,7 +291,7 @@ export default {
                         },
                         smooth: true,
                         areaStyle:{
-                            color: '#C0C0C0',
+                            color: color,
                             origin: 'start',
                             opacity: 0.5
                         },
@@ -317,7 +319,7 @@ export default {
                         data: data.line,
                         symbolSize: 6,
                         itemStyle: {
-                            color: '#c23531'
+                            color: color
                         },
                         markPoint:{
                             data: [

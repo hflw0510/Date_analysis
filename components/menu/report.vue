@@ -574,7 +574,7 @@ export default {
                 yAxis: [
                     {
                         type: 'value',
-                        name: this.noppb?'浓度(μg/m³)':'浓度(ppb)'
+                        name: '浓度(ppb)'
                     },
                     {
                         type: 'value',
@@ -588,7 +588,7 @@ export default {
                         data: this.chartData1.bar,
                         itemStyle: {
                             normal: {
-                                color: (params) => ['#5a9dd7','#ee751d','#ff339c','#9d78ff','#58ff25','#00fff7'][params.dataIndex]
+                                color: (params) => ['#5a9dd7','#ee751d','#ff339c','#9d78ff','#58ff25','#00fff7', '#c1c1ff'][params.dataIndex]
                             }
                         }
                     },
@@ -596,7 +596,10 @@ export default {
                         name: '标准差',
                         type: 'line',
                         yAxisIndex: 1,
-                        data: this.chartData1.line
+                        data: this.chartData1.line,
+                        lineStyle: {
+                            color: '#ceccce'
+                        }
                     }
                 ]
             };
@@ -616,7 +619,7 @@ export default {
                     text: 'VOCs组成特征',
                     left: 'center'
                 },
-                color: ['#5a9dd7','#ee751d','#ff339c','#9d78ff','#58ff25','#00fff7','#c23531','#2f4554', '#61a0a8'],
+                color: ['#5a9dd7','#ee751d','#ff339c','#9d78ff','#58ff25','#00fff7', '#c1c1ff'],
                 tooltip:{
                     trigger: 'item',
                     formatter: '{a} <br/>{b} : {c} ({d}%)'
@@ -777,7 +780,7 @@ export default {
                 tooltip: {
                     trigger: 'axis'
                 },
-                color: ['#5d9cd3','#eb7b2e','#ff3299','#9369fe','#9369fe','#03ffff','#dfeb00','#c23531','#2f4554', '#61a0a8'],
+                color: ['#5d9cd3','#eb7b2e','#ff3299','#9369fe','#9369fe','#03ffff','#dfeb00','#ceccce'],
                 legend:{
                     icon: 'pin',
                     bottom: "0%",
@@ -817,7 +820,7 @@ export default {
                 tooltip: {
                     trigger: 'axis'
                 },
-                color: ['#5d9cd3','#eb7b2e','#ff3299','#9369fe','#9369fe','#03ffff','#dfeb00'],
+                color: ['#5d9cd3','#eb7b2e','#ff3299','#9369fe','#9369fe','#03ffff','#dfeb00','#ceccce'],
                 legend:{
                     icon: 'pin',
                     bottom: "0%",
@@ -911,6 +914,7 @@ export default {
         },
         get_chartData7() {
             let k, d, chartData = [], chartData1 = [];
+            let color = ['#5a9dd7', '#ee751d', '#ff339c', '#9d78ff', '#58ff25', '#00fff7', '#c1c1ff']
 
             //this.spec_type_hours_freon
 
@@ -947,15 +951,15 @@ export default {
             });
 
             chartData.forEach((v, i) => {
-                this.chart7('myChart_test' + (i+9), i+9, v);
+                this.chart7('myChart_test' + (i+9), i+9, v, color[i]);
             });
 
             chartData1.forEach((v, i) => {
-                this.chart7('myChart_test' + (i+9+chartData.length), (i+18), v);
+                this.chart7('myChart_test' + (i+9+chartData.length), (i+18), v, color[i]);
             });
 
         },
-        chart7(divid, i, data){
+        chart7(divid, i, data, color){
             let myChart = this.$echarts.init(document.getElementById(divid));
             let aa = {
                 title: {
@@ -990,7 +994,7 @@ export default {
                         },
                         smooth: true,
                         areaStyle:{
-                            color: '#C0C0C0',
+                            color: color,
                             origin: 'start',
                             opacity: 0.5
                         },
@@ -1018,7 +1022,7 @@ export default {
                         data: data.line,
                         symbolSize: 6,
                         itemStyle: {
-                            color: '#c23531'
+                            color: color
                         },
                         showSymbol: false
                     },

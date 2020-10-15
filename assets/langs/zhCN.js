@@ -46,7 +46,10 @@ const zhCN = {
         'source': '源解析',
         'source_analysis': '源解析结果',
         'excel': '物种库导入',
-        'report': '科学报告'
+        'report': '科学报告',
+        'input_log': '导入日志',
+        'operation_log': '操作日志',
+        'error_log': '错误日志'
     },
     table: {
         'edit': '编辑',

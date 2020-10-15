@@ -38,7 +38,9 @@ const m = [
             'menu.spec_type': '',
             'menu.species': '',
             'menu.excel': '',
-            'menu.log': ''
+            'menu.operation_log': '',
+            'menu.input_log': '',
+            'menu.error_log': ''
         }
     },
     {

@@ -119,7 +119,7 @@
                 <div id="myChart_test24" class=charts_test2></div>
             </el-col>
         </el-row>
-<el-row>
+        <el-row>
             <el-col :span=8 style="padding: 8px 12px;">
                 <div id="myChart_test25" class=charts_test2></div>
             </el-col>

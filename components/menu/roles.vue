@@ -33,6 +33,7 @@
 </template>
 <script>
 import hosts from '~/assets/config/hosts'
+import privileges from '~/assets/config/privileges'
 import simpletable from '~/components/util/simpletable';
 import rpc from '~/assets/js/rpc'
 
@@ -138,40 +139,11 @@ export default {
     created() {
         this.load();
 
-        let bi, bs, i, s;
-        bi = {
-            device: '设备',
-            department: '部门',
-            roles: '角色',
-            users: '用户',
-            species: '物种库',
-            spec_type: '物种类型'
-        };
-        bs = {
-            'search.Get_data' : '图表查询'
-        };
-        for (i in bi){
-            this.data.push({
-                key: i + '.Create',
-                label: bi[i] + '-新建'
-            });
-            this.data.push({
-                key: i + '.Modify',
-                label: bi[i] + '-编辑'
-            });
-            this.data.push({
-                key: i + '.List',
-                label: bi[i] + '-读取'
-            });
-            this.data.push({
-                key: i + '.Delete',
-                label: bi[i] + '-删除'
-            });
-        }
-        for (s in bs){
+        let s;
+        for (s in privileges){
             this.data.push({
                 key: s,
-                label: bs[s]
+                label: privileges[s]
             });
         }
 	},

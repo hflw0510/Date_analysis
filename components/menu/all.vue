@@ -111,6 +111,7 @@ export default {
                         if(d.result.length){
                             let data={}, data1={}, data2={};
                             d.result.forEach(v => {
+                                let val = v[3];
                                 if (this.noppb) v[3] = this.get_μg(v[2], v[3]);
 
                                 if (!data.hasOwnProperty(v[10])){
@@ -128,17 +129,9 @@ export default {
 
                                 if (v[8] > 0) {
                                     if (!data2.hasOwnProperty(v[5])){
-                                        data2[v[5]] = {};
+                                        data2[v[5]] = 0;
                                     }
-                                    if (!data2[v[5]].hasOwnProperty(v[1])){
-                                        data2[v[5]][v[1]] = 0;
-                                    }
-                                    let val;
-                                    if (this.noppb)
-                                        val = v[3];
-                                    else
-                                        val = this.get_μg(v[2], v[3]);
-                                    data2[v[5]][v[1]] = NP.plus(data2[v[5]][v[1]], NP.times(val, v[8]));
+                                    data2[v[5]] = NP.plus(data2[v[5]], NP.times(val, v[8]));
                                 }
                             });
 
@@ -220,13 +213,7 @@ export default {
             this.chartData4.xAxis = [];
             this.chartData4.bar = [];
 
-            for (k in data){
-                d.push([
-                    k,
-                    this.get_average(Object.values(data[k]))
-                ])
-            }
-            d.sort((x, y) => y[1] - x[1]);
+            d = Object.keys(data).map(v => [v, data[v]]).sort((x, y) => y[1] - x[1]);
             d.splice(0, 10).forEach(v => {
                 this.chartData4.xAxis.push(v[0]);
                 this.chartData4.bar.push(v[1]);

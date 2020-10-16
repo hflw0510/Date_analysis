@@ -14,20 +14,20 @@
                 >
                 </el-date-picker>
                 <el-button-group>
-                    <el-tooltip effect="dark" :content="$t('utilSimpletable.search')" placement="top">
+                    <el-tooltip effect="dark" content="生成数据" placement="top">
                         <el-button type="primary" icon="el-icon-search" @click="search()" v-loading.fullscreen.lock="fullscreenLoading"></el-button>
                     </el-tooltip>
                     <el-tooltip effect="dark" :content="$t('utilSimpletable.searchreset')" placement="top">
                         <el-button type="primary" icon="el-icon-delete" @click="search_date='';"></el-button>
                     </el-tooltip>
-                    <el-button type="primary" @click="work" :disabled="btn">确定</el-button>
+                    <el-button type="primary" @click="work" :disabled="btn">下载</el-button>
                 </el-button-group>
             </el-col>
         </el-row>
         <el-row>
-            <el-col :span=24 style="padding: 8px 12px;">
+            <el-col :span=24 style="padding: 8px 12px; height:480px">
                 <div>
-                    <el-input type="textarea" v-model="mytext" :rows="30"></el-input>
+                    <el-input type="textarea" v-model="mytext" :rows="30" style="display:none"></el-input>
                 </div>
             </el-col>
         </el-row>
@@ -139,6 +139,7 @@
     height: 390px;
     margin-left: auto;
     margin-right: auto;
+    display: none
   }
 
 .charts_test2 {
@@ -146,6 +147,7 @@
     height: 390px;
     margin-left: auto;
     margin-right: auto;
+    display:none
   }
 
 </style>
@@ -165,6 +167,7 @@ NP.enableBoundaryChecking(false);
 export default {
     data() {
         return {
+            tip: '',
             btn: true,
             spec_type_data:{},
             specs: {},
@@ -331,7 +334,11 @@ export default {
             this.docx_data["ofp_top1_per"] = ofp_top1_per +'%';
             ret.push(this.docx_data["ofp_top1"] + ' 是臭氧生成趋势最高的VOCs物种， 贡献了 ' +  this.docx_data["ofp_top1_per"]);
 
-            this.mytext = ret.join('\n');
+            //this.mytext = ret.join('\n');
+            this.$message({
+                message: '数据处理完毕，请点击下载。',
+                type: 'success'
+            })
         },
         search(){
             this.fullscreenLoading = true;

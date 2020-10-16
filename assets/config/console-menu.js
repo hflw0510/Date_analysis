@@ -42,22 +42,6 @@ const m = [
             'menu.input_log': '',
             'menu.error_log': ''
         }
-    },
-    {
-        'index': 'console.test',
-        'icon': 'el-icon-menu',
-        'sub': {
-            'console.test': {
-                key1:'11test'
-            },
-            'list.mylist': '',
-            'list.mysearch': '',
-            'console.instance': '22',
-            'console.echarts' : '',
-            'console.docx' : '',
-            'console.excel': ''
-        }
-        
     }
 ]
 

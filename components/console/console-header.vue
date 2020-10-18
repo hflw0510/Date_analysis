@@ -1,7 +1,7 @@
 <template>
     <el-row>
         <el-col :span="8">
-            <div class="header-left"><img src="/images/logo.png" alt="Admin Pro">在线源数据分析系统</div>
+            <div class="header-left"><img src="/images/logo.png" alt="Admin Pro">北京鹏宇昌亚在线源解析系统</div>
         </el-col>
         <el-col :span="16">
             <div class="header-right">

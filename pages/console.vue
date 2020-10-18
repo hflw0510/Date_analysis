@@ -26,7 +26,7 @@
 
     .console-header {
         padding: 0px;
-        background-color: #d6e9ff;
+        background-color: #bcd9fb;
         margin: 0px;
     }
     .console-header-cheader {

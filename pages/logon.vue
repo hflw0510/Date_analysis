@@ -9,7 +9,7 @@
                 <div class="logon-main-logo">
                     <img src="/images/logo.png" alt="logo">
                 </div>
-                <div class="logon-main-title">Admin Pro 在线源数据分析系统</div>
+                <div class="logon-main-title">北京鹏宇昌亚在线源解析系统</div>
                 <div class="logon-main-user">
                     <el-input placeholder="请输入用户名" prefix-icon="el-icon-user" v-model="user" ref="user"></el-input>
                 </div>
@@ -23,7 +23,7 @@
         </el-container>
 
         <el-footer class="logon-footer" height="56px">
-            Copyright © 2020 北京AdminPro科技有限公司
+            Copyright © 2020 北京鹏宇昌亚环保科技有限公司
         </el-footer>
     </el-container>
 </template>

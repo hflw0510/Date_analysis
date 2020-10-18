@@ -4,7 +4,7 @@
         <el-dialog
             title="设备管理"
             :visible.sync="centerDialogVisible"
-            width="40%"
+            width="70%"
             center
         >
             <el-form ref="form" :model="form" :rules="rules" ret="form" label-width="80px" label-position="left">

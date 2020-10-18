@@ -20,7 +20,7 @@
                     <el-input v-model="form.name"></el-input>
                 </el-form-item>
                 <el-form-item label="解析因子">
-                    <el-slider v-model="form.factors" show-input :min="1"></el-slider>
+                    <el-slider v-model="form.factors" show-input :min="1" :max="20"></el-slider>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="Source_Analysis">确定</el-button>

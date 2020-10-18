@@ -1,6 +1,6 @@
 const m = [
     {
-        'index': 'console.overview',
+        'index': 'menu.overview',
         'icon': 'el-icon-info',
         'props': '1214',
         'sub': {}

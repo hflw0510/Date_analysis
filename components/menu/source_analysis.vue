@@ -3,12 +3,15 @@
         <el-row>
             <el-col :span=24 style="padding: 8px 12px;">
                 <div v-for="(item, index) in divs" :key="index">
+                    <el-select v-model="values[index]" placeholder="请选择" style="padding: 8px;">
+                        <el-option v-for="item in options[index]" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                    </el-select>
                     <div :id="item" class=charts7_2></div>
                 </div>
             </el-col>
         </el-row>
         <el-row>
-            <el-col :span=24 style="padding: 8px 12px;">
+            <el-col :span=24 style="padding: 8px 12px ;">
                 <div :id="'myChart7_'+props[0]+'_2'" class=charts7_1></div>
             </el-col>
         </el-row>
@@ -53,13 +56,38 @@ export default {
     props: ['props'],
     data () {
         return {
+            values: [],
+            options:[],
+            options_t: [
+                {
+                    value: 1,
+                    label: '生物源'
+                },
+                {
+                    value: 2,
+                    label: '汽车尾气排放'
+                },
+                {
+                    value: 3,
+                    label: '油气挥发性'
+                },
+                {
+                    value: 4,
+                    label: '有机溶剂使用'
+                },
+                {
+                    value: 5,
+                    label: '未知'
+                }
+            ],
             search_date: '',
             noppb: false,
             fullscreenLoading: false,
             specs:{},
+            specs_name: {},
             spec_selects: [],
             centerDialogVisible : false,
-            spec_types: [],
+            spec_types_name: {},
             datelist: [],
             chartData1: [],
             divs: [],
@@ -81,14 +109,13 @@ export default {
         }
     },
     mounted() {
-        //this.spec_type_load();
-        this.spec_load();
+        this.spec_type_load();
+        //this.spec_load();
     },
     methods: {
         searchClick() {
             this.fullscreenLoading = false;
             let id = this.props[0];
-            console.log(this.divs)
             rpc(hosts.baseHost, 'Bi.Load', 'source_analysis', id, (d) => {
                 if(d.result){
                     if(Object.keys(d.result).length){
@@ -139,14 +166,18 @@ export default {
         get_chartData1(spec_id, data) {
             let k, d, divid;
             this.divs = [];
+            this.options = [];
+            this.values = []
             this.chartData1 = [];
 
             data.forEach((v, index) => {
                 divid = 'myChart7_'+this.props[0]+'_1_' + index;
                 this.divs.push(divid);
+                this.options.push(this.options_t);
+                this.values.push(this.get_value(spec_id, v)); 
                 d = {
                     title : '因子' + (index+1),
-                    xAxis : spec_id.map(v => this.specs[v]),
+                    xAxis : spec_id.map(v => this.specs[v][7]),
                     series : [{
                         name: '因子' + (index+1),
                         type: 'bar',
@@ -162,7 +193,6 @@ export default {
                 };
                 this.chartData1.push(d);
             });
-            console.log(this.chartData1);
             this.$nextTick(() => {
                 this.divs.forEach((v, i) => {
                     this.chart1(v, this.chartData1[i]);
@@ -228,6 +258,63 @@ export default {
             });
             this.chart4();
         },
+        get_value(spec_id, data){
+            let arr = spec_id.map((v, index) => [v, data[index]]).sort((x, y) => y[1] - x[1]);
+
+            let v1 = 38;
+            if (v1 in this.specs_name){
+                if (arr[0][0] == this.specs_name[v1])
+                    return 1;
+            }
+
+            let total = data.reduce((a, v) => NP.plus(a, v), 0);
+            let v2_type = this.get_spec_type_percent('烷烃', spec_id, data, total);
+            let v2 = 6;
+            if (v2 in this.specs_name){
+                if (arr[0][0] == this.specs_name[v2] && v2_type > 40)
+                    return 2;
+            }
+
+            let v3 = this.get_spec_percent([42, 43, 44, 45, 46], spec_id, data, total);
+            if (v2_type > 20 && v3 > 20)
+                return 3;
+            
+            let v3_1 = this.get_spec_percent([102, 93, 97], spec_id, data, total);
+            let v3_2 = this.get_spec_percent([43, 44, 45, 46], spec_id, data, total);
+            if (v3_1 > 30 && v3_2 > 20)
+                return 4;
+
+            return 5;
+
+        },
+        get_spec_type_percent(spec_type_name, spec_id, data, total){
+            let spec_type_id, count = 0;
+            if (spec_type_name in this.spec_types_name){
+                spec_type_id = this.spec_types_name[spec_type_name];
+            }
+            else
+                return 0;
+
+            spec_id.forEach((v, index) => {
+                if (v in this.specs){
+                    if (this.specs[v][3] == spec_type_id){
+                        count = NP.plus(count, data[index]);
+                    }
+                }
+            });
+            return this.get_percent(count, total);
+        },
+        get_spec_percent(specs, spec_id, data, total){
+            let count = 0;
+            specs.forEach(v => {
+                spec_id.forEach((w, index) => {
+                    if (this.specs_name[v] == w){
+                        count = NP.plus(count, data[index]);
+                    }
+                })
+            });
+            return this.get_percent(count, total);
+        },
         get_percent(n, t){
             return t<=0?0:Math.round(NP.divide(n, t) * 10000) / 100;
         },
@@ -256,8 +343,9 @@ export default {
             rpc(hosts.baseHost, 'bi.list', 'spec_type', '', (d) => {
                 if(d.result){
                     d.result.forEach((v, i) => {
-                        this.spec_types.push(v[3]);
+                        this.spec_types_name[v[3]] = v[0];
                     });
+                    this.spec_load();
                 }
             })
         },
@@ -265,7 +353,8 @@ export default {
             rpc(hosts.baseHost, 'bi.list', 'species', '', (d) => {
                 if(d.result){
                     d.result.forEach(v => {
-                        this.specs[v[0]] = v[7];
+                        this.specs[v[0]] = v;
+                        this.specs_name[v[13]] = v[0];
                     });
                     this.searchClick();
                 }
@@ -309,7 +398,6 @@ export default {
                 ],
                 series: data.series
             };
-            console.log()
             myChart.setOption(aa)
         },
         chart2(){

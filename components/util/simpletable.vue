@@ -92,12 +92,13 @@
                     @selection-change="handleSelectionChange"
                     @sort-change="handleTableSortChange"
                     ref="myTable"
-                    stripe
+                    :stripe="row_color.length?false:true"
                     :data="td"
                     :default-sort = "{prop: 'date', order: 'ascending'}"
                     :height="tableHeight + 'px'"
                     :border="isBorder"
                     :show-summary="isSum"
+                    :row-style="tableRowStyle"
                     style="width: 100%"
                 >
                     <el-table-column
@@ -173,6 +174,20 @@
     </div>
 </template>
 
+<style>
+    .el-table .rowa {
+        background: #ffffff;
+    }
+
+    .el-table .rowb {
+        background: #989797;
+    }
+
+    .el-table__footer-wrapper tbody td {
+        background-color:#9ae2f4;
+    }
+</style>
+
 <script>
 import XLSX from 'xlsx';
 import expand from '~/components/util/expand'
@@ -193,6 +208,7 @@ export default {
             isDown: this.props['isDown'],
             isInfo: this.props['isInfo'],
             isSum: this.props['isSum'],
+            row_color: this.props['row_color']?this.props['row_color']:[],
             title: [],
             td: [],
             tds: [],
@@ -219,6 +235,21 @@ export default {
         window.addEventListener('resize', () => this.tableSetHeight());
     },
     methods: {
+        tableRowStyle({row, rowIndex}) {
+            if (this.row_color.length > 0){
+                if (rowIndex % 2 == 0) {
+                    return {
+                        background: this.row_color[0]
+                    }
+                }
+                else {
+                    return {
+                        background: this.row_color[1]
+                    }
+                }
+            }
+            return ''
+        },
         tableSetHeight() {
             let h;
             h = window.innerHeight - this.topHeight - this.bottomHeight;

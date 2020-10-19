@@ -126,7 +126,7 @@ export default {
             rules: {
                 name: [
                     { required: true, message: '请输入设备名称', trigger: 'blur' },
-                    { min: 3, max: 12, message: '长度在 3 到 12 个字符', trigger: 'blur' }
+                    { min: 3, max: 30, message: '长度在 3 到 30 个字符', trigger: 'blur' }
                 ]
             },
             props : {

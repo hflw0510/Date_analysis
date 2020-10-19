@@ -3,7 +3,7 @@
         <el-row>
             <el-col :span=24 style="padding: 8px 12px;">
                 <div v-for="(item, index) in divs" :key="index">
-                    <el-select v-model="values[index]" placeholder="请选择" style="padding: 8px;">
+                    <el-select v-model="values[index]" placeholder="请选择" style="padding-left: 1180px;">
                         <el-option v-for="item in options[index]" :key="item.value" :label="item.label" :value="item.value"></el-option>
                     </el-select>
                     <div :id="item" class=charts7_2></div>

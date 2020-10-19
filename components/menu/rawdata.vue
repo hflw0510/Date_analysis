@@ -43,6 +43,11 @@
         </el-dialog>
     </div>
 </template>
+<style>
+    .el-table__footer{
+        background-color:#9ae2f4;
+    }
+</style>
 <script>
 import simpletable from '~/components/util/simpletable';
 import checkboxes from '~/components/util/checkboxes';
@@ -103,6 +108,7 @@ export default {
                         width: '160'
                     }
                 ],
+                row_color: ['#ffffff','#989797'],
                 tbBtns,
                 tbData: tableData,
                 noSelect: true,

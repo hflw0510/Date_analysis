@@ -508,6 +508,10 @@ export default {
                             this.fullscreenLoading = false;
                             this.btn = false;
                         }
+                        else{
+                            this.fullscreenLoading = false;
+                            this.$message.error('没有符合条件的数据！');
+                        }
                     }
                     else if(d.error){
                         this.fullscreenLoading = false;

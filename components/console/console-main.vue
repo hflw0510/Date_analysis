@@ -72,10 +72,10 @@ export default {
                 this.consoleTabsValue = activeName;
             else {
                 this.consoleTabs.push({
-                    title: this.$t('console.overview'),
+                    title: this.$t('menu.overview'),
                     name: '0',
-                    index: 'console.overview',
-                    content: resolve => require(['~/components/console/overview'], resolve)
+                    index: 'menu.overview',
+                    content: resolve => require(['~/components/menu/overview'], resolve)
                 });
                 this.consoleTabsValue = '0';
             }

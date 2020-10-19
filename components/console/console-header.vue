@@ -1,12 +1,10 @@
 <template>
     <el-row>
         <el-col :span="8">
-            <div class="header-left"><img src="/images/logo.png" alt="Admin Pro">北京鹏宇昌亚在线源解析系统</div>
+            <div class="header-left"><img src="/images/nlogo.png" alt="Admin Pro">北京鹏宇昌亚在线源解析系统</div>
         </el-col>
         <el-col :span="16">
             <div class="header-right">
-                <i class="el-icon-share"></i>  
-                <i class="el-icon-bell"></i>
             <el-dropdown :hide-timeout="ht" :show-timeout="st" @command="handleCommand">
                 <i class="el-icon-user"></i>
                 <el-dropdown-menu slot="dropdown">
@@ -22,10 +20,14 @@
 <style>
     .header-left {
         height: 60px;
+        font-size: 20px;
+        color: #000000;
+        font-weight:bold;
     }
 
     .header-left img {
         height: 80%;
+        padding: 0 10px 6px 20px;
         vertical-align: middle;
     }
 

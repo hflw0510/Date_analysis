@@ -175,16 +175,8 @@
 </template>
 
 <style>
-    .el-table .rowa {
-        background: #ffffff;
-    }
-
-    .el-table .rowb {
-        background: #989797;
-    }
-
     .el-table__footer-wrapper tbody td {
-        background-color:#9ae2f4;
+        background-color:#989797;
     }
 </style>
 

@@ -113,8 +113,10 @@
 import session from '~/assets/js/session'
 
 export default {
-    head() {
+    head () {
         return {
+            title: '北京鹏宇昌亚在线源解析系统'
+
         }
     },
     data () {

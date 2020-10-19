@@ -15,12 +15,15 @@
             width="40%"
             center
         >
-            <el-form ref="form" :model="form" ret="form" label-width="80px" label-position="left">
+            <el-form ref="form" :model="form" ret="form" label-width="100px" label-position="left">
                 <el-form-item label="输入名称" prop="name">
                     <el-input v-model="form.name"></el-input>
                 </el-form-item>
                 <el-form-item label="解析因子">
                     <el-slider v-model="form.factors" show-input :min="1" :max="20"></el-slider>
+                </el-form-item>
+                <el-form-item label="使用58模板">
+                    <el-switch v-model="form.template"></el-switch>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="Source_Analysis">确定</el-button>
@@ -108,12 +111,13 @@ export default {
                         width: '160'
                     }
                 ],
-                row_color: ['#ffffff','#989797'],
+                row_color: ['#ffffff','#f0f0f0'],
                 tbBtns,
                 tbData: tableData,
                 noSelect: true,
                 isSearch: true
             },
+            template1: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 54, 55, 56, 57, 93, 97, 102],
             cbs: {
                 data: '',
                 dataGroups: [],
@@ -121,12 +125,14 @@ export default {
             },
             form: {
                 name: '',
+                template: false,
                 factors: 4
             },
             noppb: false,
             cbsgroups:{},
             search_date: '',
             specs:{},
+            specs_name: {},
             spec_selects: [],
             spec_position: {},
             centerDialogVisible : false,
@@ -216,8 +222,14 @@ export default {
         },
         Source_Analysis(){
             if (this.search_date){
-                if (this.spec_selects.length > 0){
-                    rpc(hosts.baseHost, 'Search.Source_Analysis', this.form.name, this.form.factors, this.search_date, {spec_id: this.spec_selects}, (d) => {
+                let specs;
+                if (this.form.template) 
+                    specs = this.template1.map(v => this.specs_name[v]);
+                else
+                    specs = this.spec_selects;
+                return;
+                if (specs.length > 0){
+                    rpc(hosts.baseHost, 'Search.Source_Analysis', this.form.name, this.form.factors, this.search_date, {spec_id: specs}, (d) => {
                         if(d.result){
                             this.$message({
                                 message: '源解析提交成功，ID：' + d.result + '请在源解析功能里查看结果。',
@@ -323,6 +335,7 @@ export default {
                             }
                         );
                         this.specs[v[0]] = v;
+                        this.specs_name[v[13]] = v[0];
                     });
                 }
             })

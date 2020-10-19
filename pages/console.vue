@@ -72,7 +72,8 @@ import request from '~/assets/js/request'
 export default {
     head () {
         return {
-            title: this.$t('console.title')
+            title: '北京鹏宇昌亚在线源解析系统 - ' + this.$t('console.title')
+
         }
     },
     data() {

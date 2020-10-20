@@ -12,6 +12,14 @@ npm install
 npm run dev
 ```
 
+## Public
+发布静态页面
+```sh
+npm run generate
+```
+
+生成dist目录，可以使用Nginx或其他Web服务器启动浏览
+
 ##Path
 
 ####pages

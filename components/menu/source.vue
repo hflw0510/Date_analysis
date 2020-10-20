@@ -12,6 +12,14 @@ let tableData = [];
 
 const tbCols = [
     {
+        colname: '0',
+        title: 'ID',
+        searchable: false,
+        sortable: false,
+        align: 'center',
+        width: '60'
+    },
+    {
         colname: '1',
         title: '创建时间',
         searchable: false,

@@ -1,4 +1,4 @@
-# Drcloud Vue Template with Nuxt ElementUI
+# Vue Template with Nuxt ElementUI
 
 ## Install
 在项目根目录下运行，安装依赖包。

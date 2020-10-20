@@ -176,7 +176,7 @@
 
 <style>
     .el-table__footer-wrapper tbody td {
-        background-color:#989797;
+        background-color:#1edacf;
     }
 </style>
 

@@ -111,7 +111,7 @@ export default {
                         width: '160'
                     }
                 ],
-                row_color: ['#ffffff','#f0f0f0'],
+                row_color: ['#ffffff','#9bf2fa'],
                 tbBtns,
                 tbData: tableData,
                 noSelect: true,
@@ -227,7 +227,6 @@ export default {
                     specs = this.template1.map(v => this.specs_name[v]);
                 else
                     specs = this.spec_selects;
-                return;
                 if (specs.length > 0){
                     rpc(hosts.baseHost, 'Search.Source_Analysis', this.form.name, this.form.factors, this.search_date, {spec_id: specs}, (d) => {
                         if(d.result){

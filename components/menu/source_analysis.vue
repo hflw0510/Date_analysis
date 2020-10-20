@@ -4,7 +4,7 @@
             <el-col :span=24 style="padding: 8px 12px;">
                 <div v-for="(item, index) in divs" :key="index">
                     <div align="right" style="width:1400px;">
-                        <el-select v-model="values[index]" placeholder="请选择">
+                        <el-select v-model="values[index]" placeholder="请选择" @change="v_change">
                             <el-option v-for="item in options[index]" :key="item.value" :label="item.label" :value="item.value"></el-option>
                         </el-select>
                     </div>
@@ -58,6 +58,7 @@ export default {
     props: ['props'],
     data () {
         return {
+            id: this.props[0],
             values: [],
             options:[],
             options_t: [
@@ -117,8 +118,7 @@ export default {
     methods: {
         searchClick() {
             this.fullscreenLoading = false;
-            let id = this.props[0];
-            rpc(hosts.baseHost, 'Bi.Load', 'source_analysis', id, (d) => {
+            rpc(hosts.baseHost, 'Bi.Load', 'source_analysis', this.id, (d) => {
                 if(d.result){
                     if(Object.keys(d.result).length){
                         //this.get_datelist(JSON.parse(d.result['date_range']));
@@ -127,6 +127,9 @@ export default {
                         this.get_chartData2(JSON.parse(d.result['G_FACTOR']));
                         this.get_chartData3(JSON.parse(d.result['G_FACTOR']));
                         this.get_chartData4(JSON.parse(d.result['G_FACTOR']));
+                        if (d.result['Result']){
+                            this.values = JSON.parse(d.result['Result']);
+                        }
                     }
                     else{
                         this.fullscreenLoading = false;
@@ -142,6 +145,21 @@ export default {
                     })
                 }
 
+            })
+        },
+        v_change () {
+            let data;
+            data = {
+                result: JSON.stringify(this.values)
+            }
+            rpc(hosts.baseHost, 'bi.Save', 'source_analysis', this.id, data, (d) => {
+                if(d.result){
+                    this.$message({
+                        message: '因子分类保存成功',
+                        type: 'success'
+                        });
+                    this.load();
+                }
             })
         },
         get_datelist(d){
@@ -176,7 +194,7 @@ export default {
                 divid = 'myChart7_'+this.props[0]+'_1_' + index;
                 this.divs.push(divid);
                 this.options.push(this.options_t);
-                this.values.push(this.get_value(spec_id, v)); 
+                if (! (this.values.length > index)) this.values.push(this.get_value(spec_id, v)); 
                 d = {
                     title : '因子' + (index+1),
                     xAxis : spec_id.map(v => this.specs[v][7]),

@@ -5,11 +5,13 @@ bi = {
     roles: '角色',
     users: '用户',
     species: '物种库',
-    spec_type: '物种类型'
+    spec_type: '物种类型',
+    source_analysis: '源解析'
 };
 bs = {
     'search.get_data' : '图表查询',
-    'search.source_analysis' : '源解析',
+    'search.source_analysis' : '源解析请求',
+    'source_analysis.load' : '源解析结果',
     'search.get_log' : '日志查询',
     'service.spec_upload' : '导入物种库'
 };

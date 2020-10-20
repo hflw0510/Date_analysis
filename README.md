@@ -20,24 +20,24 @@ npm run generate
 
 生成dist目录，可以使用Nginx或其他Web服务器启动浏览
 
-##Path
+## Path
 
-####pages
+#### pages
 
 >+ 每个 vue 文件对应一个入口页面
 >+ name.vue 文件对应访问路径 /name
 
-####components
+#### components
 >+ 每个 vue 文件对应一个被页面加载的组件
 >+ 可复用组件存放在 components 目录下，独立使用组件新建目录存放
 
-####assets
+#### assets
 
 >+ 放置css、js文件
 >+ import对应路径 '~/assets/'
 
 
-##i18n
+## i18n
 
 >+ 已内置i18n，使用参考 /pages/ab.vue
 >+ 命名规则

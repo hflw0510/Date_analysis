@@ -144,6 +144,7 @@ export default {
     },
     mounted() {
         this.spec_type_load();
+        this.refresh();
     },
     methods: {
         refresh () {

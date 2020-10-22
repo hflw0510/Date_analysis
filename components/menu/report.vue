@@ -355,7 +355,7 @@ export default {
                             let data={}, spec_vice, data1={}, data2={}, data3={}, data4={}, data5={}, data6={}, data7={};
                             d.result.forEach(v => {
                                 if (v[1].length==10) v[1] = v[1] + " 00:00:00";
-                                //v[3] = this.get_μg(v[2], v[3]);
+                                v[3] = this.get_μg(v[2], v[3]);
 
                                 if (!data.hasOwnProperty(v[10])){
                                     data[v[10]] = [];

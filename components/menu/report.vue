@@ -798,7 +798,7 @@ export default {
                 tooltip: {
                     trigger: 'axis'
                 },
-                color: ['#5d9cd3','#eb7b2e','#ff3299','#9369fe','#9369fe','#03ffff','#dfeb00','#ceccce'],
+                color: ['#5d9cd3','#eb7b2e','#ff3299','#9369fe','#89fe66','#03ffff','#dfeb00','#ceccce'],
                 legend:{
                     icon: 'pin',
                     bottom: "0%",
@@ -838,7 +838,7 @@ export default {
                 tooltip: {
                     trigger: 'axis'
                 },
-                color: ['#5d9cd3','#eb7b2e','#ff3299','#9369fe','#9369fe','#03ffff','#dfeb00','#ceccce'],
+                color: ['#5d9cd3','#eb7b2e','#ff3299','#9369fe','#89fe66','#03ffff','#dfeb00','#ceccce'],
                 legend:{
                     icon: 'pin',
                     bottom: "0%",

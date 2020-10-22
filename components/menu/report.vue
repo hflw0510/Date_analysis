@@ -295,13 +295,14 @@ export default {
             this.docx_data["spec_hours_range_min_value"] = spec_hours_range[0][1] + 'ppb';
             ret.push('VOCs体积分数 于' + this.docx_data["spec_hours_range_max"] + '时出现最大值' + this.docx_data["spec_hours_range_max_value"] + ', 于' + this.docx_data["spec_hours_range_min"] + '时出现最小值'+ this.docx_data["spec_hours_range_min_value"]);
 
-            let sth, spec_type_hours=[[],[],[]], spec_type_hours_light, spec_type_hours_night, spec_type_hours_range;
+            let sth, spec_type_hours=[[],[],[]], spec_type_hours_light, spec_type_hours_night, spec_type_hours_range, spec_type_wave=[];
             this.docx_data["spec_type_hours"] = []
             for (k in this.spec_type_hours){
                 sth = Object.keys(this.spec_type_hours[k]).map(v => [v, this.spec_type_hours[k][v]]);
                 spec_type_hours_light = sth.filter(v => (v[0]>=8 && v[0]<=18));
                 spec_type_hours_night = sth.filter(v => (v[0]<8 || v[0]>18));
                 spec_type_hours_range = sth.sort((x, y) => x[1] - y[1]);
+                spec_type_wave.push([k, spec_type_hours_range[spec_type_hours_range.length-1][1] - spec_type_hours_range[0][1]])
                 spec_type_hours[0].push(k);
                 spec_type_hours[1].push(this.get_average(spec_type_hours_light.map(v => v[1])));
                 spec_type_hours[2].push(this.get_average(spec_type_hours_night.map(v => v[1])));
@@ -310,6 +311,10 @@ export default {
             this.docx_data["spec_type_count"] = Object.keys(this.spec_type_hours).length;
             this.docx_data["spec_type_hours"] = this.docx_data["spec_type_hours"].join(';');
             ret.push(this.docx_data["spec_type_hours"]);
+
+            spec_type_wave = spec_type_wave.sort((x, y) => x[1] - y[1]);
+            this.docx_data["spec_max"] = spec_type_wave[spec_type_wave.length-1][0];
+            this.docx_data["spec_min"] = spec_type_wave[0][0];
 
             this.docx_data["spec_type_hour"] = spec_type_hours[0].join(',');
             this.docx_data["spec_type_night"] = spec_type_hours[2].join(',');
@@ -350,6 +355,7 @@ export default {
                             let data={}, spec_vice, data1={}, data2={}, data3={}, data4={}, data5={}, data6={}, data7={};
                             d.result.forEach(v => {
                                 if (v[1].length==10) v[1] = v[1] + " 00:00:00";
+                                //v[3] = this.get_μg(v[2], v[3]);
 
                                 if (!data.hasOwnProperty(v[10])){
                                     data[v[10]] = [];
@@ -392,10 +398,11 @@ export default {
                                 data4[v[1]] = NP.plus(data4[v[1]], v[3]);
                                 
                                 if (v[8] > 0) {
+                                    let val = this.get_μg(v[2], v[3]);
                                     if (!data5.hasOwnProperty(v[2])){
                                         data5[v[2]] = 0;
                                     }
-                                    data5[v[2]] = NP.plus(data5[v[2]], NP.times(v[3], v[8]));
+                                    data5[v[2]] = NP.plus(data5[v[2]], NP.times(val, v[8]));
                                 }
 
                                 if (v[5] == '氟利昂113'){
@@ -538,7 +545,7 @@ export default {
                 let st = d[0];
                 if (st.length==10) st = st + " 00:00:00";
                 st = new Date(st);
-                st.setHours(i);
+                st.setHours(st.getHours() + i);
                 this.datelist.push(this.dateFormat("YYYY-mm-dd HH:MM:SS", st));
             }
         },
@@ -1047,6 +1054,9 @@ export default {
                     backgroundColor: '#fff'
                 });
             });
+        },
+        get_μg(spec_id, value){
+            return NP.divide(NP.times(value, this.specs[spec_id][9]), 22.4).toFixed(4);
         },
         get_percent(n, t){
             return t<=0?0:Math.round(NP.divide(n, t) * 10000) / 100;

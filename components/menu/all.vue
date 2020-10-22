@@ -111,7 +111,7 @@ export default {
                         if(d.result.length){
                             let data={}, data1={}, data2={};
                             d.result.forEach(v => {
-                                let val = v[3];
+                                let val = this.get_μg(v[2], v[3]);
                                 if (this.noppb) v[3] = this.get_μg(v[2], v[3]);
 
                                 if (!data.hasOwnProperty(v[10])){

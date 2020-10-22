@@ -179,7 +179,7 @@ export default {
                 let st = d[0];
                 if (st.length==10) st = st + " 00:00:00";
                 st = new Date(st);
-                st.setHours(i);
+                st.setHours(st.getHours() + i);
                 this.datelist.push(this.dateFormat("YYYY-mm-dd HH:MM:SS", st));
             }
         },
@@ -198,8 +198,9 @@ export default {
                 this.datelist.forEach(v => {
                     if (v in data[k]){
                         d.data.push(data[k][v]);
-                        dtlist.push(v);
                     }
+                    else
+                        d.data.push('-')
                 });
                 if (d.data.length) this.chartData1.data.push(d);
             }

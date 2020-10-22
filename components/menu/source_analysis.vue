@@ -169,7 +169,7 @@ export default {
                 let st = d[0];
                 if (st.length==10) st = st + " 00:00:00";
                 st = new Date(st);
-                st.setHours(i);
+                st.setHours(st.getHours() + i);
                 this.datelist.push(this.dateFormat("YYYY-mm-dd HH:MM:SS", st));
             }
         },

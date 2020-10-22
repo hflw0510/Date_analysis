@@ -198,11 +198,15 @@ export default {
                     data[v[1]][v[2]] = v[3];
                 }
             });
+            console.log(data)
             for (i=0;i<this.dateCheck(search_date[0], search_date[1])+1;i++) {
+                
                 let st = search_date[0], x = [], k, ct, y;
                 if (st.length==10) st = st + " 00:00:00";
+                console.log(st);
                 st = new Date(st);
-                st.setHours(i);
+                st.setHours(st.getHours() + i);
+                console.log(st);
                 ct = this.dateFormat("YYYY-mm-dd HH:MM:SS", st)
                 if (ct in data){
                     x.push(this.dateFormat("YYYY-mm-dd HH:MM", st));

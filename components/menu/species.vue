@@ -57,7 +57,7 @@
                 <el-form-item label="MIR">
                     <el-input v-model="form.mir"></el-input>
                 </el-form-item>
-                <el-form-item label="因子小数">
+                <el-form-item label="KOH">
                     <el-input v-model="form.fac"></el-input>
                 </el-form-item>
                 <el-form-item label="状态">
@@ -130,7 +130,7 @@ const tbCols = [
     },
     {
         colname: '11',
-        title: '因子小数',
+        title: 'KOH',
         searchable: false,
         sortable: false,
         width: '80'

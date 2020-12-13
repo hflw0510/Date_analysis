@@ -4,6 +4,7 @@
             <el-col :span=18 style="display: inline-block;padding-left: 8px">
                 <el-date-picker
                     v-model="search_date"
+                    @change="date_change"
                     type="datetimerange"
                     value-format="yyyy-MM-dd HH:00:00"
                     :default-time="['00:00:00', '23:00:00']"
@@ -93,8 +94,16 @@ export default {
     },
     mounted() {
         this.spec_type_load();
+        let d = sessionStorage.getItem('search_date');
+        if (d) this.search_date = JSON.parse(d);
     },
     methods: {
+        date_change(d){
+            if (d){
+                sessionStorage.setItem('search_date', JSON.stringify(d));
+                console.log(sessionStorage.getItem('search_date'));
+            }
+        },
         searchClick() {
             this.fullscreenLoading = true;
             if (this.search_date.length == 2) {
@@ -289,7 +298,7 @@ export default {
                 tooltip: {
                     trigger: 'axis'
                 },
-                color: ['#5d9cd3','#eb7b2e','#ff3299','#9369fe','#89fe66','#03ffff','#dfeb00','#ceccce'],
+                color: ['#f6f784','#0100fe','#03ffff','#f99a87','#ec7c31','#7501e8','#9c007a','#c1c1ff','#86e3bf','#ceccce','#ffc0db','#0ba72c','#00a8ff','#fffc00','#19b9ac','#87800b','#666666','#6a72c1','#3dc567','#ff99e6'],
                 legend:{
                     icon: 'rect',
                     data: this.chartData1.legend
@@ -326,7 +335,7 @@ export default {
                 tooltip: {
                     trigger: 'axis'
                 },
-                color: ['#5d9cd3','#eb7b2e','#ff3299','#9369fe','#89fe66','#03ffff','#dfeb00','#ceccce'],
+                color: ['#f6f784','#0100fe','#03ffff','#f99a87','#ec7c31','#7501e8','#9c007a','#c1c1ff','#86e3bf','#ceccce','#ffc0db','#0ba72c','#00a8ff','#fffc00','#19b9ac','#87800b','#666666','#6a72c1','#3dc567','#ff99e6'],
                 toolbox:{
                     feature:{
                         saveAsImage: {}

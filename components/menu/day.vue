@@ -1,10 +1,11 @@
 <template> 
     <div>
         <el-row>
-            <el-col :span=18 style="display: inline-block;padding-left: 8px">
+            <el-col :span=16 style="display: inline-block;padding-left: 8px">
 
                 <el-date-picker
                     v-model="search_date"
+                    @change="date_change"
                     type="datetimerange"
                     value-format="yyyy-MM-dd HH:00:00"
                     :default-time="['00:00:00', '23:00:00']"
@@ -23,7 +24,13 @@
                     </el-tooltip>
                 </el-button-group>
             </el-col>
-            <el-col :span=6>
+            <el-col :span=8>
+                <el-switch
+                    v-model="isday"
+                    active-text="日均值"
+                    inactive-text="小时均值"
+                    @change="searchClick">
+                </el-switch>
                 <el-switch
                     v-model="noppb"
                     active-text="μg/m³"
@@ -95,6 +102,7 @@ export default {
         return {
             freon: false,
             noppb: false,
+            isday: false,
             search_date: '',
             fullscreenLoading: false,
             specs_type: {},
@@ -106,16 +114,23 @@ export default {
     },
     mounted() {
         this.spec_type_load();
-        //this.echartsInit2()
+        let d = sessionStorage.getItem('search_date');
+        if (d) this.search_date = JSON.parse(d);
     },
     methods: {
+        date_change(d){
+            if (d){
+                sessionStorage.setItem('search_date', JSON.stringify(d));
+                console.log(sessionStorage.getItem('search_date'));
+            }
+        },
         searchClick() {
             this.fullscreenLoading = true;
             if (this.search_date) {
                 rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {}, (d) => {
                     if(d.result.length){
                         if(d.result.length){
-                            let data={}, data1={};
+                            let data={}, data1={}, data2={}, data3 = {};
                             d.result.forEach(v => {
                                 if (this.noppb) v[3] = this.get_μg(v[2], v[3]);
 
@@ -124,16 +139,31 @@ export default {
                                     data[v[10]] = {};
                                 }
                                 if (!data[v[10]].hasOwnProperty(v[1])){
-                                    data[v[10]][v[1]] = [];
+                                    data[v[10]][v[1]] = 0;
                                 }
                                 data[v[10]][v[1]] = NP.plus(data[v[10]][v[1]], v[3]);
 
+                                let day1 = this.dateFormat('YYYY-mm-dd', v[1]);
+                                if (!data2.hasOwnProperty(v[10])){
+                                    data2[v[10]] = {};
+                                }
+                                if (!data2[v[10]].hasOwnProperty(day1)){
+                                    data2[v[10]][day1] = [];
+                                }
+                                data2[v[10]][day1].push(v[3]);
+
                                 if (this.freon && v[5] == '氟利昂113'){
-                                    if (!data1.hasOwnProperty(v[1])) data1[v[1]] = [];
+                                    if (!data1.hasOwnProperty(v[1])) data1[v[1]] = 0;
                                     data1[v[1]] = NP.plus(data1[v[1]], v[3]);
+                                    if (!data3.hasOwnProperty(day1)) data3[day1] = [];
+                                    data3[day1].push(v[3]);
                                 }
                             });
-                            this.get_chartData1(data, data1);
+                            if (this.isday)
+                                this.get_chartData2(data2, data3);
+                            else
+                                this.get_chartData1(data, data1);
+
                         }
                         else{
                             this.fullscreenLoading = false;
@@ -158,6 +188,37 @@ export default {
                     type: 'warning'
                 })
             }
+        },
+        get_chartData2(data, data_freon) {
+            let k, t, i;
+            let color = ['#5a9dd7', '#ee751d', '#ff339c', '#9d78ff', '#58ff25', '#00fff7', '#c1c1ff'];
+            this.chartData = [];
+            for (k in data) {
+                let d = ({
+                    title: k,
+                    xAxis: [],
+                    line: [],
+                    stdevp: []
+                });
+                for (t in data[k]){
+                    d.xAxis.unshift(t);
+                    if (this.freon) {
+                        if (t in data_freon)
+                            d.line.unshift(NP.divide(this.get_average(data[k][t]), this.get_average(data_freon[t])).toFixed(4));
+                        else
+                            d.line.unshift(this.get_average(data[k][t]));
+                    }
+                    else {
+                        d.line.unshift(this.get_average(data[k][t]));
+                        d.stdevp.unshift(this.get_stdevp(data[k][t]));
+                    }
+                }
+                this.chartData.push(d);
+            }
+            this.chartData.forEach((v, i) => {
+                this.chart1('myChart3_'+ (i+1), v, color[i]);
+            });
+
         },
         get_chartData1(data, data_freon) {
             let k, t, i;
@@ -214,7 +275,6 @@ export default {
                 }
                 this.chartData.push(d);
             }
-            console.log(this.chartData);
             this.chartData.forEach((v, i) => {
                 this.chart1('myChart3_'+ (i+1), v, color[i]);
             });

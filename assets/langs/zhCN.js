@@ -36,6 +36,7 @@ const zhCN = {
         'log': '日志管理',
         'search': '数据查询',
         'rawdata': '基础数据查询',
+        'rawdata_ext': '外标数据查询',
         'analysis': '专业分析',
         'all': '总体特征',
         'space': '时空分布特征',

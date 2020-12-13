@@ -11,6 +11,7 @@
             <el-col :span=20 style="display: inline-block;padding-left: 8px">
                 <el-date-picker
                     v-model="search_date"
+                    @change="date_change"
                     type="datetimerange"
                     value-format="yyyy-MM-dd HH:00:00"
                     :default-time="['00:00:00', '23:00:00']"
@@ -118,8 +119,16 @@ export default {
         //this.echartsInit()
         //this.echartsInit2()
         this.spec_type_load();
+        let d = sessionStorage.getItem('search_date');
+        if (d) this.search_date = JSON.parse(d);
     },
     methods: {
+        date_change(d){
+            if (d){
+                sessionStorage.setItem('search_date', JSON.stringify(d));
+                console.log(sessionStorage.getItem('search_date'));
+            }
+        },
         searchClick() {
             this.fullscreenLoading = true;
             if (this.search_date && this.spec_selects.length==2) {

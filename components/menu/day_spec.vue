@@ -11,6 +11,7 @@
             <el-col :span=16 style="display: inline-block;padding-left: 8px">
                 <el-date-picker
                     v-model="search_date"
+                    @change="date_change"
                     type="datetimerange"
                     value-format="yyyy-MM-dd HH:00:00"
                     :default-time="['00:00:00', '23:00:00']"
@@ -122,8 +123,15 @@ export default {
         //this.echartsInit()
         //this.echartsInit2()
         this.spec_type_load();
+        let d = sessionStorage.getItem('search_date');
+        if (d) this.search_date = JSON.parse(d);
     },
     methods: {
+        date_change(d){
+            if (d){
+                sessionStorage.setItem('search_date', JSON.stringify(d));
+            }
+        },
         searchClick() {
             this.fullscreenLoading = true;
             if (this.search_date && this.spec_id) {
@@ -137,13 +145,16 @@ export default {
                 rpc(hosts.baseHost, 'Search.Get_data', this.search_date, params, (d) => {
                     if(d.result){
                         if(d.result.length){
-                            let data={}, data1={};
+                            let data={}, data1={}, data2={}, data3={};
                             d.result.forEach(v => {
                                 if (this.noppb && this.spec_iscalc[this.spec_id]) v[3] = this.get_μg(v[2], v[3]);
 
+                                let day1 = this.dateFormat('YYYY-mm-dd', v[1]);
                                 if (this.freon && v[5] == '氟利昂113'){
-                                    if (!data1.hasOwnProperty(v[1])) data1[v[1]] = [];
+                                    if (!data1.hasOwnProperty(v[1])) data1[v[1]] = 0;
                                     data1[v[1]] = NP.plus(data1[v[1]], v[3]);
+                                    if (!data3.hasOwnProperty(day1)) data3[day1] = [];
+                                    data3[day1].push(v[3]);
                                 }
                                 else{
                                     if (v[1].length==10) v[1] = v[1] + " 00:00:00";
@@ -151,10 +162,19 @@ export default {
                                         data[v[5]] = {};
                                     }
                                     if (!data[v[5]].hasOwnProperty(v[1])){
-                                        data[v[5]][v[1]] = [];
+                                        data[v[5]][v[1]] = 0;
                                     }
                                     data[v[5]][v[1]] = NP.plus(data[v[5]][v[1]], (v[3]));
+
+                                    if (!data2.hasOwnProperty(v[5])){
+                                        data2[v[5]] = {};
+                                    }
+                                    if (!data2[v[5]].hasOwnProperty(day1)){
+                                        data2[v[5]][day1] = [];
+                                    }
+                                    data2[v[5]][day1].push(v[3]);
                                 }
+
 
                             });
                             if (Object.keys(data).length == 0){
@@ -163,6 +183,10 @@ export default {
                             }
                             else{
                                 this.get_chartData1(data, data1);
+                                if (this.spec_iscalc[this.spec_id])
+                                    this.get_chartData2(data2, data3);
+                                else
+                                    this.chart2_clear();
                             }
                         }
                         else{
@@ -250,6 +274,34 @@ export default {
             this.chart1('myChart4_1', this.chartData[0]);
 
         },
+        get_chartData2(data, data_freon) {
+            let k, t, i;
+            this.chartData = [];
+            for (k in data) {
+                let d = ({
+                    title: k,
+                    xAxis: [],
+                    line: [],
+                    stdevp: []
+                });
+                for (t in data[k]){
+                    d.xAxis.unshift(t);
+                    if (this.freon) {
+                        if (t in data_freon)
+                            d.line.unshift(NP.divide(this.get_average(data[k][t]), this.get_average(data_freon[t])).toFixed(4));
+                        else
+                            d.line.unshift(this.get_average(data[k][t]));
+                    }
+                    else {
+                        d.line.unshift(this.get_average(data[k][t]));
+                        d.stdevp.unshift(this.get_stdevp(data[k][t]));
+                    }
+                }
+                this.chartData.push(d);
+            }
+            this.chart1('myChart4_2', this.chartData[0]);
+
+        },
         get_μg(spec_id, value){
             return NP.divide(NP.times(value, this.specs[spec_id][9]), 22.4).toFixed(4);
         },
@@ -326,6 +378,10 @@ export default {
                     });
                 }
             })
+        },
+        chart2_clear(){
+            let myChart = this.$echarts.init(document.getElementById('myChart4_2'));
+            myChart.clear();
         },
         chart1(divid, data){
             let myChart = this.$echarts.init(document.getElementById(divid));

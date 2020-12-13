@@ -4,6 +4,7 @@
             <el-col :span=18 style="display: inline-block;padding-left: 8px">
                 <el-date-picker
                     v-model="search_date"
+                    @change="date_change"
                     type="datetimerange"
                     value-format="yyyy-MM-dd HH:00:00"
                     :default-time="['00:00:00', '23:00:00']"
@@ -43,6 +44,12 @@
                 <div id="myChart1_4" class=charts1_2></div>
             </el-col>
         </el-row>
+        <el-row>
+            <el-col :span=24 style="padding: 8px 12px;">
+                <div id="myChart1_5" class=charts1_1></div>
+                <div id="myChart1_6" class=charts1_2></div>
+            </el-col>
+        </el-row>
     </div>
 </template>
 
@@ -75,7 +82,7 @@ export default {
     data () {
         return {
             freon: false,
-            noppb: false,
+            noppb: true,
             search_date: '',
             fullscreenLoading: false,
             specs_type: {},
@@ -87,6 +94,10 @@ export default {
                 bar: [],
                 line: []
             },
+            chartData5: {
+                xAxis: [],
+                bar: []
+            },
             chartData2: [],
             chartData3:{
                 xAxis: [],
@@ -95,21 +106,32 @@ export default {
             chartData4:{
                 xAxis: [],
                 bar: []
+            },
+            chartData6:{
+                xAxis: [],
+                bar: []
             }
         }
     },
     mounted() {
         this.spec_type_load();
-        //this.echartsInit2()
+        let d = sessionStorage.getItem('search_date');
+        if (d) this.search_date = JSON.parse(d);
     },
     methods: {
+        date_change(d){
+            if (d){
+                sessionStorage.setItem('search_date', JSON.stringify(d));
+                console.log(sessionStorage.getItem('search_date'));
+            }
+        },
         searchClick() {
             this.fullscreenLoading = true;
             if (this.search_date) {
                 rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {}, (d) => {
                     if(d.result){
                         if(d.result.length){
-                            let data={}, data1={}, data2={};
+                            let data={}, data1={}, data2={}, data3={};
                             d.result.forEach(v => {
                                 let val = this.get_μg(v[2], v[3]);
                                 if (this.noppb) v[3] = this.get_μg(v[2], v[3]);
@@ -131,14 +153,22 @@ export default {
                                     if (!data2.hasOwnProperty(v[5])){
                                         data2[v[5]] = 0;
                                     }
-                                    data2[v[5]] = NP.plus(data2[v[5]], NP.times(val, v[8]));
+                                    data2[v[5]] = NP.plus(data2[v[5]], NP.times(v[3], v[8])).toFixed(4);
+                                }
+
+                                if (v[11] > 0) {
+                                    if (!data3.hasOwnProperty(v[5])){
+                                        data3[v[5]] = 0;
+                                    }
+                                    data3[v[5]] = NP.plus(data3[v[5]], NP.times(v[3], NP.divide(v[11], v[7]))).toFixed(4);
                                 }
                             });
 
                             this.get_chartData1(data);
                             this.get_chartData2(data);
                             this.get_chartData3(data1);
-                            this.get_chartData4(data2)
+                            this.get_chartData4(data2);
+                            this.get_chartData6(data3);
                         }
                         else{
                             this.fullscreenLoading = false;
@@ -169,14 +199,19 @@ export default {
             this.chartData1.xAxis = [];
             this.chartData1.bar = [];
             this.chartData1.line = [];
+            this.chartData5.xAxis = [];
+            this.chartData5.bar = [];
 
             for (k in data) {
                 this.chartData1.xAxis.push(k);
                 this.chartData1.bar.push(this.get_average(Object.values(data[k])));
+                this.chartData5.xAxis.push(k);
+                this.chartData5.bar.push(Object.values(data[k]).reduce((a, v) => NP.plus(a, v), 0));
                 this.chartData1.line.push(this.get_stdevp(Object.values(data[k])));
             }
             
             this.chart1();
+            this.chart5();
         },
         get_chartData2(data) {
             let k;
@@ -219,6 +254,18 @@ export default {
                 this.chartData4.bar.push(v[1]);
             });
             this.chart4();
+        },
+        get_chartData6(data){
+            let k, d=[];
+            this.chartData6.xAxis = [];
+            this.chartData6.bar = [];
+
+            d = Object.keys(data).map(v => [v, data[v]]).sort((x, y) => y[1] - x[1]);
+            d.splice(0, 10).forEach(v => {
+                this.chartData6.xAxis.push(v[0]);
+                this.chartData6.bar.push(v[1]);
+            });
+            this.chart6();
         },
         get_μg(spec_id, value){
             return NP.divide(NP.times(value, this.specs[spec_id][9]), 22.4).toFixed(4);
@@ -332,7 +379,7 @@ export default {
             let myChart = this.$echarts.init(document.getElementById('myChart1_2'));
             myChart.setOption({
                 title: {
-                    text: 'VOCs组成特征',
+                    text: '各类VOCs组分占比',
                     left: 'center'
                 },
                 color: ['#5a9dd7','#ee751d','#ff339c','#9d78ff','#58ff25','#00fff7', '#c1c1ff'],
@@ -404,7 +451,7 @@ export default {
             let myChart = this.$echarts.init(document.getElementById('myChart1_4'))
             myChart.setOption({
                 title: {
-                    text: 'OFP前10种VOCs物种',
+                    text: 'OFP排名前十VOCs物种',
                     left: 'center'
                 },
                 tooltip: {
@@ -428,7 +475,7 @@ export default {
                 },
                 yAxis: {
                         type: 'value',
-                        name: '物种浓度(μg/m³)'
+                        name: this.noppb?'浓度(μg/m³)':'浓度(ppb)'
                     },
                 series: [{
                     name: '浓度',
@@ -441,10 +488,90 @@ export default {
                     }
                 }]
             });
+        },
+        chart5() {
+            let myChart = this.$echarts.init(document.getElementById('myChart1_5'))
+            myChart.setOption({
+                title: {
+                    text: '各类VOC浓度总和',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                toolbox:{
+                    feature:{
+                        saveAsImage: {}
+                    }
+                },
+                label:{
+                    show: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: this.chartData5.xAxis
+                },
+                yAxis: {
+                        type: 'value',
+                        name: this.noppb?'浓度(μg/m³)':'浓度(ppb)'
+                    },
+                series: [{
+                    name: '浓度',
+                    type: 'bar',
+                    data: this.chartData5.bar,
+                    itemStyle: {
+                        normal: {
+                            color: (params) => ['#5a9dd7','#ee751d','#ff339c','#9d78ff','#58ff25','#00fff7', '#c1c1ff'][params.dataIndex]
+                        }
+                    }
+                }]
+            });
+        },
+        chart6() {
+            let myChart = this.$echarts.init(document.getElementById('myChart1_6'))
+            myChart.setOption({
+                title: {
+                    text: 'LOH排名前十VOC物种',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                toolbox:{
+                    feature:{
+                        saveAsImage: {}
+                    }
+                },
+                label:{
+                    show: true
+                },
+                xAxis: {
+                    data: this.chartData6.xAxis,
+                    axisLabel: {
+                        interval: 0,
+                        rotate: 35,
+                        fontSize: 10
+                    }
+                },
+                yAxis: {
+                        type: 'value',
+                        name: this.noppb?'浓度(μg/m³)':'浓度(ppb)'
+                    },
+                series: [{
+                    name: '浓度',
+                    type: 'bar',
+                    data: this.chartData6.bar,
+                    itemStyle: {
+                        normal: {
+                            color: (params) => ['#0100fe','#03ffff','#ec7c31','#7501e8','#9c007a','#c1c1ff','#86e3bf','#f6f784','#ceccce','#ffc0db'][params.dataIndex]
+                        }
+                    }
+                }]
+            });
             myChart.on('finished', (params) => {
                 this.fullscreenLoading = false;
             });
-        }
+        },
     },
     components: {
         checkboxes

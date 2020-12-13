@@ -62,14 +62,16 @@ export default {
                     deleteIndex = index;
                     if (activeName === targetName){
                         let nextTab = tabs[index + 1] || tabs[index - 1];
-                        if (nextTab) activeName = nextTab.name;
+                        if (nextTab) activeName = nextTab;
                     }
                 }
             });
 
             this.consoleTabs.splice(deleteIndex, 1);
-            if ( this.consoleTabs.length)
-                this.consoleTabsValue = activeName;
+            if ( this.consoleTabs.length){
+                this.consoleTabsValue = activeName.name;
+                this.$emit('selectTab', activeName.index);
+            }
             else {
                 this.consoleTabs.push({
                     title: this.$t('menu.overview'),

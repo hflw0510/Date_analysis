@@ -24,10 +24,60 @@
                 </el-button-group>
             </el-col>
         </el-row>
+        <el-row style="padding-top:22px;">
+            <el-col :span=2>&nbsp;</el-col>
+            <el-col :span=8>
+                <el-form ref="form" :model="form" ret="form" label-width="80px" label-position="left">
+                    <el-form-item label="站点名称" prop="name">
+                        <el-input v-model="form.name"></el-input>
+                    </el-form-item>
+                </el-form>
+            </el-col>
+            <el-col :span=14></el-col>
+        </el-row>
         <el-row>
-            <el-col :span=24 style="padding: 8px 12px; height:480px">
+            <el-col :span=2>&nbsp;</el-col>
+            <el-col :span=8>
+                <el-form ref="form" :model="form"  ret="form" label-width="80px" label-position="left">
+                    <el-form-item label="昼间设定" prop="time_set">
+                        <el-select v-model="form.stime" style="width:80px">
+                            <el-option
+                                v-for="i in [5,6,7,8,9]"
+                                :key="i"
+                                :label="i"
+                                :value="i"
+                            ></el-option>
+                        </el-select>
+                        &nbsp;- &nbsp;
+                        <el-select v-model="form.etime" style="width:80px">
+                            <el-option
+                                v-for="i in [17,18,19,20]"
+                                :key="i"
+                                :label="i"
+                                :value="i"
+                            ></el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-form>
+            </el-col>
+            <el-col :span=14></el-col>
+        </el-row>
+        <el-row >
+            <el-col :span=2>&nbsp;</el-col>
+            <el-col :span=8>
+                <el-form ref="form" :model="form" ret="form" label-width="80px" label-position="left">
+                    <el-form-item label="单位选择" prop="unit">
+                        <el-radio v-model="form.unit" label=0>ppb</el-radio>
+                        <el-radio v-model="form.unit" label=1>μg/m³</el-radio>
+                    </el-form-item>
+                </el-form>
+            </el-col>
+            <el-col :span=14></el-col>
+        </el-row>
+        <el-row>
+            <el-col :span=24 style="padding: 8px 12px; height:720px">
                 <div>
-                    <el-input type="textarea" v-model="mytext" :rows="30" style="display:none"></el-input>
+                    <el-input type="textarea" v-model="mytext" :rows="32" style="display:block"></el-input>
                 </div>
             </el-col>
         </el-row>
@@ -139,7 +189,7 @@
     height: 390px;
     margin-left: auto;
     margin-right: auto;
-    display: none
+    display: block
   }
 
 .charts_test2 {
@@ -147,7 +197,7 @@
     height: 390px;
     margin-left: auto;
     margin-right: auto;
-    display:none
+    display:block
   }
 
 </style>
@@ -183,6 +233,8 @@ export default {
             chartData4: {},
             chartData5: {},
             chartData6: {},
+            chartData7: {},
+            chartData8: {},
             mytext: '',
             spec_count: 0,
             spec_type_count: {},
@@ -199,7 +251,15 @@ export default {
             spec_hours_stdevp: {},
             spec_hours_freon: {},
             OFP: {},
-            docx_data: {}
+            LOH: {},
+            docx_data: {},
+            form: {
+                name: '',
+                time_set: '',
+                unit: '0',
+                stime: 8,
+                etime: 19
+            }
         }
     },
     created() {
@@ -213,6 +273,10 @@ export default {
         text_set(){
             let ret=[], k, da=[];
             this.mytext = '';
+
+            this.docx_data["name"] = this.form.name;
+            this.docx_data["unit"] = ((this.form.unit=='1')?'μg/m³':'ppb')
+            ret.push('单位: ' + this.docx_data["unit"]);
 
             this.docx_data["datefrom"] = this.search_date[0];
             this.docx_data["dateto"] = this.search_date[1];
@@ -230,12 +294,12 @@ export default {
             let stc=0, sta=0;
             da = [];
             for (k in this.spec_type_avg){
-                da.push(k + ' ' + this.spec_type_avg[k][0] + '±' + this.spec_type_avg[k][1]);
+                da.push(k + ' ' + this.spec_type_avg[k][0] + this.docx_data["unit"] + '±' + this.spec_type_avg[k][1]);
                 stc = NP.plus(stc, this.spec_type_avg[k][0]);
                 sta = NP.plus(sta, this.spec_type_avg[k][1]);
             }
 
-            this.docx_data["spec_total_avg"] = stc + '±' + sta;
+            this.docx_data["spec_total_avg"] = stc + this.docx_data["unit"] + '±' + sta;
             ret.push('体积分数平均值: ' + this.docx_data["spec_total_avg"]);
 
             this.docx_data["spec_type_avg"] = da.join(',');
@@ -253,7 +317,7 @@ export default {
 
             let spec_avg = this.spec_avg.slice(0, 10);
             this.docx_data["spec_top10"] = spec_avg.map(v => v[0]).join(',')
-            this.docx_data["spec_top10_ppb"] = spec_avg.map(v => v[1]).join(',')
+            this.docx_data["spec_top10_ppb"] = spec_avg.map(v => v[1] + this.docx_data["unit"]).join(',')
             ret.push('体积分数平均值最高的前十种VOCs分别为: ' + this.docx_data["spec_top10"]);
             ret.push('体积分数平均值分别为: ' + this.docx_data["spec_top10_ppb"]);
 
@@ -263,36 +327,45 @@ export default {
             this.docx_data["spec_total_percent"] = this.get_percent(spec_top10_count, spec_count) + '%';
             ret.push('VOCs总体积分数占比为: ' + this.docx_data["spec_total_percent"]);
 
-            this.docx_data["spec_range"] = this.spec_range[0][1] + '-' + this.spec_range[1][1];
+            this.docx_data["spec_range"] = this.spec_range[0][1] + '-' + this.spec_range[1][1] + this.docx_data["unit"];
             ret.push('体积分数变化范围: ' +  this.docx_data["spec_range"]);
 
             this.docx_data["spec_range_time"] = this.spec_range[0][0] + '和' + this.spec_range[1][0];
             ret.push('分别出现在: ' +  this.docx_data["spec_range_time"]);
 
-            this.docx_data["spec_type_range"] = Object.keys(this.spec_type_range).map(v => [v, this.spec_type_range[v].map(w => w[1]).join('-')].join('体积分数变化范围为') + 'ppb').join(',') +'.';
+            this.docx_data["spec_type_range"] = Object.keys(this.spec_type_range).map(v => [v, this.spec_type_range[v].map(w => w[1]).join('-')].join('体积分数变化范围为') + this.docx_data["unit"] ).join(',') +'.';
             ret.push('其中:' + this.docx_data["spec_type_range"]);
+
+            this.docx_data["stime"] = parseInt(this.form.stime);
+            this.docx_data["etime"] = parseInt(this.form.etime);
             
+            this.docx_data["night"] = "0:00-" + (this.docx_data["stime"]-1) + ":00," + (this.docx_data["etime"]+1) + ":00-23:00";
+            this.docx_data["day"] = this.docx_data["stime"] + ":00-" + this.docx_data["etime"] + ":00";
+
+            ret.push("夜间：" + this.docx_data["night"]);
+            ret.push("昼间：" + this.docx_data["day"]);
+
             let spec_hours = Object.keys(this.spec_hours).map(v => [v, this.spec_hours[v]]);
-            let spec_hours_light = spec_hours.filter(v => (v[0]>=8 && v[0]<=18)).sort((x, y) => x[1] - y[1]);
-            let spec_hours_night = spec_hours.filter(v => (v[0]<8 || v[0]>18)).sort((x, y) => x[1] - y[1]);
+            let spec_hours_light = spec_hours.filter(v => (v[0]>=this.docx_data["stime"] && v[0]<=this.docx_data["etime"])).sort((x, y) => x[1] - y[1]);
+            let spec_hours_night = spec_hours.filter(v => (v[0]<this.docx_data["stime"] || v[0]>this.docx_data["etime"])).sort((x, y) => x[1] - y[1]);
             let spec_hours_range = spec_hours.sort((x, y) => x[1] - y[1]);
 
             this.docx_data["spec_hours_night"] = this.get_average(spec_hours_night.map(v => v[1]));
-            ret.push('夜间体积分数平均值: ' + this.docx_data["spec_hours_night"]);
+            ret.push('夜间体积分数平均值: ' + this.docx_data["spec_hours_night"] + this.docx_data["unit"]);
 
-            this.docx_data["spec_hours_night_range"] = spec_hours_night[0][1] + '-' + spec_hours_night[spec_hours_night.length-1][1] + 'ppb';
+            this.docx_data["spec_hours_night_range"] = spec_hours_night[0][1] + '-' + spec_hours_night[spec_hours_night.length-1][1] + this.docx_data["unit"];
             ret.push('夜间体积分数在: ' + this.docx_data["spec_hours_night_range"]);
 
             this.docx_data["spec_hours_light"] = this.get_average(spec_hours_light.map(v => v[1]));
-            ret.push('昼间体积分数平均值: ' + this.docx_data["spec_hours_light"]);
+            ret.push('昼间体积分数平均值: ' + this.docx_data["spec_hours_light"] + this.docx_data["unit"]);
 
-            this.docx_data["spec_hours_light_range"] = spec_hours_light[0][1] + '-' + spec_hours_light[spec_hours_light.length-1][1] + 'ppb';
+            this.docx_data["spec_hours_light_range"] = spec_hours_light[0][1] + '-' + spec_hours_light[spec_hours_light.length-1][1] + this.docx_data["unit"];
             ret.push('昼间体积分数在: ' + this.docx_data["spec_hours_light_range"]);
 
             this.docx_data["spec_hours_range_max"] = spec_hours_range[spec_hours_range.length-1][0];
-            this.docx_data["spec_hours_range_max_value"] = spec_hours_range[spec_hours_range.length-1][1] + 'ppb';
+            this.docx_data["spec_hours_range_max_value"] = spec_hours_range[spec_hours_range.length-1][1] + this.docx_data["unit"];
             this.docx_data["spec_hours_range_min"] = spec_hours_range[0][0];
-            this.docx_data["spec_hours_range_min_value"] = spec_hours_range[0][1] + 'ppb';
+            this.docx_data["spec_hours_range_min_value"] = spec_hours_range[0][1] + this.docx_data["unit"];
             ret.push('VOCs体积分数 于' + this.docx_data["spec_hours_range_max"] + '时出现最大值' + this.docx_data["spec_hours_range_max_value"] + ', 于' + this.docx_data["spec_hours_range_min"] + '时出现最小值'+ this.docx_data["spec_hours_range_min_value"]);
 
             let sth, spec_type_hours=[[],[],[]], spec_type_hours_light, spec_type_hours_night, spec_type_hours_range, spec_type_wave=[];
@@ -304,8 +377,8 @@ export default {
                 spec_type_hours_range = sth.sort((x, y) => x[1] - y[1]);
                 spec_type_wave.push([k, spec_type_hours_range[spec_type_hours_range.length-1][1] - spec_type_hours_range[0][1]])
                 spec_type_hours[0].push(k);
-                spec_type_hours[1].push(this.get_average(spec_type_hours_light.map(v => v[1])));
-                spec_type_hours[2].push(this.get_average(spec_type_hours_night.map(v => v[1])));
+                spec_type_hours[1].push(this.get_average(spec_type_hours_light.map(v => v[1])) + this.docx_data["unit"]);
+                spec_type_hours[2].push(this.get_average(spec_type_hours_night.map(v => v[1])) + this.docx_data["unit"]);
                 this.docx_data["spec_type_hours"].push(k + ' 于' + spec_type_hours_range[spec_type_hours_range.length-1][0] + '时出现最大值' + spec_type_hours_range[spec_type_hours_range.length-1][1] + 'ppb, 于' + spec_type_hours_range[0][0] + '时出现最小值'+ spec_type_hours_range[0][1] + 'ppb');
             }
             this.docx_data["spec_type_count"] = Object.keys(this.spec_type_hours).length;
@@ -339,7 +412,23 @@ export default {
             this.docx_data["ofp_top1_per"] = ofp_top1_per +'%';
             ret.push(this.docx_data["ofp_top1"] + ' 是臭氧生成趋势最高的VOCs物种， 贡献了 ' +  this.docx_data["ofp_top1_per"]);
 
-            //this.mytext = ret.join('\n');
+            let loh, loh_total, loh_top10, loh_top10_per, loh_top1_per;
+            loh = this.LOH;
+            loh_total = loh.map(v => v[1]).reduce((x, y) => NP.plus(x, y));
+            loh_top10 = loh.slice(0, 10);
+            loh_top10_per = this.get_percent(loh_top10.map(v => v[1]).reduce((x, y) => NP.plus(x, y)), loh_total);
+            loh_top1_per = this.get_percent(loh_top10[0][1], loh_total);
+
+            this.docx_data["loh_top10"] = loh_top10.map(v => v[0]).join(',');
+            this.docx_data["loh_top10_per"] = loh_top10_per +'%';
+            ret.push('自由基反应活性最高的前十种VOCs: ' +  this.docx_data["loh_top10"]);
+            ret.push('总计占: ' +  this.docx_data["loh_top10_per"]);
+
+            this.docx_data["loh_top1"] = loh_top10[0][0];
+            this.docx_data["loh_top1_per"] = loh_top1_per +'%';
+            ret.push(this.docx_data["loh_top1"] + ' 是自由基反应活性最高的VOCs物种， 贡献了 ' +  this.docx_data["loh_top1_per"]);
+
+            this.mytext = ret.join('\n');
             this.$message({
                 message: '数据处理完毕，请点击下载。',
                 type: 'success'
@@ -352,10 +441,10 @@ export default {
                 rpc(hosts.baseHost, 'Search.Get_data', this.search_date, {}, (d) => {
                     if(d.result){
                         if(d.result.length){
-                            let data={}, spec_vice, data1={}, data2={}, data3={}, data4={}, data5={}, data6={}, data7={};
+                            let data={}, spec_vice, data1={}, data2={}, data3={}, data4={}, data5={}, data6={}, data7={}, data8={};
                             d.result.forEach(v => {
                                 if (v[1].length==10) v[1] = v[1] + " 00:00:00";
-                                v[3] = this.get_μg(v[2], v[3]);
+                                if (this.form.unit=='1') v[3] = this.get_μg(v[2], v[3]);
 
                                 if (!data.hasOwnProperty(v[10])){
                                     data[v[10]] = [];
@@ -398,11 +487,18 @@ export default {
                                 data4[v[1]] = NP.plus(data4[v[1]], v[3]);
                                 
                                 if (v[8] > 0) {
-                                    let val = this.get_μg(v[2], v[3]);
+                                    let val = v[3];
                                     if (!data5.hasOwnProperty(v[2])){
                                         data5[v[2]] = 0;
                                     }
                                     data5[v[2]] = NP.plus(data5[v[2]], NP.times(val, v[8]));
+                                }
+
+                                if (v[11] > 0) {
+                                    if (!data8.hasOwnProperty(v[5])){
+                                        data8[v[5]] = 0;
+                                    }
+                                    data8[v[5]] = NP.plus(data8[v[5]], NP.times(v[3], NP.divide(v[11], v[7]))).toFixed(4);
                                 }
 
                                 if (v[5] == '氟利昂113'){
@@ -504,12 +600,14 @@ export default {
                             }
 
                             this.OFP = Object.keys(data5).map(v => [v, data5[v]]).sort((x, y) => y[1] - x[1]);
+                            this.LOH = Object.keys(data8).map(v => [v, data8[v]]).sort((x, y) => y[1] - x[1]);
 
                             this.text_set();
                             this.get_chartData1(data);
                             this.get_chartData3(this.spec_avg);
                             this.get_chartData4(data, data6);
                             this.get_chartData6(this.OFP);
+                            this.get_chartData8(this.LOH);
                             this.get_chartData7();
 
                             this.fullscreenLoading = false;
@@ -592,7 +690,7 @@ export default {
                 yAxis: [
                     {
                         type: 'value',
-                        name: '浓度(ppb)'
+                        name: (this.form.unit=='1')?'浓度(μg/m³)':'浓度(ppb)'
                     },
                     {
                         type: 'value',
@@ -996,7 +1094,7 @@ export default {
                 yAxis: [
                     {
                         type: 'value',
-                        name: '浓度(ppb)',
+                        name: (this.form.unit=='1')?'浓度(μg/m³)':'浓度(ppb)',
                         splitLine: {
                             show: false
                         }
@@ -1049,6 +1147,66 @@ export default {
             myChart.setOption(aa)
             myChart.on('finished', (params) => {
                 this.docx_data['image'+i] = myChart.getDataURL({
+                    type: 'png',
+                    pixelRatio: 1,
+                    backgroundColor: '#fff'
+                });
+            });
+        },
+        get_chartData8(data){
+            let k;
+            this.chartData8.xAxis = [];
+            this.chartData8.bar = [];
+
+            data.splice(0, 10).forEach(v => {
+                this.chartData8.xAxis.push(v[0]);
+                this.chartData8.bar.push(v[1]);
+            });
+            this.chart8();
+        },
+        chart8() {
+            let myChart = this.$echarts.init(document.getElementById('myChart_test27'))
+            myChart.setOption({
+                title: {
+                    text: 'LOH排名前十VOC物种',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                toolbox:{
+                    feature:{
+                        saveAsImage: {}
+                    }
+                },
+                label:{
+                    show: true
+                },
+                xAxis: {
+                    data: this.chartData8.xAxis,
+                    axisLabel: {
+                        interval: 0,
+                        rotate: 35,
+                        fontSize: 10
+                    }
+                },
+                yAxis: {
+                        type: 'value',
+                        name: (this.form.unit=='1')?'浓度(μg/m³)':'浓度(ppb)'
+                    },
+                series: [{
+                    name: '浓度',
+                    type: 'bar',
+                    data: this.chartData8.bar,
+                    itemStyle: {
+                        normal: {
+                            color: (params) => ['#0100fe','#03ffff','#ec7c31','#7501e8','#9c007a','#c1c1ff','#86e3bf','#f6f784','#ceccce','#ffc0db'][params.dataIndex]
+                        }
+                    }
+                }]
+            });
+            myChart.on('finished', (params) => {
+                this.docx_data['image27'] = myChart.getDataURL({
                     type: 'png',
                     pixelRatio: 1,
                     backgroundColor: '#fff'

@@ -77,7 +77,7 @@
         <el-row>
             <el-col :span=24 style="padding: 8px 12px; height:720px">
                 <div>
-                    <el-input type="textarea" v-model="mytext" :rows="32" style="display:block"></el-input>
+                    <el-input type="textarea" v-model="mytext" :rows="32" style="display:none"></el-input>
                 </div>
             </el-col>
         </el-row>
@@ -189,7 +189,7 @@
     height: 390px;
     margin-left: auto;
     margin-right: auto;
-    display: block
+    display: none
   }
 
 .charts_test2 {
@@ -197,7 +197,7 @@
     height: 390px;
     margin-left: auto;
     margin-right: auto;
-    display:block
+    display:none
   }
 
 </style>
@@ -513,7 +513,7 @@ export default {
                             this.spec_count = 0;
                             for (k in data2){
                                 this.tableData1.push({
-                                    spec_type: k,
+                                    spec_type: k + '(' + Object.keys(data2[k]).length + ')',
                                     spec: Object.keys(data2[k]).map(v => (this.specs[v][7] + this.specs[v][8])).join(' ')
                                 });
                                 this.spec_type_count[k] = Object.keys(data2[k]).length;

@@ -150,6 +150,7 @@ export default {
         refresh () {
             this.tableData.length = 0;
             this.$refs.st.searchReset();
+            this.server_search(this.search_date);
         },
         dtc(params) {
             this.search_date = params;

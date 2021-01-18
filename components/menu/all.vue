@@ -137,9 +137,12 @@ export default {
                                 if (this.noppb) v[3] = this.get_μg(v[2], v[3]);
 
                                 if (!data.hasOwnProperty(v[10])){
-                                    data[v[10]] = [];
+                                    data[v[10]] = {};
                                 }
-                                data[v[10]].push(v[3]);
+                                if (!data[v[10]].hasOwnProperty(v[1])){
+                                    data[v[10]][v[1]] = 0;
+                                }
+                                data[v[10]][v[1]] = NP.plus(data[v[10]][v[1]], v[3]);
 
                                 if (!data1.hasOwnProperty(v[5])){
                                     data1[v[5]] = {};
@@ -160,7 +163,7 @@ export default {
                                     if (!data3.hasOwnProperty(v[5])){
                                         data3[v[5]] = 0;
                                     }
-                                    data3[v[5]] = NP.plus(data3[v[5]], NP.times(v[3], NP.divide(v[11], v[7]))).toFixed(4);
+                                    data3[v[5]] = NP.plus(data3[v[5]], NP.times(val, NP.divide(v[11], v[7]))).toFixed(4);
                                 }
                             });
 
@@ -433,7 +436,7 @@ export default {
                 },
                 yAxis: {
                         type: 'value',
-                        name: this.noppb?'物种浓度(μg/m³)':'物种浓度(ppb)'
+                        name: this.noppb?'浓度(μg/m³)':'浓度(ppb)'
                     },
                 series: [{
                     name: '浓度',
@@ -555,7 +558,7 @@ export default {
                 },
                 yAxis: {
                         type: 'value',
-                        name: this.noppb?'浓度(μg/m³)':'浓度(ppb)'
+                        name: '浓度(μg/m³)'
                     },
                 series: [{
                     name: '浓度',

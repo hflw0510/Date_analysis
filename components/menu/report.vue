@@ -444,12 +444,16 @@ export default {
                             let data={}, spec_vice, data1={}, data2={}, data3={}, data4={}, data5={}, data6={}, data7={}, data8={};
                             d.result.forEach(v => {
                                 if (v[1].length==10) v[1] = v[1] + " 00:00:00";
+                                let val = this.get_μg(v[2], v[3]);
                                 if (this.form.unit=='1') v[3] = this.get_μg(v[2], v[3]);
 
                                 if (!data.hasOwnProperty(v[10])){
                                     data[v[10]] = [];
                                 }
-                                data[v[10]].push(v[3]);
+                                if (!data[v[10]].hasOwnProperty(v[1])){
+                                    data[v[10]][v[1]] = 0;
+                                }
+                                data[v[10]][v[1]] = NP.plus(data[v[10]][v[1]], v[3]);
 
                                 spec_vice = this.specs_type_vice[v[2]];
                                 if (!data1.hasOwnProperty(spec_vice)){
@@ -498,7 +502,7 @@ export default {
                                     if (!data8.hasOwnProperty(v[5])){
                                         data8[v[5]] = 0;
                                     }
-                                    data8[v[5]] = NP.plus(data8[v[5]], NP.times(v[3], NP.divide(v[11], v[7]))).toFixed(4);
+                                    data8[v[5]] = NP.plus(data8[v[5]], NP.times(val, NP.divide(v[11], v[7]))).toFixed(4);
                                 }
 
                                 if (v[5] == '氟利昂113'){
@@ -1192,7 +1196,7 @@ export default {
                 },
                 yAxis: {
                         type: 'value',
-                        name: (this.form.unit=='1')?'浓度(μg/m³)':'浓度(ppb)'
+                        name: '浓度(μg/m³)'
                     },
                 series: [{
                     name: '浓度',

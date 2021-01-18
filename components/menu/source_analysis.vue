@@ -194,9 +194,10 @@ export default {
                 divid = 'myChart7_'+this.props[0]+'_1_' + index;
                 this.divs.push(divid);
                 this.options.push(this.options_t);
-                if (! (this.values.length > index)) this.values.push(this.get_value(spec_id, v)); 
+                let val = this.get_value(spec_id, v);
+                if (! (this.values.length > index)) this.values.push(val);
                 d = {
-                    title : '因子' + (index+1),
+                    title : this.get_option(val) + (index + 1),
                     xAxis : spec_id.map(v => this.specs[v][7]),
                     series : [{
                         name: '因子' + (index+1),
@@ -227,9 +228,9 @@ export default {
             this.chartData2.series = [];
 
             data[0].forEach((v, index) => {
-                this.chartData2.legend.push('因子' + (index+1));
+                this.chartData2.legend.push(this.get_option(this.values[index])+(index+1));
                 this.chartData2.series.push({
-                    name: '因子' + (index+1),
+                    name: this.get_option(this.values[index])+(index+1),
                     type: 'line',
                     stack: 'total',
                     showSymbol: false,
@@ -252,9 +253,9 @@ export default {
             });
 
             data1[0].forEach((v, index) => {
-                this.chartData3.legend.push('因子' + (index+1));
+                this.chartData3.legend.push(this.get_option(this.values[index]) + (index+1));
                 this.chartData3.series.push({
-                    name: '因子' + (index+1),
+                    name: this.get_option(this.values[index]) + (index+1),
                     type: 'line',
                     stack: 'total',
                     showSymbol: false,
@@ -270,13 +271,22 @@ export default {
             this.chartData4.legend = [];
 
             data[0].forEach((v, index) => {
-                this.chartData4.legend.push('因子' + (index+1));
+                this.chartData4.legend.push(this.get_option(this.values[index]) + (index+1));
                 this.chartData4.data.push({
-                    name: '因子' + (index+1),
+                    name: this.get_option(this.values[index]) + (index+1),
                     value: data.map(w => w[index]).reduce((x, y) => NP.plus(x, y))
                 })
             });
             this.chart4();
+        },
+        get_option(v){
+            let t, ret;
+            this.options_t.forEach(function(t){
+                if (v == t['value']){
+                    ret = t['label'];
+                }
+            });
+            return ret;
         },
         get_value(spec_id, data){
             let arr = spec_id.map((v, index) => [v, data[index]]).sort((x, y) => y[1] - x[1]);
@@ -461,6 +471,10 @@ export default {
             myChart.setOption({
                 tooltip: {
                     trigger: 'axis'
+                },
+                legend:{
+                    icon: 'rect',
+                    data: this.chartData3.legend
                 },
                 toolbox:{
                     feature:{

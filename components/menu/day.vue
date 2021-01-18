@@ -1,7 +1,7 @@
 <template> 
     <div>
         <el-row>
-            <el-col :span=16 style="display: inline-block;padding-left: 8px">
+            <el-col :span=14 style="display: inline-block;padding-left: 8px">
 
                 <el-date-picker
                     v-model="search_date"
@@ -24,19 +24,19 @@
                     </el-tooltip>
                 </el-button-group>
             </el-col>
-            <el-col :span=8>
+            <el-col :span=10>
                 <el-switch
                     v-model="isday"
                     active-text="日均值"
                     inactive-text="小时均值"
                     @change="searchClick">
-                </el-switch>
+                </el-switch>&nbsp;&nbsp;
                 <el-switch
                     v-model="noppb"
                     active-text="μg/m³"
                     inactive-text="ppb"
                     @change="searchClick">
-                </el-switch>
+                </el-switch>&nbsp;&nbsp;
                 <el-switch
                     v-model="freon"
                     active-text="VOCs/氟利昂"
@@ -252,7 +252,7 @@ export default {
                     }
                     data1[i].push(data[k][t]);
                 }
-
+                console.log(data1);
                 for (i=0;i<24;i++) {
                     if (i in data1) {
                         if (this.freon) {
@@ -282,6 +282,9 @@ export default {
         },
         get_μg(spec_id, value){
             return NP.divide(NP.times(value, this.specs[spec_id][9]), 22.4).toFixed(4);
+        },
+        get_total(arr){
+            return arr.reduce((a, v) => NP.plus(a, v), 0).toFixed(4);
         },
         get_average(arr){
             return NP.divide(arr.reduce((a, v) => NP.plus(a, v), 0), arr.length).toFixed(4);

@@ -130,7 +130,7 @@ const tbCols = [
     },
     {
         colname: '11',
-        title: 'KOH',
+        title: '6.02*10^11*KOH',
         searchable: false,
         sortable: false,
         width: '80'

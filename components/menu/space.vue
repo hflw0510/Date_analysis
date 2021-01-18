@@ -219,6 +219,7 @@ export default {
         get_chartData2(data) {
             let k, dtlist = [];
             this.chartData2.data = {};
+            this.chartData2.legend = this.spec_types.map(v => v);
             this.chartData2.xAxis = dtlist;
             this.chartData2.series = [];
 
@@ -336,6 +337,10 @@ export default {
                     trigger: 'axis'
                 },
                 color: ['#f6f784','#0100fe','#03ffff','#f99a87','#ec7c31','#7501e8','#9c007a','#c1c1ff','#86e3bf','#ceccce','#ffc0db','#0ba72c','#00a8ff','#fffc00','#19b9ac','#87800b','#666666','#6a72c1','#3dc567','#ff99e6'],
+                legend:{
+                    icon: 'rect',
+                    data: this.chartData1.legend
+                },
                 toolbox:{
                     feature:{
                         saveAsImage: {}

@@ -277,6 +277,7 @@ export default {
                     value: data.map(w => w[index]).reduce((x, y) => NP.plus(x, y))
                 })
             });
+            console.log(this.chartData4.data);
             this.chart4();
         },
         get_option(v){

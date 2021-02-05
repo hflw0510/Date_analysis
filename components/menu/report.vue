@@ -74,10 +74,21 @@
             </el-col>
             <el-col :span=14></el-col>
         </el-row>
+        <el-row >
+            <el-col :span=2>&nbsp;</el-col>
+            <el-col :span=8>
+                <el-form ref="form" :model="form" ret="form" label-width="80px" label-position="left">
+                    <el-form-item label="源解析ID" prop="sid">
+                        <el-input v-model="form.sid"></el-input>
+                    </el-form-item>
+                </el-form>
+            </el-col>
+            <el-col :span=14></el-col>
+        </el-row>
         <el-row>
             <el-col :span=24 style="padding: 8px 12px; height:720px">
                 <div>
-                    <el-input type="textarea" v-model="mytext" :rows="32" style="display:none"></el-input>
+                    <el-input type="textarea" v-model="mytext" :rows="32" style="display:block"></el-input>
                 </div>
             </el-col>
         </el-row>
@@ -180,6 +191,39 @@
                 <div id="myChart_test27" class=charts_test2></div>
             </el-col>
         </el-row>
+        <el-row>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test30" class=charts_test2></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test31" class=charts_test2></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test32" class=charts_test2></div>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test33" class=charts_test2></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test34" class=charts_test2></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test35" class=charts_test2></div>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test36" class=charts_test2></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test37" class=charts_test2></div>
+            </el-col>
+            <el-col :span=8 style="padding: 8px 12px;">
+                <div id="myChart_test38" class=charts_test2></div>
+            </el-col>
+        </el-row>
     </div>
 </template>
 
@@ -189,7 +233,7 @@
     height: 390px;
     margin-left: auto;
     margin-right: auto;
-    display: none
+    display: block
   }
 
 .charts_test2 {
@@ -197,7 +241,15 @@
     height: 390px;
     margin-left: auto;
     margin-right: auto;
-    display:none
+    display:block
+  }
+
+ .charts_test3 {
+    width: 720px;
+    height: 390px;
+    margin-left: auto;
+    margin-right: auto;
+    float: left;
   }
 
 </style>
@@ -257,9 +309,55 @@ export default {
                 name: '',
                 time_set: '',
                 unit: '0',
+                sid: '',
                 stime: 8,
                 etime: 19
-            }
+            },
+            specs_name: {},
+            spec_types_name: {},
+            s_chartData1: [],
+            s_chartData2: {
+                legend: [],
+                xAxis: [],
+                series: []
+            },
+            s_chartData3: {
+                legend: [],
+                xAxis: [],
+                series: []
+            },
+            s_chartData4: {
+                legend: [],
+                data: []
+            },
+            color: ['#0100fe','#03ffff', '#ec7c31', '#7501e8', '#9c007a','#c1c1ff',  '#86e3bf', '#f6f784','#ceccce', '#ffc0db'],
+            divs: [],
+            values: [],
+            options:[],
+            options_t: [
+                {
+                    value: 1,
+                    label: '生物源'
+                },
+                {
+                    value: 2,
+                    label: '汽车尾气排放'
+                },
+                {
+                    value: 3,
+                    label: '油气挥发性'
+                },
+                {
+                    value: 4,
+                    label: '有机溶剂使用'
+                },
+                {
+                    value: 5,
+                    label: '未知'
+                }
+            ],
+            v_str: '',
+            s_spec_count:0
         }
     },
     created() {
@@ -427,6 +525,12 @@ export default {
             this.docx_data["loh_top1"] = loh_top10[0][0];
             this.docx_data["loh_top1_per"] = loh_top1_per +'%';
             ret.push(this.docx_data["loh_top1"] + ' 是自由基反应活性最高的VOCs物种， 贡献了 ' +  this.docx_data["loh_top1_per"]);
+
+            this.docx_data["s_spec_count"] = this.s_spec_count;
+            console.log(this.s_chartData4.data.map(v => v['value']));
+            let total = this.s_chartData4.data.map(v => v['value']).reduce((x, y) => NP.plus(x, y));
+
+            console.log(3);
 
             this.mytext = ret.join('\n');
             this.$message({
@@ -606,7 +710,6 @@ export default {
                             this.OFP = Object.keys(data5).map(v => [v, data5[v]]).sort((x, y) => y[1] - x[1]);
                             this.LOH = Object.keys(data8).map(v => [v, data8[v]]).sort((x, y) => y[1] - x[1]);
 
-                            this.text_set();
                             this.get_chartData1(data);
                             this.get_chartData3(this.spec_avg);
                             this.get_chartData4(data, data6);
@@ -614,8 +717,9 @@ export default {
                             this.get_chartData8(this.LOH);
                             this.get_chartData7();
 
-                            this.fullscreenLoading = false;
-                            this.btn = false;
+                            this.source_analysis(this.form.sid);
+                            //this.fullscreenLoading = false;
+                            //this.btn = false;
                         }
                         else{
                             this.fullscreenLoading = false;
@@ -639,6 +743,41 @@ export default {
                     type: 'warning'
                 })
             }
+        },
+        source_analysis(id) {
+            this.fullscreenLoading = true;
+            rpc(hosts.baseHost, 'Bi.Load', 'source_analysis', id, (d) => {
+                if(d.result){
+                    if(Object.keys(d.result).length){
+                        //this.get_datelist(JSON.parse(d.result['date_range']));
+                        this.get_datelist_data(JSON.parse(d.result['data'])['result']);
+                        this.get_s_chartData1(JSON.parse(d.result['spec_id']), JSON.parse(d.result['F_FACTOR']));
+                        this.get_s_chartData2(JSON.parse(d.result['G_FACTOR']));
+                        this.get_s_chartData3(JSON.parse(d.result['G_FACTOR']));
+                        this.get_s_chartData4(JSON.parse(d.result['G_FACTOR']));
+                        this.s_spec_count = JSON.parse(d.result['spec_id']).length;
+                        if (d.result['Result']){
+                            this.values = JSON.parse(d.result['Result']);
+                        }
+                        this.text_set();
+                        this.fullscreenLoading = false;
+                        this.btn = false;
+                    }
+                    else{
+                        this.fullscreenLoading = false;
+                        this.$message.error('源解析没有符合条件的数据！');
+                    }
+                }
+                else if(d.error){
+                    this.fullscreenLoading = false;
+                    throw(d.error);
+                    this.$message({
+                        message: d.error,
+                        type: 'warning'
+                    })
+                }
+
+            })
         },
         get_datelist(d){
             let i;
@@ -1217,6 +1356,376 @@ export default {
                 });
             });
         },
+        get_s_chartData1(spec_id, data) {
+            let k, d, divid;
+            this.divs = [];
+            this.options = [];
+            this.values = []
+            this.s_chartData1 = [];
+
+            data.forEach((v, index) => {
+                divid = 'myChart_test'+ (30 + index);
+                this.divs.push(divid);
+                this.options.push(this.options_t);
+                let val = this.get_value(spec_id, v);
+                if (! (this.values.length > index)) this.values.push(val);
+                d = {
+                    title : this.get_option(val) + (index + 1),
+                    xAxis : spec_id.map(v => this.specs[v][7]),
+                    series : [{
+                        name: '因子' + (index+1),
+                        type: 'bar',
+                        showSymbol: false,
+                        areaStyle: {},
+                        data: v,
+                        itemStyle: {
+                            normal: {
+                                color: this.color[index]
+                            }
+                        }
+                    }]
+                };
+                this.s_chartData1.push(d);
+            });
+            this.$nextTick(() => {
+                this.divs.forEach((v, i) => {
+                    this.s_chart1(v, this.s_chartData1[i], i);
+                })
+            });
+            
+        },
+        get_s_chartData2(data) {
+            let k;
+            this.s_chartData2.legend = [];
+            this.s_chartData2.xAxis = this.datelist;
+            this.s_chartData2.series = [];
+
+            data[0].forEach((v, index) => {
+                this.s_chartData2.legend.push(this.get_option(this.values[index])+(index+1));
+                this.s_chartData2.series.push({
+                    name: this.get_option(this.values[index])+(index+1),
+                    type: 'line',
+                    stack: 'total',
+                    showSymbol: false,
+                    areaStyle: {},
+                    data: data.map(x => x[index])
+                })
+            });
+
+            this.s_chart2();
+        },
+        get_s_chartData3(data) {
+            let data1;
+            this.s_chartData3.legend = [];
+            this.s_chartData3.xAxis = this.datelist;
+            this.s_chartData3.series = [];
+
+            data1 = data.map(v => {
+                let total = v.reduce((x, y) => NP.plus(x, y));
+                return v.map(w => this.get_percent(w, total));
+            });
+
+            data1[0].forEach((v, index) => {
+                this.s_chartData3.legend.push(this.get_option(this.values[index]) + (index+1));
+                this.s_chartData3.series.push({
+                    name: this.get_option(this.values[index]) + (index+1),
+                    type: 'line',
+                    stack: 'total',
+                    showSymbol: false,
+                    areaStyle: {},
+                    data: data1.map(x => x[index])
+                })
+            });
+
+            this.s_chart3();
+        },
+        get_s_chartData4(data) {
+            this.s_chartData4.data = [];
+            this.s_chartData4.legend = [];
+
+            data[0].forEach((v, index) => {
+                this.s_chartData4.legend.push(this.get_option(this.values[index]) + (index+1));
+                this.s_chartData4.data.push({
+                    name: this.get_option(this.values[index]) + (index+1),
+                    value: data.map(w => w[index]).reduce((x, y) => NP.plus(x, y))
+                })
+            });
+
+            this.s_chart4();
+        },
+        s_chart1(divid, data, index){
+            let myChart = this.$echarts.init(document.getElementById(divid));
+            let aa = {
+                title: {
+                    text: data.title,
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                toolbox:{
+                    feature:{
+                        saveAsImage: {}
+                    }
+                },
+                grid:{
+                    left: '4%',
+                    right: '4%',
+                    bottom: '20%'
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: data.xAxis,
+                        axisLabel: {
+                            interval: 0,
+                            rotate: 35,
+                            fontSize: 10
+                        }
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: data.series
+            };
+            myChart.setOption(aa);
+            myChart.on('finished', (params) => {
+                this.docx_data['image' + (30 + index)] = myChart.getDataURL({
+                    type: 'png',
+                    pixelRatio: 1,
+                    backgroundColor: '#fff'
+                });
+            });
+        },
+        s_chart2(){
+            let myChart = this.$echarts.init(document.getElementById('myChart_test36'));
+            let aa = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend:{
+                    icon: 'rect',
+                    data: this.s_chartData2.legend
+                },
+                toolbox:{
+                    feature:{
+                        saveAsImage: {}
+                    }
+                },
+                color: this.color,
+                grid:{
+                    left: '4%',
+                    right: '4%'
+                },
+                dataZoom:[{}],
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: this.s_chartData2.xAxis
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: this.s_chartData2.series
+            };
+            myChart.setOption(aa);
+            myChart.on('finished', (params) => {
+                this.docx_data['image36'] = myChart.getDataURL({
+                    type: 'png',
+                    pixelRatio: 1,
+                    backgroundColor: '#fff'
+                });
+            });
+        },
+        s_chart3() {
+            let myChart = this.$echarts.init(document.getElementById('myChart_test37'));
+            myChart.setOption({
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend:{
+                    icon: 'rect',
+                    data: this.s_chartData3.legend
+                },
+                toolbox:{
+                    feature:{
+                        saveAsImage: {}
+                    }
+                },
+                color: this.color,
+                grid:{
+                    left: '4%',
+                    right: '4%'
+                },
+                dataZoom:[{}],
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: this.s_chartData3.xAxis
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        min: 0,
+                        max: 100,
+                        axisLabel: {
+                            formatter: '{value} %'
+                        }
+                    }
+                ],
+                series: this.s_chartData3.series
+            });
+            myChart.on('finished', (params) => {
+                this.docx_data['image37'] = myChart.getDataURL({
+                    type: 'png',
+                    pixelRatio: 1,
+                    backgroundColor: '#fff'
+                });
+            });
+        },
+        s_chart4() {
+            let myChart = this.$echarts.init(document.getElementById('myChart_test38'));
+            myChart.setOption({
+                title: {
+                    text: '因子占比关系',
+                    left: 'center'
+                },
+                tooltip:{
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b} : {c} ({d}%)'
+                },
+                toolbox:{
+                    feature:{
+                        saveAsImage: {}
+                    }
+                },
+                color: this.color,
+                legend:{
+                    bottom: 'bottom',
+                    data: this.s_chartData4.legend
+                },
+                label:{
+                    formatter: '{b}: {d}%'
+                },
+                series:[
+                    {
+                        name: '因子占比',
+                        type: 'pie',
+                        radius: '55%',
+                        data: this.s_chartData4.data
+                    }
+                ]
+            });
+            myChart.on('finished', (params) => {
+                this.docx_data['image38'] = myChart.getDataURL({
+                    type: 'png',
+                    pixelRatio: 1,
+                    backgroundColor: '#fff'
+                });
+            });
+        },
+        get_datelist(d){
+            let i;
+            this.datelist = [];
+            for (i=0;i<this.dateCheck(d[0], d[1])+24;i++) {
+                let st = d[0];
+                if (st.length==10) st = st + " 00:00:00";
+                st = new Date(st);
+                st.setHours(st.getHours() + i);
+                this.datelist.push(this.dateFormat("YYYY-mm-dd HH:MM:SS", st));
+            }
+        },
+        get_datelist_data(d){
+            let dt={};
+            this.datelist = [];
+            d.forEach(v => {
+                if (!dt.hasOwnProperty(v[0]))
+                    dt[v[0]] = '';
+
+            })
+            this.datelist = Object.keys(dt);
+        },
+        get_option(v){
+            let t, ret;
+            this.options_t.forEach(function(t){
+                if (v == t['value']){
+                    ret = t['label'];
+                }
+            });
+            return ret;
+        },
+        get_value(spec_id, data){
+            let arr = spec_id.map((v, index) => [v, data[index]]).sort((x, y) => y[1] - x[1]);
+
+            let v1 = 38;
+            if (v1 in this.specs_name){
+                if (arr[0][0] == this.specs_name[v1]){
+                    this.v_str = '异戊二烯占比最高 生物源√';
+                    return 1;
+                }
+            }
+
+            let total = data.reduce((a, v) => NP.plus(a, v), 0);
+            let v2_type = this.get_spec_type_percent('烷烃', spec_id, data, total);
+            let v2 = 6;
+            if (v2 in this.specs_name){
+                if (arr[0][0] == this.specs_name[v2] && v2_type > 40){
+                    this.v_str = '烷烃类占比'+ v2_type + '%，异戊烷占比最高 汽车尾气排放√';
+                    return 2;
+                }
+            }
+
+            let v3 = this.get_spec_percent([42, 43, 44, 45, 46], spec_id, data, total);
+            if (v2_type > 20 && v3 > 20){
+                this.v_str = '烷烃类占比'+ v2_type + '%，苯、甲苯、乙苯、和二甲苯和占比'+ v3 + '% 油气挥发性√';
+                return 3;
+            }
+
+            let v3_1 = this.get_spec_percent([102, 93, 97], spec_id, data, total);
+            let v3_2 = this.get_spec_percent([43, 44, 45, 46], spec_id, data, total);
+            if (v3_1 > 30 && v3_2 > 20){
+                this.v_str = '乙酸乙酯，丙酮，和丁酮在排放源中的占比'+ v3_1 + '%，苯、甲苯、乙苯、和二甲苯和占比'+ v3_2 + '% 有机溶剂使用√';
+                return 4;
+            }
+
+            this.v_str = '未知';
+            return 5;
+        },
+        get_spec_type_percent(spec_type_name, spec_id, data, total){
+            let spec_type_id, count = 0;
+            if (spec_type_name in this.spec_types_name){
+                spec_type_id = this.spec_types_name[spec_type_name];
+            }
+            else
+                return 0;
+
+            spec_id.forEach((v, index) => {
+                if (v in this.specs){
+                    if (this.specs[v][3] == spec_type_id){
+                        count = NP.plus(count, data[index]);
+                    }
+                }
+            });
+            return this.get_percent(count, total);
+        },
+        get_spec_percent(specs, spec_id, data, total){
+            let count = 0;
+            specs.forEach(v => {
+                spec_id.forEach((w, index) => {
+                    if (this.specs_name[v] == w){
+                        count = NP.plus(count, data[index]);
+                    }
+                })
+            });
+            return this.get_percent(count, total);
+        },
         get_μg(spec_id, value){
             return NP.divide(NP.times(value, this.specs[spec_id][9]), 22.4).toFixed(4);
         },
@@ -1237,6 +1746,7 @@ export default {
                 if(d.result){
                     d.result.forEach(v => {
                         this.spec_type_data[v[0]] = v[3];
+                        this.spec_types_name[v[3]] = v[0];
                     });
                     this.spec_load();
                 }
@@ -1248,6 +1758,7 @@ export default {
                     d.result.forEach(v => {
                         this.specs[v[0]] = v;
                         this.specs_type_vice[v[0]] = this.spec_type_data[v[4]];
+                        this.specs_name[v[13]] = v[0];
                     });
             })
         },

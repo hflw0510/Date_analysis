@@ -196,11 +196,12 @@ export default {
                 this.options.push(this.options_t);
                 let val = this.get_value(spec_id, v);
                 if (! (this.values.length > index)) this.values.push(val);
+                let name = '因子' + (index + 1) + '(' + this.get_option(val) + ')';
                 d = {
-                    title : this.get_option(val) + (index + 1),
+                    title : name,
                     xAxis : spec_id.map(v => this.specs[v][7]),
                     series : [{
-                        name: '因子' + (index+1),
+                        name: name,
                         type: 'bar',
                         showSymbol: false,
                         areaStyle: {},
@@ -228,9 +229,10 @@ export default {
             this.chartData2.series = [];
 
             data[0].forEach((v, index) => {
-                this.chartData2.legend.push(this.get_option(this.values[index])+(index+1));
+                let name = '因子' + (index + 1) + '(' + this.get_option(this.values[index]) + ')';
+                this.chartData2.legend.push(name);
                 this.chartData2.series.push({
-                    name: this.get_option(this.values[index])+(index+1),
+                    name: name,
                     type: 'line',
                     stack: 'total',
                     showSymbol: false,
@@ -253,9 +255,10 @@ export default {
             });
 
             data1[0].forEach((v, index) => {
-                this.chartData3.legend.push(this.get_option(this.values[index]) + (index+1));
+                let name = '因子' + (index + 1) + '(' + this.get_option(this.values[index]) + ')';
+                this.chartData3.legend.push(name);
                 this.chartData3.series.push({
-                    name: this.get_option(this.values[index]) + (index+1),
+                    name: name,
                     type: 'line',
                     stack: 'total',
                     showSymbol: false,
@@ -271,9 +274,10 @@ export default {
             this.chartData4.legend = [];
 
             data[0].forEach((v, index) => {
-                this.chartData4.legend.push(this.get_option(this.values[index]) + (index+1));
+                let name = '因子' + (index + 1) + '(' + this.get_option(this.values[index]) + ')';
+                this.chartData4.legend.push(name);
                 this.chartData4.data.push({
-                    name: this.get_option(this.values[index]) + (index+1),
+                    name: name,
                     value: data.map(w => w[index]).reduce((x, y) => NP.plus(x, y))
                 })
             });

@@ -202,7 +202,7 @@
                 <div id="myChart_test32" class=charts_test2></div>
             </el-col>
         </el-row>
-        <el-row>
+                <el-row>
             <el-col :span=8 style="padding: 8px 12px;">
                 <div id="myChart_test33" class=charts_test2></div>
             </el-col>
@@ -245,8 +245,8 @@
   }
 
  .charts_test3 {
-    width: 720px;
-    height: 390px;
+    width: 1400px;
+    height: 280px;
     margin-left: auto;
     margin-right: auto;
     float: left;
@@ -356,7 +356,7 @@ export default {
                     label: '未知'
                 }
             ],
-            v_str: '',
+            v_str: [],
             s_spec_count:0
         }
     },
@@ -527,9 +527,20 @@ export default {
             ret.push(this.docx_data["loh_top1"] + ' 是自由基反应活性最高的VOCs物种， 贡献了 ' +  this.docx_data["loh_top1_per"]);
 
             this.docx_data["s_spec_count"] = this.s_spec_count;
-            console.log(this.s_chartData4.data.map(v => v['value']));
             let total = this.s_chartData4.data.map(v => v['value']).reduce((x, y) => NP.plus(x, y));
+            let source_data = this.s_chartData4.data.map(v => [v['name'], this.get_percent(v['value'], total)]).sort((x, y) => y[1] - x[1]);
+            this.docx_data["s_top1"] = source_data[0][0] + '占比' + source_data[0][1] + '%';
+            this.docx_data["s_top1_name"] = source_data[0][0];
 
+            this.docx_data["s_topn"] = source_data.slice(1).map(v => v[0]).join('、');
+            this.docx_data["s_topn_value"] = source_data.slice(1).map(v => v[1] + '%').join('、');
+            this.docx_data["s_v_str"] = this.v_str.map((v, i) => '因子'+ (i+1) + ' '+ v).join('。');
+
+            ret.push('源解析物种数：' +  this.docx_data["s_spec_count"]);
+            ret.push('贡献最大：' +  this.docx_data["s_top1"]);
+            ret.push('其他依次为：' +  this.docx_data["s_topn"]);
+            ret.push('占比为：' +  this.docx_data["s_topn_value"]);
+            ret.push('解析结果为：' +  this.docx_data["s_v_str"]);
             console.log(3);
 
             this.mytext = ret.join('\n');
@@ -1369,11 +1380,12 @@ export default {
                 this.options.push(this.options_t);
                 let val = this.get_value(spec_id, v);
                 if (! (this.values.length > index)) this.values.push(val);
+                let name = '因子' + (index + 1) + '(' + this.get_option(val) + ')';
                 d = {
-                    title : this.get_option(val) + (index + 1),
+                    title : name,
                     xAxis : spec_id.map(v => this.specs[v][7]),
                     series : [{
-                        name: '因子' + (index+1),
+                        name: name,
                         type: 'bar',
                         showSymbol: false,
                         areaStyle: {},
@@ -1401,9 +1413,10 @@ export default {
             this.s_chartData2.series = [];
 
             data[0].forEach((v, index) => {
-                this.s_chartData2.legend.push(this.get_option(this.values[index])+(index+1));
+                let name = '因子' + (index + 1) + '(' + this.get_option(this.values[index]) + ')';
+                this.s_chartData2.legend.push(name);
                 this.s_chartData2.series.push({
-                    name: this.get_option(this.values[index])+(index+1),
+                    name: name,
                     type: 'line',
                     stack: 'total',
                     showSymbol: false,
@@ -1426,9 +1439,10 @@ export default {
             });
 
             data1[0].forEach((v, index) => {
-                this.s_chartData3.legend.push(this.get_option(this.values[index]) + (index+1));
+                let name = '因子' + (index + 1) + '(' + this.get_option(this.values[index]) + ')';
+                this.s_chartData3.legend.push(name);
                 this.s_chartData3.series.push({
-                    name: this.get_option(this.values[index]) + (index+1),
+                    name: name,
                     type: 'line',
                     stack: 'total',
                     showSymbol: false,
@@ -1444,9 +1458,10 @@ export default {
             this.s_chartData4.legend = [];
 
             data[0].forEach((v, index) => {
-                this.s_chartData4.legend.push(this.get_option(this.values[index]) + (index+1));
+                let name = '因子' + (index + 1) + '(' + this.get_option(this.values[index]) + ')';
+                this.s_chartData4.legend.push(name);
                 this.s_chartData4.data.push({
-                    name: this.get_option(this.values[index]) + (index+1),
+                    name: name,
                     value: data.map(w => w[index]).reduce((x, y) => NP.plus(x, y))
                 })
             });
@@ -1667,7 +1682,7 @@ export default {
             let v1 = 38;
             if (v1 in this.specs_name){
                 if (arr[0][0] == this.specs_name[v1]){
-                    this.v_str = '异戊二烯占比最高 生物源√';
+                    this.v_str.push('异戊二烯占比最高 生物源√');
                     return 1;
                 }
             }
@@ -1677,25 +1692,25 @@ export default {
             let v2 = 6;
             if (v2 in this.specs_name){
                 if (arr[0][0] == this.specs_name[v2] && v2_type > 40){
-                    this.v_str = '烷烃类占比'+ v2_type + '%，异戊烷占比最高 汽车尾气排放√';
+                    this.v_str.push('烷烃类占比'+ v2_type + '%，异戊烷占比最高 汽车尾气排放√');
                     return 2;
                 }
             }
 
             let v3 = this.get_spec_percent([42, 43, 44, 45, 46], spec_id, data, total);
             if (v2_type > 20 && v3 > 20){
-                this.v_str = '烷烃类占比'+ v2_type + '%，苯、甲苯、乙苯、和二甲苯和占比'+ v3 + '% 油气挥发性√';
+                this.v_str.push('烷烃类占比'+ v2_type + '%，苯、甲苯、乙苯、和二甲苯和占比'+ v3 + '% 油气挥发性√');
                 return 3;
             }
 
             let v3_1 = this.get_spec_percent([102, 93, 97], spec_id, data, total);
             let v3_2 = this.get_spec_percent([43, 44, 45, 46], spec_id, data, total);
             if (v3_1 > 30 && v3_2 > 20){
-                this.v_str = '乙酸乙酯，丙酮，和丁酮在排放源中的占比'+ v3_1 + '%，苯、甲苯、乙苯、和二甲苯和占比'+ v3_2 + '% 有机溶剂使用√';
+                this.v_str.push('乙酸乙酯，丙酮，和丁酮在排放源中的占比'+ v3_1 + '%，苯、甲苯、乙苯、和二甲苯和占比'+ v3_2 + '% 有机溶剂使用√');
                 return 4;
             }
 
-            this.v_str = '未知';
+            this.v_str.push('未知');
             return 5;
         },
         get_spec_type_percent(spec_type_name, spec_id, data, total){

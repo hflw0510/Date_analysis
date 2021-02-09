@@ -773,7 +773,7 @@ export default {
                 }
                 else if(d.error){
                     this.fullscreenLoading = false;
-                    throw(d.error);
+                    //throw(d.error);
                     this.$message({
                         message: d.error,
                         type: 'warning'

@@ -88,7 +88,7 @@
         <el-row>
             <el-col :span=24 style="padding: 8px 12px; height:720px">
                 <div>
-                    <el-input type="textarea" v-model="mytext" :rows="32" style="display:block"></el-input>
+                    <el-input type="textarea" v-model="mytext" :rows="32" style="display:none"></el-input>
                 </div>
             </el-col>
         </el-row>
@@ -233,7 +233,7 @@
     height: 390px;
     margin-left: auto;
     margin-right: auto;
-    display: block
+    display: none
   }
 
 .charts_test2 {
@@ -241,15 +241,7 @@
     height: 390px;
     margin-left: auto;
     margin-right: auto;
-    display:block
-  }
-
- .charts_test3 {
-    width: 1400px;
-    height: 280px;
-    margin-left: auto;
-    margin-right: auto;
-    float: left;
+    display:none
   }
 
 </style>

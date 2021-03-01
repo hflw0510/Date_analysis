@@ -122,14 +122,15 @@ export default {
                 if(d.result){
                     if(Object.keys(d.result).length){
                         //this.get_datelist(JSON.parse(d.result['date_range']));
+                        if (d.result['Result']){
+                            this.values = JSON.parse(d.result['Result']);
+                        }
+
                         this.get_datelist_data(JSON.parse(d.result['data'])['result']);
                         this.get_chartData1(JSON.parse(d.result['spec_id']), JSON.parse(d.result['F_FACTOR']));
                         this.get_chartData2(JSON.parse(d.result['G_FACTOR']));
                         this.get_chartData3(JSON.parse(d.result['G_FACTOR']));
                         this.get_chartData4(JSON.parse(d.result['G_FACTOR']));
-                        if (d.result['Result']){
-                            this.values = JSON.parse(d.result['Result']);
-                        }
                     }
                     else{
                         this.fullscreenLoading = false;
@@ -158,7 +159,7 @@ export default {
                         message: '因子分类保存成功',
                         type: 'success'
                         });
-                    this.load();
+                    this.searchClick();
                 }
             })
         },
@@ -187,15 +188,20 @@ export default {
             let k, d, divid;
             this.divs = [];
             this.options = [];
-            this.values = []
+            //this.values = [];
             this.chartData1 = [];
 
             data.forEach((v, index) => {
                 divid = 'myChart7_'+this.props[0]+'_1_' + index;
                 this.divs.push(divid);
                 this.options.push(this.options_t);
-                let val = this.get_value(spec_id, v);
-                if (! (this.values.length > index)) this.values.push(val);
+                let val;
+                if (! (this.values.length > index)){
+                    val = this.get_value(spec_id, v);
+                    this.values.push(val);
+                }
+                else
+                    val = this.values[index];
                 let name = '因子' + (index + 1) + '(' + this.get_option(val) + ')';
                 d = {
                     title : name,
@@ -215,6 +221,7 @@ export default {
                 };
                 this.chartData1.push(d);
             });
+
             this.$nextTick(() => {
                 this.divs.forEach((v, i) => {
                     this.chart1(v, this.chartData1[i]);
@@ -270,18 +277,26 @@ export default {
             this.chart3();
         },
         get_chartData4(data) {
+            let k, d = {};
             this.chartData4.data = [];
             this.chartData4.legend = [];
 
             data[0].forEach((v, index) => {
-                let name = '因子' + (index + 1) + '(' + this.get_option(this.values[index]) + ')';
-                this.chartData4.legend.push(name);
-                this.chartData4.data.push({
-                    name: name,
-                    value: data.map(w => w[index]).reduce((x, y) => NP.plus(x, y))
-                })
+                let name = this.get_option(this.values[index]);
+                if (name in d)
+                    d[name] = NP.plus(d[name], data.map(w => w[index]).reduce((x, y) => NP.plus(x, y)));
+                else
+                    d[name] = data.map(w => w[index]).reduce((x, y) => NP.plus(x, y));
             });
-            console.log(this.chartData4.data);
+
+            for (k in d)
+            {
+                this.chartData4.legend.push(k);
+                this.chartData4.data.push({
+                    name: k,
+                    value: d[k]
+                })
+            }
             this.chart4();
         },
         get_option(v){
